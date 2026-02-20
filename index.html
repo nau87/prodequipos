@@ -243,11 +243,11 @@ tbody tr:hover td { background: #f5f8ff; }
   </div>
   <div class="header-stats" id="hstats"></div>
   <div class="tabs-wrap">
-    <button class="tab active" onclick="showTab(event,'jugadores')"><span>&#128100;</span> Jugadores</button>
-    <button class="tab" onclick="showTab(event,'apertura')"><span>&#127960;</span> Apertura</button>
-    <button class="tab" onclick="showTab(event,'ideal')"><span>&#11088;</span> Ideal</button>
-    <button class="tab" onclick="showTab(event,'clausura')"><span>&#127960;</span> Clausura</button>
-    <button class="tab" onclick="showTab(event,'anual')"><span>&#127942;</span> Tabla Anual</button>
+    <button class="tab active" onclick="showTab(event,'jugadores')">Jugadores</button>
+    <button class="tab" onclick="showTab(event,'apertura')">Apertura</button>
+    <button class="tab" onclick="showTab(event,'ideal')">Ideal</button>
+    <button class="tab" onclick="showTab(event,'clausura')">Clausura</button>
+    <button class="tab" onclick="showTab(event,'anual')">Tabla Anual</button>
   </div>
 </header>
 
@@ -390,8 +390,6 @@ function renderHeaderStats() {
   const jug = DATA.jugadores.filter(j=>j.equipo).length;
   const fecha = DATA.ideal.fecha || 1;
   document.getElementById("hstats").innerHTML = `
-    <div class="hstat"><div class="val">${eq}</div><div class="lbl">Equipos</div></div>
-    <div class="hstat"><div class="val">${jug}</div><div class="lbl">Jugadores</div></div>
     <div class="hstat"><div class="val">${fecha}</div><div class="lbl">Fecha actual</div></div>`;
 }
 
