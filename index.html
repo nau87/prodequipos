@@ -216,6 +216,24 @@ tbody tr:hover td { background: #f5f8ff; }
   .ar-total .tv { font-size: 1.3rem; }
   .player-card { min-width: 100px; }
 }
+
+/* ROTATE TOAST */
+#rotate-toast {
+  display: none;
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: rgba(20,20,20,0.92); color: #fff;
+  padding: 12px 20px; border-radius: 30px;
+  font-size: 0.82rem; font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+  z-index: 9999; white-space: nowrap;
+  backdrop-filter: blur(8px);
+  animation: toastIn 0.4s ease;
+  align-items: center; gap: 10px;
+}
+#rotate-toast.show { display: flex; }
+.toast-icon { font-size: 1.2rem; animation: spin90 1.2s ease infinite alternate; }
+@keyframes toastIn { from { opacity:0; transform: translateX(-50%) translateY(16px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+@keyframes spin90 { from { transform: rotate(0deg); } to { transform: rotate(90deg); } }
 </style>
 </head>
 <body>
@@ -527,6 +545,30 @@ async function init() {
   }
 }
 init();
+</script>
+
+<div id="rotate-toast">
+  <span class="toast-icon">&#x21BA;</span>
+  Girá el teléfono para mejor experiencia
+</div>
+<script>
+(function() {
+  function checkOrientation() {
+    var toast = document.getElementById('rotate-toast');
+    var isMobile = window.innerWidth <= 768;
+    var isPortrait = window.innerHeight > window.innerWidth;
+    if (isMobile && isPortrait) {
+      toast.classList.add('show');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(function() { toast.classList.remove('show'); }, 4000);
+    } else {
+      toast.classList.remove('show');
+    }
+  }
+  window.addEventListener('load', checkOrientation);
+  window.addEventListener('resize', checkOrientation);
+  window.addEventListener('orientationchange', checkOrientation);
+})();
 </script>
 </body>
 </html>
