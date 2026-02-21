@@ -177,20 +177,21 @@ tbody tr:hover td { background: #f5f8ff; }
 .field {
   position: relative; border-radius: 16px; overflow: hidden;
   background: linear-gradient(180deg, #1e6c38 0%, #24843c 30%, #1e6c38 60%, #246030 100%);
-  padding: 36px 24px 28px; display: flex; flex-direction: column; align-items: center; gap: 30px;
+  padding: 50px 24px 40px; display: flex; flex-direction: column; align-items: center; gap: 55px;
   box-shadow: inset 0 0 60px rgba(0,0,0,0.2), 0 4px 24px rgba(0,0,0,0.15);
+  min-height: 580px;
 }
 .field::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(180deg, transparent 0px, transparent 40px, rgba(0,0,0,0.04) 40px, rgba(0,0,0,0.04) 80px); pointer-events: none; }
 .field::after { content: ""; position: absolute; top: 50%; left: 8%; right: 8%; height: 2px; background: rgba(255,255,255,0.2); border-radius: 2px; }
-.formation-row { display: flex; justify-content: center; gap: 32px; position: relative; z-index: 2; width: 100%; }
-.player-pin { display: flex; flex-direction: column; align-items: center; width: 88px; cursor: default; }
-.pin-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; font-size: 0.95rem; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 3px solid rgba(255,255,255,0.85); box-shadow: 0 4px 14px rgba(0,0,0,0.35); transition: transform 0.2s; }
-.player-pin:hover .pin-avatar { transform: scale(1.1); }
-.pin-pts { background: rgba(0,0,0,0.55); color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 20px; margin-top: 5px; }
-.pin-name { margin-top: 4px; font-size: 0.6rem; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.3px; width: 88px; text-align: center; text-shadow: 0 1px 4px rgba(0,0,0,0.6); line-height: 1.3; height: calc(2 * 0.6rem * 1.3); display: flex; align-items: center; justify-content: center; word-break: break-word; overflow-wrap: break-word; }
-.pin-equipo { font-size: 0.52rem; color: rgba(255,255,255,0.65); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 88px; text-align: center; }
-.ideal-total-wrap { position: relative; z-index: 2; }
-.ideal-total { background: linear-gradient(135deg, #f5a623, #e8870a); color: #fff; padding: 10px 28px; border-radius: 30px; font-weight: 900; font-size: 1rem; letter-spacing: 0.5px; box-shadow: 0 4px 16px rgba(245,166,35,0.4); }
+.formation-row { display: flex; justify-content: center; gap: 45px; position: relative; z-index: 2; width: 100%; }
+.player-pin { display: flex; flex-direction: column; align-items: center; width: 110px; cursor: default; position: relative; }
+.pin-avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; font-size: 1.1rem; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 4px solid rgba(255,255,255,0.95); box-shadow: 0 6px 18px rgba(0,0,0,0.45), 0 0 0 2px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; }
+.player-pin:hover .pin-avatar { transform: scale(1.12); box-shadow: 0 8px 24px rgba(0,0,0,0.55), 0 0 0 2px rgba(0,0,0,0.15); }
+.pin-pts { background: linear-gradient(135deg, #f5a623, #e8870a); color: #fff; font-size: 0.8rem; font-weight: 900; padding: 4px 12px; border-radius: 20px; margin-top: 8px; box-shadow: 0 3px 10px rgba(245,166,35,0.5); border: 2px solid rgba(255,255,255,0.3); }
+.pin-name { margin-top: 6px; font-size: 0.72rem; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; width: 110px; text-align: center; text-shadow: 0 2px 6px rgba(0,0,0,0.7); line-height: 1.2; }
+.pin-equipo { font-size: 0.58rem; color: rgba(255,255,255,0.7); margin-top: 3px; font-weight: 600; text-align: center; }
+.ideal-total-wrap { position: relative; z-index: 2; margin-top: 10px; }
+.ideal-total { background: linear-gradient(135deg, #f5a623, #e8870a); color: #fff; padding: 12px 32px; border-radius: 30px; font-weight: 900; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 4px 16px rgba(245,166,35,0.4); }
 
 
 /* GRAN FINAL */
@@ -452,14 +453,14 @@ function rankEl(i) {
 function initials(n) { return n.split(" ").slice(0,2).map(w=>w[0]||'').join("").toUpperCase(); }
 function getTeamClass(name) {
   const n = name.toUpperCase();
-  if (n.includes("FERRERO")) return "team-ferrero";
-  if (n.includes("MONTR")) return "team-montre";
-  if (n.includes("CERRAJERIA")) return "team-cerrajeria";
+  if (n.includes("FERRERO HNOS") || n.includes("FERRERO HNO")) return "team-ferrero";
+  if (n.includes("MONTRE")) return "team-montre";
+  if (n.includes("CERRAJERIA OMARCITO") || n.includes("CERRAJERIA")) return "team-cerrajeria";
   if (n.includes("CABRON")) return "team-cabron";
   if (n.includes("INSIDE")) return "team-inside";
-  if (n.includes("AGENCIA")) return "team-agencia";
-  if (n.includes("RADIO")) return "team-radio";
-  if (n.includes("JUAN")) return "team-juan";
+  if (n.includes("AGENCIA 133") || n.includes("AGENCIA")) return "team-agencia";
+  if (n.includes("RADIO UNO") || n.includes("RADIO")) return "team-radio";
+  if (n.includes("A LO DE JUAN") || n.includes("JUAN")) return "team-juan";
   if (n.includes("TRIBUNERAS")) return "team-tribuneras";
   return "";
 }
@@ -561,11 +562,14 @@ function renderIdeal() {
   const pin = p => {
     if (!p) return '';
     const initials = p.nombre.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
-    const name = p.nombre;
+    const nameParts = p.nombre.split(' ');
+    const shortName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : p.nombre;
+    const teamClass = getTeamClass(p.equipo);
+    const avatarClass = `pin-avatar ${teamClass}`;
     return `<div class="player-pin">
-      <div class="pin-avatar">${initials}</div>
+      <div class="${avatarClass}">${initials}</div>
       <div class="pin-pts">${p.pts} pts</div>
-      <div class="pin-name">${name}</div>
+      <div class="pin-name">${shortName}</div>
       <div class="pin-equipo">${p.equipo}</div>
     </div>`;
   };
