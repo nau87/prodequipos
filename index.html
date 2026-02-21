@@ -122,19 +122,20 @@ tbody tr:hover td { background: #f5f8ff; }
 
 /* TEAM */
 .team-pill { display: inline-flex; align-items: center; gap: 8px; }
-.team-avatar { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--c1), var(--c2)); display: inline-flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 800; color: #fff; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+.team-avatar { width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.72rem; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.2s; }
+.team-avatar:hover { transform: scale(1.1); }
 .team-name { font-weight: 700; font-size: 0.9rem; color: var(--text); }
 
 /* TEAM COLORS */
-.team-ferrero { background: linear-gradient(135deg, #6b0f1a, #8b1538) !important; color: #fff !important; }
-.team-montre { background: linear-gradient(135deg, #2d7a3e, #3a9d52) !important; color: #fff !important; }
-.team-cerrajeria { background: linear-gradient(135deg, #e67e22, #d35400) !important; color: #fff !important; }
-.team-cabron { background: #ffffff !important; color: #000 !important; border: 1px solid #d0d0d0; }
-.team-inside { background: linear-gradient(135deg, #1a1a1a, #2d2d2d) !important; color: #fff !important; }
-.team-agencia { background: linear-gradient(135deg, #16a085, #1abc9c) !important; color: #fff !important; }
-.team-radio { background: linear-gradient(135deg, #5dade2, #3498db) !important; color: #fff !important; }
-.team-juan { background: linear-gradient(135deg, #1a3a5c, #2c5282) !important; color: #ffd700 !important; }
-.team-tribuneras { background: linear-gradient(135deg, #f39c12, #f1c40f) !important; color: #2c5282 !important; }
+.team-ferrero { background: linear-gradient(135deg, #8b1538, #6a0f2a); color: #fff; }
+.team-montre { background: linear-gradient(135deg, #22a855, #1a7a3c); color: #fff; }
+.team-cerrajeria { background: linear-gradient(135deg, #e67e22, #d35400); color: #fff; }
+.team-cabron { background: linear-gradient(135deg, #ffffff, #f0f0f0); color: #000; }
+.team-inside { background: linear-gradient(135deg, #1a1a1a, #000000); color: #fff; }
+.team-agencia { background: linear-gradient(135deg, #1abc9c, #16a085); color: #fff; }
+.team-radio { background: linear-gradient(135deg, #3498db, #2980b9); color: #fff; }
+.team-juan { background: linear-gradient(135deg, #2c5282, #1e3a5f); color: #f1c40f; }
+.team-tribuneras { background: linear-gradient(135deg, #f1c40f, #f39c12); color: #2c5282; }
 
 /* BADGES */
 .pts { display: inline-flex; align-items: center; justify-content: center; min-width: 52px; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; }
@@ -174,24 +175,41 @@ tbody tr:hover td { background: #f5f8ff; }
 /* IDEAL */
 .ideal-wrap { padding: 24px 20px; }
 .ideal-subtitle { text-align: center; font-size: 0.78rem; color: var(--text3); font-weight: 500; margin-bottom: 20px; }
+.ideal-container { display: flex; gap: 24px; align-items: stretch; }
 .field {
   position: relative; border-radius: 16px; overflow: hidden;
   background: linear-gradient(180deg, #1e6c38 0%, #24843c 30%, #1e6c38 60%, #246030 100%);
-  padding: 50px 24px 40px; display: flex; flex-direction: column; align-items: center; gap: 55px;
+  padding: 40px 20px 32px; display: flex; flex-direction: column; align-items: center; gap: 45px;
   box-shadow: inset 0 0 60px rgba(0,0,0,0.2), 0 4px 24px rgba(0,0,0,0.15);
-  min-height: 580px;
+  flex: 1; min-height: 480px;
 }
 .field::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(180deg, transparent 0px, transparent 40px, rgba(0,0,0,0.04) 40px, rgba(0,0,0,0.04) 80px); pointer-events: none; }
 .field::after { content: ""; position: absolute; top: 50%; left: 8%; right: 8%; height: 2px; background: rgba(255,255,255,0.2); border-radius: 2px; }
-.formation-row { display: flex; justify-content: center; gap: 45px; position: relative; z-index: 2; width: 100%; }
-.player-pin { display: flex; flex-direction: column; align-items: center; width: 110px; cursor: default; position: relative; }
-.pin-avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; font-size: 1.1rem; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 4px solid rgba(255,255,255,0.95); box-shadow: 0 6px 18px rgba(0,0,0,0.45), 0 0 0 2px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; }
-.player-pin:hover .pin-avatar { transform: scale(1.12); box-shadow: 0 8px 24px rgba(0,0,0,0.55), 0 0 0 2px rgba(0,0,0,0.15); }
-.pin-pts { background: linear-gradient(135deg, #f5a623, #e8870a); color: #fff; font-size: 0.8rem; font-weight: 900; padding: 4px 12px; border-radius: 20px; margin-top: 8px; box-shadow: 0 3px 10px rgba(245,166,35,0.5); border: 2px solid rgba(255,255,255,0.3); }
-.pin-name { margin-top: 6px; font-size: 0.72rem; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; width: 110px; text-align: center; text-shadow: 0 2px 6px rgba(0,0,0,0.7); line-height: 1.2; }
-.pin-equipo { font-size: 0.58rem; color: rgba(255,255,255,0.7); margin-top: 3px; font-weight: 600; text-align: center; }
-.ideal-total-wrap { position: relative; z-index: 2; margin-top: 10px; }
-.ideal-total { background: linear-gradient(135deg, #f5a623, #e8870a); color: #fff; padding: 12px 32px; border-radius: 30px; font-weight: 900; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 4px 16px rgba(245,166,35,0.4); }
+.formation-row { display: flex; justify-content: center; gap: 35px; position: relative; z-index: 2; width: 100%; }
+.player-pin { display: flex; flex-direction: column; align-items: center; width: 90px; cursor: default; position: relative; }
+.pin-avatar { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.4rem; box-shadow: 0 6px 18px rgba(0,0,0,0.45); transition: transform 0.2s; border: 3px solid rgba(255,255,255,0.2); }
+.player-pin:hover .pin-avatar { transform: scale(1.12); }
+.pin-pts { background: linear-gradient(135deg, #f5a623, #e8870a); color: #fff; font-size: 0.72rem; font-weight: 900; padding: 3px 10px; border-radius: 20px; margin-top: 6px; box-shadow: 0 3px 10px rgba(245,166,35,0.5); border: 2px solid rgba(255,255,255,0.3); }
+.pin-name { margin-top: 5px; font-size: 0.62rem; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 0.4px; width: 90px; text-align: center; text-shadow: 0 2px 6px rgba(0,0,0,0.7); line-height: 1.2; }
+.pin-equipo { font-size: 0.52rem; color: rgba(255,255,255,0.7); margin-top: 2px; font-weight: 600; text-align: center; display: none; }
+
+.ideal-list { flex: 1; display: flex; flex-direction: column; }
+.ideal-players { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+.ideal-player-row { display: flex; align-items: center; gap: 12px; background: var(--surface2); border-radius: 12px; padding: 12px 16px; border: 2px solid var(--border); transition: all 0.15s; }
+.ideal-player-row:hover { background: #f5f8ff; border-color: var(--c3); transform: translateX(3px); }
+.ideal-rank { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0; }
+.ideal-rank.top1 { background: linear-gradient(135deg, #f5a623, #e8870a); font-size: 0.85rem; }
+.ideal-player-info { flex: 1; min-width: 0; }
+.ideal-player-name { font-weight: 800; font-size: 0.9rem; color: var(--text); line-height: 1.2; }
+.ideal-player-team { font-size: 0.72rem; color: var(--text3); font-weight: 600; margin-top: 2px; }
+.ideal-player-pts { font-size: 1.1rem; font-weight: 900; color: var(--c1); flex-shrink: 0; }
+.ideal-total-wrap { margin-top: 16px; padding-top: 16px; border-top: 2px solid var(--border); }
+.ideal-total { background: linear-gradient(135deg, #f5a623, #e8870a); color: #fff; padding: 14px 24px; border-radius: 12px; font-weight: 900; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 4px 16px rgba(245,166,35,0.4); text-align: center; }
+
+@media (max-width: 880px) {
+  .ideal-container { flex-direction: column; }
+  .field { min-height: 420px; }
+}
 
 
 /* GRAN FINAL */
@@ -200,7 +218,8 @@ tbody tr:hover td { background: #f5f8ff; }
 .final-badge { background: linear-gradient(135deg, #f5a623, #e8870a); color: #fff; padding: 6px 22px; border-radius: 20px; font-weight: 900; font-size: 0.82rem; letter-spacing: 1px; display: inline-block; }
 .final-vs-wrap { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
 .final-team { text-align: center; flex: 1; min-width: 110px; max-width: 160px; }
-.final-avatar { width: 68px; height: 68px; border-radius: 50%; background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; font-size: 1.3rem; font-weight: 900; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; border: 3px solid rgba(255,255,255,0.25); box-shadow: 0 6px 20px rgba(0,0,0,0.45); }
+.final-avatar { width: 68px; height: 68px; border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.5rem; box-shadow: 0 6px 20px rgba(0,0,0,0.45); border: 3px solid rgba(255,255,255,0.15); }
+
 .final-team-role { font-size: 0.58rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
 .final-team-name { font-size: 0.82rem; font-weight: 700; color: rgba(255,255,255,0.9); }
 .final-global { font-size: 2.4rem; font-weight: 900; color: #f5a623; line-height: 1; margin-top: 10px; }
@@ -337,7 +356,7 @@ tbody tr:hover td { background: #f5f8ff; }
       <div class="card-head"><div class="card-head-icon">&#11088;</div><h2 id="ideal-title">Equipo Ideal &mdash; Fecha ?</h2></div>
       <div class="ideal-wrap">
         <p class="ideal-subtitle">Los capitanes acumulan puntaje x2 &mdash; los valores ya incluyen la multiplicaci&oacute;n</p>
-        <div class="field" id="ideal-field"></div>
+        <div id="ideal-field"></div>
       </div>
     </div>
   </div>
@@ -452,7 +471,7 @@ function rankEl(i) {
 }
 function initials(n) { return n.split(" ").slice(0,2).map(w=>w[0]||'').join("").toUpperCase(); }
 function getTeamClass(name) {
-  const n = name.toUpperCase();
+  const n = name.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   if (n.includes("FERRERO HNOS") || n.includes("FERRERO HNO")) return "team-ferrero";
   if (n.includes("MONTRE")) return "team-montre";
   if (n.includes("CERRAJERIA OMARCITO") || n.includes("CERRAJERIA")) return "team-cerrajeria";
@@ -464,7 +483,10 @@ function getTeamClass(name) {
   if (n.includes("TRIBUNERAS")) return "team-tribuneras";
   return "";
 }
-function teamAvatar(n) { return `<span class="team-avatar ${getTeamClass(n)}">${initials(n)}</span>`; }
+function teamAvatar(nombre, equipo) {
+  const teamClass = getTeamClass(equipo || nombre);
+  return `<span class="team-avatar ${teamClass}">${initials(nombre)}</span>`;
+}
 
 function showTab(e, name) {
   document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
@@ -493,7 +515,7 @@ function renderJugadores(filter) {
     const apF = j.ap.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
     const clF = j.cl.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
     return `<tr>
-      <td><div class="team-pill">${teamAvatar(j.nombre)}<span class="team-name">${j.nombre}</span></div></td>
+      <td><div class="team-pill">${teamAvatar(j.nombre, j.equipo)}<span class="team-name">${j.nombre}</span></div></td>
       <td style="color:var(--text2);font-size:0.83rem;font-weight:500">${j.equipo}</td>
       <td><span class="tag ${mc}">${j.modo}</span></td>
       ${apF}<td class="c"><span class="pts ${j.ap_total?'pts-hi':'pts-lo'}">${j.ap_total}</span></td>
@@ -527,7 +549,7 @@ function buildEquipoRows(rawRows, prefix, fl) {
       const tot = jd ? jd[totalKey] : 0;
       const fCells = arr.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
       const capTag = p.cap ? `<span class="tag tag-cap" style="margin-left:6px">CAP 2x</span>` : "";
-      return `<tr><td><div class="player-name-cell">${teamAvatar(p.nombre)}<span style="font-weight:600;font-size:0.82rem">${p.nombre}</span>${capTag}</div></td>${fCells}<td class="c"><strong style="color:var(--c1)">${tot}</strong></td></tr>`;
+      return `<tr><td><div class="player-name-cell">${teamAvatar(p.nombre, eq.equipo)}<span style="font-weight:600;font-size:0.82rem">${p.nombre}</span>${capTag}</div></td>${fCells}<td class="c"><strong style="color:var(--c1)">${tot}</strong></td></tr>`;
     }).join("");
     const fHds = Array.from({length:11},(_,k)=>`<th class="c fc">${fl}${k+1}</th>`).join("");
     const det = document.createElement("tr");
@@ -553,6 +575,7 @@ function renderIdeal() {
   if (!ideal.jugadores?.length) { field.innerHTML = `<p style="color:rgba(255,255,255,0.6);padding:40px;text-align:center">Sin datos para esta fecha.</p>`; return; }
   const sorted = [...ideal.jugadores].sort((a,b) => b.pts - a.pts).slice(0,5);
   const withTeam = sorted.map(p => ({...p, equipo: (DATA.jugadores.find(j => j.nombre === p.nombre)||{}).equipo||''}));
+  
   // Formation 1-3-1
   const formation = [
     [withTeam[0]],
@@ -561,22 +584,42 @@ function renderIdeal() {
   ];
   const pin = p => {
     if (!p) return '';
-    const initials = p.nombre.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
     const nameParts = p.nombre.split(' ');
     const shortName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : p.nombre;
     const teamClass = getTeamClass(p.equipo);
-    const avatarClass = `pin-avatar ${teamClass}`;
     return `<div class="player-pin">
-      <div class="${avatarClass}">${initials}</div>
+      <div class="pin-avatar ${teamClass}">${initials(p.nombre)}</div>
       <div class="pin-pts">${p.pts} pts</div>
       <div class="pin-name">${shortName}</div>
-      <div class="pin-equipo">${p.equipo}</div>
     </div>`;
   };
-  field.innerHTML = formation.map(row =>
+  
+  const fieldHTML = formation.map(row =>
     `<div class="formation-row">${row.filter(Boolean).map(pin).join('')}</div>`
-  ).join('')
-  + `<div class="ideal-total-wrap"><div class="ideal-total">TOTAL DEL EQUIPO: ${ideal.total} pts</div></div>`;
+  ).join('');
+  
+  const listHTML = withTeam.map((p, i) => `
+    <div class="ideal-player-row">
+      <div class="ideal-rank ${i===0?'top1':''}">${i+1}</div>
+      <div class="ideal-player-info">
+        <div class="ideal-player-name">${p.nombre}</div>
+        <div class="ideal-player-team">${p.equipo}</div>
+      </div>
+      <div class="ideal-player-pts">${p.pts}</div>
+    </div>
+  `).join('');
+  
+  field.innerHTML = `
+    <div class="ideal-container">
+      <div class="field">${fieldHTML}</div>
+      <div class="ideal-list">
+        <div class="ideal-players">${listHTML}</div>
+        <div class="ideal-total-wrap">
+          <div class="ideal-total">TOTAL: ${ideal.total} pts</div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderAnual() {
@@ -606,20 +649,22 @@ function renderFinal() {
   const cont = document.getElementById('final-content');
   if (!fin || fin.equipos.length < 2) { cont.innerHTML = '<div class="final-prox">Sin datos</div>'; return; }
   const [e0, e1] = fin.equipos;
-  const ini = n => n.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
   const hasData = e0.ida > 0 || e1.ida > 0 || e0.vta > 0 || e1.vta > 0;
   const matchRows = [
     {label:'Final IDA', a: e0.ida, b: e1.ida},
     {label:'Final Vuelta', a: e0.vta, b: e1.vta},
     {label:'3er Partido', a: e0.tercero, b: e1.tercero},
   ].filter(m => !(m.label === '3er Partido' && m.a === 0 && m.b === 0));
-  const teamBlock = (e, showGlobal) => `
+  const teamBlock = (e, showGlobal) => {
+    const teamClass = getTeamClass(e.nombre);
+    return `
     <div class="final-team">
-      <div class="final-avatar">${ini(e.nombre)}</div>
+      <div class="final-avatar ${teamClass}">${initials(e.nombre)}</div>
       <div class="final-team-role">${e.rol}</div>
       <div class="final-team-name">${e.nombre}</div>
       ${showGlobal ? `<div class="final-global">${e.global}</div><div class="final-global-lbl">GLOBAL</div>` : ''}
     </div>`;
+  };
   if (!hasData) {
     cont.innerHTML = `
       <div class="final-vs-wrap">
