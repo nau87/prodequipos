@@ -125,6 +125,17 @@ tbody tr:hover td { background: #f5f8ff; }
 .team-avatar { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--c1), var(--c2)); display: inline-flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 800; color: #fff; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
 .team-name { font-weight: 700; font-size: 0.9rem; color: var(--text); }
 
+/* TEAM COLORS */
+.team-ferrero { background: linear-gradient(135deg, #6b0f1a, #8b1538) !important; color: #fff !important; }
+.team-montre { background: linear-gradient(135deg, #2d7a3e, #3a9d52) !important; color: #fff !important; }
+.team-cerrajeria { background: linear-gradient(135deg, #e67e22, #d35400) !important; color: #fff !important; }
+.team-cabron { background: #ffffff !important; color: #000 !important; border: 1px solid #d0d0d0; }
+.team-inside { background: linear-gradient(135deg, #1a1a1a, #2d2d2d) !important; color: #fff !important; }
+.team-agencia { background: linear-gradient(135deg, #16a085, #1abc9c) !important; color: #fff !important; }
+.team-radio { background: linear-gradient(135deg, #5dade2, #3498db) !important; color: #fff !important; }
+.team-juan { background: linear-gradient(135deg, #1a3a5c, #2c5282) !important; color: #ffd700 !important; }
+.team-tribuneras { background: linear-gradient(135deg, #f39c12, #f1c40f) !important; color: #2c5282 !important; }
+
 /* BADGES */
 .pts { display: inline-flex; align-items: center; justify-content: center; min-width: 52px; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; }
 .pts-hi { background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; box-shadow: 0 2px 8px rgba(26,122,60,0.3); }
@@ -435,12 +446,24 @@ async function loadData() {
 // ---- helpers ----
 function fv(v) { return v && v !== 0 ? `<span class="fv">${v}</span>` : `<span class="fz">&#8212;</span>`; }
 function rankEl(i) {
-  const cls = ["rank-1","rank-2","rank-3"][i] || "rank-n";
-  const txt = ["&#129351;","&#129352;","&#129353;"][i] || (i+1);
-  return `<span class="rank-num ${cls}">${txt}</span>`;
+  const cls = i < 3 ? ["rank-1","rank-2","rank-3"][i] : "rank-n";
+  return `<span class="rank-num ${cls}">${i+1}</span>`;
 }
 function initials(n) { return n.split(" ").slice(0,2).map(w=>w[0]||'').join("").toUpperCase(); }
-function teamAvatar(n) { return `<span class="team-avatar">${initials(n)}</span>`; }
+function getTeamClass(name) {
+  const n = name.toUpperCase();
+  if (n.includes("FERRERO")) return "team-ferrero";
+  if (n.includes("MONTR")) return "team-montre";
+  if (n.includes("CERRAJERIA")) return "team-cerrajeria";
+  if (n.includes("CABRON")) return "team-cabron";
+  if (n.includes("INSIDE")) return "team-inside";
+  if (n.includes("AGENCIA")) return "team-agencia";
+  if (n.includes("RADIO")) return "team-radio";
+  if (n.includes("JUAN")) return "team-juan";
+  if (n.includes("TRIBUNERAS")) return "team-tribuneras";
+  return "";
+}
+function teamAvatar(n) { return `<span class="team-avatar ${getTeamClass(n)}">${initials(n)}</span>`; }
 
 function showTab(e, name) {
   document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
@@ -556,10 +579,9 @@ function renderAnual() {
   const rows = [...DATA.tabla_anual].sort((a,b) => b.anual - a.anual);
   const maxPts = rows[0]?.anual || 1;
   const posClass = ["pos-1","pos-2","pos-3"];
-  const medals = ["&#129351;","&#129352;","&#129353;"];
   document.getElementById("anual-list").innerHTML = rows.map((r, i) => {
     const pct = maxPts > 0 ? Math.round((r.anual / maxPts) * 100) : 0;
-    const rk = i < 3 ? `<span class="rank-num rank-${i+1}">${medals[i]}</span>` : `<span class="rank-num rank-n">${i+1}</span>`;
+    const rk = `<span class="rank-num ${i < 3 ? 'rank-'+(i+1) : 'rank-n'}">${i+1}</span>`;
     return `<div class="anual-row ${posClass[i]||""}">
       <div class="ar-rank">${rk}</div>
       <div class="ar-team">${teamAvatar(r.equipo)}<div><div class="ar-name">${r.equipo}</div><div class="ar-sub">${i===0?"L&iacute;der":r.anual>0?"A "+(maxPts-r.anual)+" pts del l&iacute;der":"Sin puntos"}</div></div></div>
