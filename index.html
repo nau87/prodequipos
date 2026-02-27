@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prode Equipos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --c1: #0f4c2a; --c2: #1a7a3c; --c3: #22a855; --c4: #d4f5e2;
+  --gold: #f5a623; --gold-light: #fff3dc;
+  --bg: #f0f2f5; --surface: #ffffff; --surface2: #f7f9fb;
+  --border: #e4e8ee; --text: #0d1117; --text2: #4a5568; --text3: #8a93a2;
+  --radius: 14px; --shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: auto; min-height: 100vh; overflow-y: auto; }
+body { font-family: "Inter", sans-serif; background: var(--bg); color: var(--text); }
+
+/* Asegurar scroll en fullscreen */
+body:fullscreen, html:fullscreen { overflow-y: auto; height: auto; }
+body:-webkit-full-screen, html:-webkit-full-screen { overflow-y: auto; height: auto; }
+body:-moz-full-screen, html:-moz-full-screen { overflow-y: auto; height: auto; }
+
+/* LOADING */
+.loading-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: linear-gradient(135deg, #0b3520, #1a7a3c);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+}
+.loading-overlay.hidden { display: none; }
+.spinner {
+  width: 52px; height: 52px;
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { color: rgba(255,255,255,0.85); font-size: 0.9rem; font-weight: 600; letter-spacing: 0.5px; }
+.loading-ball { font-size: 2.5rem; animation: ballBounce 1s ease-in-out infinite; }
+.error-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: #fff; display: none;
+  flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 32px;
+}
+.error-overlay.show { display: flex; }
+.error-overlay h2 { color: #c0392b; font-size: 1.1rem; }
+.error-overlay p { color: var(--text2); font-size: 0.9rem; text-align: center; max-width: 400px; }
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, #0b3520 0%, #0f5c2e 40%, #1a7a3c 100%);
+  position: relative; overflow: hidden; padding: 32px 28px 0;
+}
+.header::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 80% 50%, rgba(34,168,85,0.15) 0%, transparent 60%),
+              radial-gradient(circle at 10% 80%, rgba(245,166,35,0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+.header-top { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
+.header-ball { font-size: 2.8rem; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); animation: ballBounce 3s ease-in-out infinite; }
+@keyframes ballBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.header-title h1 { font-size: 2rem; font-weight: 900; color: #fff; letter-spacing: -0.5px; line-height: 1; text-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.header-title p { font-size: 0.85rem; color: rgba(255,255,255,0.65); margin-top: 4px; font-weight: 500; }
+.header-stats { display: flex; gap: 24px; margin-top: 20px; position: relative; z-index: 1; }
+.hstat .val { font-size: 1.4rem; font-weight: 800; color: #fff; line-height: 1; }
+.hstat .lbl { font-size: 0.7rem; color: rgba(255,255,255,0.55); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.live-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.15); border-radius: 20px;
+  padding: 4px 10px; font-size: 0.72rem; font-weight: 700;
+  color: rgba(255,255,255,0.85); margin-left: auto;
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #4ade80; box-shadow: 0 0 6px #4ade80;
+  animation: livePulse 1.5s ease-in-out infinite;
+}
+@keyframes livePulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+/* TABS */
+.tabs-wrap { display: flex; gap: 2px; margin-top: 24px; position: relative; z-index: 1; overflow-x: auto; scrollbar-width: none; }
+.tabs-wrap::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 12px 22px; border: none;
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.65);
+  border-radius: 10px 10px 0 0; cursor: pointer;
+  font-size: 0.82rem; font-weight: 700; letter-spacing: 0.3px;
+  transition: all 0.2s ease; white-space: nowrap;
+  font-family: "Inter", sans-serif; display: flex; align-items: center; gap: 6px;
+}
+.tab:hover { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); }
+.tab.active { background: var(--bg); color: var(--c1); font-weight: 800; }
+
+/* SPONSORS BANNER */
+.sponsors-banner {
+  background: linear-gradient(90deg, rgba(15,76,42,0.05), rgba(26,122,60,0.05));
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+  overflow: hidden;
+  position: relative;
+}
+.sponsors-container {
+  display: flex;
+  align-items: center;
+  animation: scroll 30s linear infinite;
+  gap: 20px;
+}
+.sponsors-container:hover {
+  animation-play-state: paused;
+}
+.sponsor-item {
+  flex-shrink: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  transition: transform 0.3s ease;
+}
+.sponsor-item:hover {
+  transform: scale(1.05);
+}
+.sponsor-item img {
+  max-height: 60px;
+  max-width: 200px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: grayscale(0%);
+  opacity: 0.85;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+.sponsor-item:hover img {
+  opacity: 1;
+  filter: grayscale(0%);
+}
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@media (max-width: 768px) {
+  .sponsors-banner { padding: 15px 0; }
+  .sponsor-item { height: 50px; padding: 0 8px; }
+  .sponsor-item img { max-height: 50px; max-width: 150px; }
+}
+
+/* CONTENT */
+.content { max-width: 1160px; margin: 0 auto; padding: 28px 20px; }
+.section { display: none; animation: fadeIn 0.25s ease; }
+.section.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* CARD */
+.card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px; border: 1px solid var(--border); }
+.card-head { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+.card-head-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--c1), var(--c2)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; box-shadow: 0 2px 8px rgba(26,122,60,0.25); }
+.card-head h2 { font-size: 0.95rem; font-weight: 800; color: var(--text); }
+.card-head span { font-size: 0.78rem; color: var(--text3); font-weight: 500; margin-left: auto; }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th { padding: 11px 16px; text-align: left; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); background: var(--surface2); border-bottom: 1px solid var(--border); white-space: nowrap; }
+thead th.c { text-align: center; }
+tbody td { padding: 13px 16px; border-bottom: 1px solid #f0f2f5; font-size: 0.875rem; color: var(--text); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr { transition: background 0.12s; }
+tbody tr:hover td { background: #f5f8ff; }
+
+/* RANK */
+.rank-num { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; background: var(--surface2); color: var(--text3); border: 1px solid var(--border); position: relative; }
+.rank-num.has-tie { cursor: help; }
+.rank-num.has-tie::after { content: "ℹ️"; position: absolute; top: -2px; right: -2px; font-size: 0.6rem; background: #0ea5e9; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
+.rank-tooltip { position: fixed; background: #1e293b; color: white; padding: 12px 14px; border-radius: 8px; font-size: 0.75rem; white-space: normal; max-width: 280px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 9999; box-shadow: 0 8px 24px rgba(0,0,0,0.4); line-height: 1.5; }
+.rank-num.has-tie:hover .rank-tooltip { opacity: 1; pointer-events: auto; }
+.rank-tooltip-line { display: block; line-height: 1.7; }
+.rank-tooltip-line strong { color: #60a5fa; }
+tbody td.c { overflow: visible; position: relative; }
+
+/* TEAM */
+.team-pill { display: inline-flex; align-items: center; gap: 8px; }
+.team-avatar { width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 900; color: #fff; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+.team-name { font-weight: 700; font-size: 0.9rem; color: var(--text); }
+
+/* BADGES */
+.pts { display: inline-flex; align-items: center; justify-content: center; min-width: 52px; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; }
+.pts-hi { background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; box-shadow: 0 2px 8px rgba(26,122,60,0.3); }
+.pts-lo { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+.fv { font-weight: 600; color: var(--c1); font-size: 0.85rem; }
+.fz { color: #d0d5dd; font-size: 0.85rem; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.3px; }
+.tag-cap { background: var(--gold-light); color: #a0620e; border: 1px solid rgba(245,166,35,0.3); }
+.tag-app { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
+.tag-papel { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+
+/* EXPAND BTN */
+.btn-expand { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text2); font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: "Inter", sans-serif; }
+.btn-expand:hover, .btn-expand.open { border-color: var(--c2); color: var(--c2); background: #f0faf5; }
+
+/* DETAIL ROW */
+.detail-row { display: none; }
+.detail-row.open { display: table-row; }
+.detail-row td { padding: 0; border: none; background: #f7fbf9; }
+.detail-inner { padding: 16px 20px 20px 52px; border-top: 2px solid var(--c4); }
+.detail-inner table { border-radius: 10px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+.detail-inner thead th { background: #e8f5ee; color: var(--c1); font-size: 0.68rem; }
+.detail-inner tbody td { background: var(--surface); font-size: 0.82rem; padding: 9px 14px; }
+.detail-inner tbody tr:hover td { background: #f5fdf8; }
+.player-name-cell { display: flex; align-items: center; gap: 6px; }
+
+/* SEARCH */
+.search-wrap { padding: 16px 20px 4px; }
+.search-input { width: 100%; padding: 11px 16px 11px 42px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 0.9rem; font-family: "Inter", sans-serif; color: var(--text); background: var(--surface2); outline: none; transition: border 0.15s, box-shadow 0.15s; }
+.search-input::placeholder { color: var(--text3); }
+.search-input:focus { border-color: var(--c2); box-shadow: 0 0 0 3px rgba(26,122,60,0.1); background: #fff; }
+.search-wrap-inner { position: relative; }
+.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: var(--text3); pointer-events: none; }
+.fc { min-width: 34px; text-align: center !important; white-space: nowrap; }
+
+/* IDEAL */
+.ideal-wrap { padding: 24px 20px; }
+.ideal-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.ideal-field-container { display: flex; flex-direction: column; gap: 16px; }
+.field {
+  position: relative; border-radius: 16px; overflow: hidden;
+  background: #1e7d3c;
+  background-image: 
+    linear-gradient(180deg, rgba(30,108,56,0.3) 0%, rgba(36,132,60,0.3) 50%, rgba(30,108,56,0.3) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 336 512'%3E%3Cdefs%3E%3Cpattern id='grass' width='4' height='4' patternUnits='userSpaceOnUse'%3E%3Crect width='4' height='4' fill='%231e7d3c'/%3E%3Crect width='2' height='4' fill='%23227a38'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='336' height='512' fill='url(%23grass)'/%3E%3Cline x1='0' y1='256' x2='336' y2='256' stroke='white' stroke-width='3' opacity='0.8'/%3E%3Ccircle cx='168' cy='256' r='50' fill='none' stroke='white' stroke-width='3' opacity='0.8'/%3E%3Crect x='76' y='4' width='184' height='60' fill='none' stroke='white' stroke-width='3' opacity='0.8'/%3E%3Crect x='122' y='4' width='92' height='24' fill='none' stroke='white' stroke-width='3' opacity='0.8'/%3E%3Crect x='76' y='448' width='184' height='60' fill='none' stroke='white' stroke-width='3' opacity='0.8'/%3E%3Crect x='122' y='484' width='92' height='24' fill='none' stroke='white' stroke-width='3' opacity='0.8'/%3E%3C/svg%3E");
+  background-size: cover;
+  background-position: center;
+  padding: 40px 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; gap: 24px;
+  box-shadow: inset 0 0 60px rgba(0,0,0,0.2), 0 4px 24px rgba(0,0,0,0.15);
+  min-height: 500px;
+}
+.field-row { display: flex; justify-content: center; gap: 20px; position: relative; z-index: 2; flex-wrap: wrap; }
+.field-row.center-row { gap: 45px; }
+.field-avatar { width: 60px; height: 60px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 900; color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.4); border: 3px solid rgba(255,255,255,0.3); transition: transform 0.2s ease; }
+.field-avatar:hover { transform: scale(1.1); }
+.ideal-list-container { background: var(--surface2); border-radius: 14px; padding: 20px; border: 1px solid var(--border); }
+.ideal-list { display: flex; flex-direction: column; gap: 12px; }
+.ideal-list-item { display: flex; align-items: center; gap: 12px; background: var(--surface); border-radius: 12px; padding: 14px 16px; border: 1px solid var(--border); transition: box-shadow 0.15s, transform 0.15s; }
+.ideal-list-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateX(3px); }
+.ideal-list-num { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; font-size: 0.85rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ideal-list-info { flex: 1; min-width: 0; }
+.ideal-list-name { font-weight: 700; font-size: 0.9rem; color: var(--text); }
+.ideal-list-team { font-size: 0.75rem; color: var(--text3); font-weight: 500; margin-top: 2px; }
+.ideal-list-pts { font-size: 1.4rem; font-weight: 900; color: var(--c1); flex-shrink: 0; }
+.ideal-total { background: linear-gradient(135deg, #f5a623, #e8870a); color: #fff; padding: 14px 24px; border-radius: 12px; font-weight: 900; font-size: 1.1rem; text-align: center; box-shadow: 0 4px 16px rgba(245,166,35,0.4); margin-top: 16px; }
+@media (max-width: 968px) { .ideal-container { grid-template-columns: 1fr; } }
+
+/* ANUAL LEADERBOARD */
+.anual-list { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+.anual-row { display: flex; align-items: center; gap: 14px; background: var(--surface2); border-radius: 14px; border: 1.5px solid var(--border); padding: 14px 18px; transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s; position: relative; overflow: hidden; }
+.anual-row::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--border); border-radius: 4px 0 0 4px; }
+.anual-row.pos-1::before { background: linear-gradient(180deg, #f5a623, #e8870a); }
+.anual-row.pos-2::before { background: linear-gradient(180deg, #b0bec5, #90a4ae); }
+.anual-row.pos-3::before { background: linear-gradient(180deg, #c87941, #a0522d); }
+.anual-row:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.09); border-color: var(--c3); transform: translateX(3px); }
+.anual-row.pos-1 { background: linear-gradient(135deg, #fffdf5, #fff); border-color: rgba(245,166,35,0.35); }
+.ar-rank { flex-shrink: 0; }
+.ar-team { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
+.ar-name { font-weight: 800; font-size: 0.95rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ar-sub { font-size: 0.75rem; color: var(--text3); font-weight: 500; margin-top: 1px; }
+.ar-parciales { display: flex; gap: 20px; flex-shrink: 0; }
+.ar-parcial { text-align: center; }
+.ar-parcial .pv { font-size: 1rem; font-weight: 700; color: var(--text2); }
+.ar-parcial .pl { font-size: 0.62rem; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+.ar-total { flex-shrink: 0; text-align: right; }
+.ar-total .tv { font-size: 1.6rem; font-weight: 900; color: var(--c1); line-height: 1; }
+.ar-total .tl { font-size: 0.62rem; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.ar-bar-wrap { position: absolute; bottom: 0; left: 4px; right: 0; height: 3px; background: var(--border); }
+.ar-bar { height: 100%; background: linear-gradient(90deg, var(--c2), var(--c3)); border-radius: 0 2px 2px 0; transition: width 0.6s ease; }
+
+/* TORNEOS INDIVIDUALES */
+.torneos-tabs-mobile {
+  display: none;
+  gap: 8px;
+  margin-bottom: 20px;
+  background: var(--surface);
+  padding: 8px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+}
+
+.torneo-tab {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.torneo-tab:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.torneo-tab.active {
+  background: var(--c1);
+  color: white;
+  font-weight: 700;
+}
+
+.torneos-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+
+/* En móvil, mostrar tabs y solo una tabla a la vez */
+@media (max-width: 768px) { 
+  .torneos-tabs-mobile {
+    display: flex;
+  }
+  
+  .torneos-container { 
+    grid-template-columns: 1fr;
+  }
+  
+  .torneo-card {
+    display: none;
+  }
+  
+  .torneo-card.active {
+    display: block;
+  }
+}
+
+/* ROTATE TOAST */
+#rotate-toast {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(135deg, rgba(15,76,42,0.97), rgba(26,122,60,0.97));
+  color: #fff;
+  padding: 24px 20px; 
+  font-size: 0.9rem; font-weight: 600;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+  z-index: 9999;
+  backdrop-filter: blur(12px);
+  animation: slideUp 0.4s ease;
+  flex-direction: column; align-items: center; gap: 16px; text-align: center;
+}
+#rotate-toast.show { display: flex; }
+.rotate-content { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.rotate-title { font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.rotate-phone-icon { font-size: 2rem; animation: rotatePhone 2s ease-in-out infinite; }
+.rotate-text { font-size: 0.85rem; color: rgba(255,255,255,0.9); font-weight: 500; }
+.rotate-buttons { display: flex; gap: 10px; margin-top: 8px; }
+.rotate-btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+.rotate-btn-primary { background: white; color: var(--c1); }
+.rotate-btn-secondary { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); }
+.rotate-btn:active { transform: scale(0.95); }
+
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes rotatePhone { 
+  0%, 100% { transform: rotate(0deg); } 
+  25% { transform: rotate(-10deg); }
+  50% { transform: rotate(90deg); } 
+  75% { transform: rotate(80deg); }
+}
+
+/* HELP MODAL */
+#help-modal {
+  display: none; position: fixed; inset: 0; z-index: 10000;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+#help-modal.show { display: flex; }
+.help-content {
+  background: white; border-radius: 16px; padding: 28px 24px; max-width: 400px; width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3); animation: scaleIn 0.3s ease;
+}
+.help-title { font-size: 1.2rem; font-weight: 800; color: var(--c1); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+.help-steps { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+.help-step { display: flex; gap: 12px; align-items: start; }
+.help-step-num { background: var(--c3); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; }
+.help-step-text { color: var(--text2); font-size: 0.9rem; line-height: 1.6; padding-top: 2px; }
+.help-close { width: 100%; padding: 12px; background: var(--c1); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: inherit; }
+@keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* FULLSCREEN BUTTON */
+#fullscreen-btn {
+  display: none; position: fixed; top: 80px; right: 20px; z-index: 9998;
+  background: linear-gradient(135deg, var(--c1), var(--c2)); color: white;
+  border-radius: 12px;
+  font-size: 0.85rem; font-weight: 700;
+  box-shadow: 0 4px 16px rgba(26,122,60,0.4);
+  animation: slideInRight 0.4s ease, pulse 2s ease-in-out infinite;
+  align-items: center; gap: 0; font-family: inherit;
+}
+#fullscreen-btn.show { display: flex; }
+#fullscreen-btn .btn-main { display: flex; align-items: center; gap: 8px; padding: 12px 18px; cursor: pointer; flex: 1; }
+#fullscreen-btn .btn-main:hover { background: rgba(255,255,255,0.1); }
+#fullscreen-btn .btn-icon { font-size: 1.2rem; }
+#fullscreen-btn .btn-close { padding: 12px 14px; opacity: 0.7; cursor: pointer; border-left: 1px solid rgba(255,255,255,0.2); }
+#fullscreen-btn .btn-close:hover { opacity: 1; background: rgba(255,255,255,0.1); }
+@keyframes slideInRight { from { transform: translateX(120%); } to { transform: translateX(0); } }
+@keyframes pulse { 0%, 100% { box-shadow: 0 4px 16px rgba(26,122,60,0.4); } 50% { box-shadow: 0 4px 24px rgba(26,122,60,0.7); } }
+
+@media (max-width: 680px) {
+  .header { padding: 20px 16px 0; }
+  .header-title h1 { font-size: 1.5rem; }
+  .header-stats { gap: 16px; }
+  .fc { display: none; }
+  .content { padding: 16px 12px; }
+  .tab { padding: 10px 14px; font-size: 0.78rem; }
+  .detail-inner { padding: 12px 12px 16px 20px; }
+  .ar-parciales { gap: 12px; }
+  .ar-total .tv { font-size: 1.3rem; }
+  .player-card { min-width: 100px; }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="loading-ball">&#9917;</div>
+  <div class="spinner"></div>
+  <div class="loading-text">Cargando datos...</div>
+</div>
+
+<div class="error-overlay" id="error-overlay">
+  <h2>&#9888; No se pudieron cargar los datos</h2>
+  <p>Verific&aacute; tu conexi&oacute;n a internet y recarg&aacute; la p&aacute;gina.</p>
+  <button onclick="location.reload()" style="margin-top:12px;padding:10px 24px;background:var(--c2);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit">Reintentar</button>
+</div>
+
+<header class="header">
+  <div class="header-top">
+    <div class="header-ball">&#9917;</div>
+    <div class="header-title">
+      <h1>PRODE EQUIPOS</h1>
+      <p id="header-subtitle">Torneo Apertura &amp; Clausura &mdash; Posiciones en vivo</p>
+    </div>
+    <div class="live-badge"><div class="live-dot"></div> EN VIVO</div>
+  </div>
+  <div class="tabs-wrap">
+    <button class="tab active" onclick="showTab(event,'jugadores')"><span>&#128100;</span> Jugadores</button>
+    <button class="tab" onclick="showTab(event,'apertura')"><span>&#127960;</span> Apertura</button>
+    <button class="tab" onclick="showTab(event,'ideal')"><span>&#11088;</span> Ideal</button>
+    <button class="tab" onclick="showTab(event,'clausura')"><span>&#127960;</span> Clausura</button>
+    <button class="tab" onclick="showTab(event,'anual')"><span>&#127942;</span> Tabla Anual</button>
+    <button class="tab" onclick="showTab(event,'torneos')"><span>&#127942;</span> Torneos Individuales</button>
+  </div>
+</header>
+
+<!-- Sponsors Banner -->
+<div class="sponsors-banner">
+  <div class="sponsors-container">
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/fullana.png" alt="Estudio Contable Fullana"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/huachuma.png" alt="Huachuma Growshop"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/montre%20prode.png" alt="Montré Agroveterinaria"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/agencia%20133%20prode.png" alt="Agencia 133"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/BOOM%20PRODE.png" alt="Boom Party"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/CABRON%20PRODE.png" alt="Cabron Ind"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/FERRERO%20PRODE.png" alt="Ferrero Hnos. Coca-Cola"></div>
+    <!-- Duplicar para efecto continuo -->
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/fullana.png" alt="Estudio Contable Fullana"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/huachuma.png" alt="Huachuma Growshop"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/montre%20prode.png" alt="Montré Agroveterinaria"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/agencia%20133%20prode.png" alt="Agencia 133"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/BOOM%20PRODE.png" alt="Boom Party"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/CABRON%20PRODE.png" alt="Cabron Ind"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/FERRERO%20PRODE.png" alt="Ferrero Hnos. Coca-Cola"></div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="section active" id="sec-jugadores">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">&#128100;</div><h2>Tabla de Jugadores</h2><span id="jug-count"></span></div>
+      <div class="search-wrap"><div class="search-wrap-inner"><span class="search-icon">&#128269;</span><input type="text" class="search-input" id="search-jug" placeholder="Buscar por nombre o equipo..." oninput="filterJugadores()"></div></div>
+      <div class="table-wrap"><table><thead><tr>
+        <th>Jugador</th><th>Equipo</th>
+        <th class="c fc">F1</th><th class="c fc">F2</th><th class="c fc">F3</th><th class="c fc">F4</th><th class="c fc">F5</th><th class="c fc">F6</th><th class="c fc">F7</th><th class="c fc">F8</th><th class="c fc">F9</th><th class="c fc">F10</th><th class="c fc">F11</th><th class="c">AP</th>
+        <th class="c fc">C1</th><th class="c fc">C2</th><th class="c fc">C3</th><th class="c fc">C4</th><th class="c fc">C5</th><th class="c fc">C6</th><th class="c fc">C7</th><th class="c fc">C8</th><th class="c fc">C9</th><th class="c fc">C10</th><th class="c fc">C11</th><th class="c">CL</th>
+      </tr></thead><tbody id="body-jugadores"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-apertura">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">&#127960;</div><h2>Torneo Apertura</h2></div>
+      <div class="table-wrap"><table><thead><tr>
+        <th class="c" style="width:52px">#</th><th>Equipo</th>
+        <th class="c fc">F1</th><th class="c fc">F2</th><th class="c fc">F3</th><th class="c fc">F4</th><th class="c fc">F5</th><th class="c fc">F6</th><th class="c fc">F7</th><th class="c fc">F8</th><th class="c fc">F9</th><th class="c fc">F10</th><th class="c fc">F11</th>
+        <th class="c">PTS</th><th style="width:110px"></th>
+      </tr></thead><tbody id="body-apertura"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-ideal">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">&#11088;</div><h2 id="ideal-title">Equipo Ideal &mdash; Fecha ?</h2></div>
+      <div class="ideal-wrap">
+        <p class="ideal-subtitle">Los capitanes acumulan puntaje x2 &mdash; los valores ya incluyen la multiplicaci&oacute;n</p>
+        <div class="field" id="ideal-field"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-clausura">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">&#127960;</div><h2>Torneo Clausura</h2></div>
+      <div class="table-wrap"><table><thead><tr>
+        <th class="c" style="width:52px">#</th><th>Equipo</th>
+        <th class="c fc">C1</th><th class="c fc">C2</th><th class="c fc">C3</th><th class="c fc">C4</th><th class="c fc">C5</th><th class="c fc">C6</th><th class="c fc">C7</th><th class="c fc">C8</th><th class="c fc">C9</th><th class="c fc">C10</th><th class="c fc">C11</th>
+        <th class="c">PTS</th><th style="width:110px"></th>
+      </tr></thead><tbody id="body-clausura"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-anual">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">&#127942;</div><h2>Tabla Anual de Posiciones</h2></div>
+      <div class="anual-list" id="anual-list"></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-torneos">
+    <!-- Tabs para móvil -->
+    <div class="torneos-tabs-mobile">
+      <button class="torneo-tab active" data-torneo="apertura">Apertura</button>
+      <button class="torneo-tab" data-torneo="clausura">Clausura</button>
+      <button class="torneo-tab" data-torneo="general">General</button>
+    </div>
+    
+    <div class="torneos-container">
+      <div class="card torneo-card" data-torneo="apertura">
+        <div class="card-head"><div class="card-head-icon">&#127942;</div><h2>Torneo Apertura</h2></div>
+        <div class="table-wrap"><table><thead><tr>
+          <th class="c" style="width:52px">#</th><th>Jugador</th><th class="c">PTS</th>
+        </tr></thead><tbody id="body-torneos-apertura"></tbody></table></div>
+      </div>
+      <div class="card torneo-card" data-torneo="clausura">
+        <div class="card-head"><div class="card-head-icon">&#127942;</div><h2>Torneo Clausura</h2></div>
+        <div class="table-wrap"><table><thead><tr>
+          <th class="c" style="width:52px">#</th><th>Jugador</th><th class="c">PTS</th>
+        </tr></thead><tbody id="body-torneos-clausura"></tbody></table></div>
+      </div>
+      <div class="card torneo-card" data-torneo="general">
+        <div class="card-head"><div class="card-head-icon">&#127942;</div><h2>Torneo General</h2></div>
+        <div class="table-wrap"><table><thead><tr>
+          <th class="c" style="width:52px">#</th><th>Jugador</th><th class="c">PTS</th>
+        </tr></thead><tbody id="body-torneos-general"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="rotate-toast">
+  <div class="rotate-content">
+    <div class="rotate-title">
+      <span class="rotate-phone-icon">&#128241;</span>
+      ¡Mejor experiencia!
+    </div>
+    <div class="rotate-text">Gira tu teléfono horizontalmente</div>
+  </div>
+  <div class="rotate-buttons">
+    <button class="rotate-btn rotate-btn-primary" onclick="dismissRotateToast()">Entendido</button>
+    <button class="rotate-btn rotate-btn-secondary" onclick="showHelpModal()">¿Cómo hago?</button>
+  </div>
+</div>
+
+<div id="help-modal">
+  <div class="help-content">
+    <div class="help-title">
+      <span>&#128161;</span>
+      Cómo girar tu teléfono
+    </div>
+    <div class="help-steps">
+      <div class="help-step">
+        <div class="help-step-num">1</div>
+        <div class="help-step-text">Gira tu teléfono de costado (horizontal)</div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-num">2</div>
+        <div class="help-step-text">Si no gira solo, desliza desde arriba de la pantalla</div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-num">3</div>
+        <div class="help-step-text">Busca el ícono <strong>&#128260; Rotación automática</strong> y actívalo</div>
+      </div>
+    </div>
+    <button class="help-close" onclick="closeHelpModal()">Entendido</button>
+  </div>
+</div>
+
+<div id="fullscreen-btn">
+  <div class="btn-main" onclick="enterFullscreen()">
+    <span class="btn-icon">&#128250;</span>
+    <span>Pantalla Completa</span>
+  </div>
+  <span class="btn-close" onclick="dismissFullscreenBtn()">&#10005;</span>
+</div>
+
+<script>
+const SHEET_ID = '1rOE_0gmeYvzFz5xbIQI0fkzdYdhr6YGgaSCNsAsVU2I';
+let DATA = {};
+
+// ---- Google Sheets fetch ----
+async function fetchSheet(name) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`;
+  const res = await fetch(url);
+  const text = await res.text();
+  const jsonStr = text.replace(/^[\s\S]*?setResponse\(/, '').replace(/\);?\s*$/, '');
+  return JSON.parse(jsonStr).table;
+}
+
+function gv(row, idx) {
+  if (!row || !row.c || row.c[idx] == null) return null;
+  return row.c[idx] ? row.c[idx].v : null;
+}
+function gn(row, idx) { return Number(gv(row, idx)) || 0; }
+function gs(row, idx) { return (gv(row, idx) || '').toString().trim(); }
+
+async function loadData() {
+  const [t1, tAp, tCl, tAn, tDt, tTablas] = await Promise.all([
+    fetchSheet('Hoja 1'),
+    fetchSheet('APERTURA'),
+    fetchSheet('CLAUSURA'),
+    fetchSheet('TABLA ANUAL'),
+    fetchSheet('DATA_TOTAL'),
+    fetchSheet('TABLAS'),
+  ]);
+
+  const jugadores = t1.rows
+    .filter(r => gv(r,0) && gv(r,25) !== null)
+    .map(r => ({
+      nombre: gs(r,0), equipo: gs(r,25), modo: gs(r,26),
+      ap: Array.from({length:11}, (_,i) => gn(r,i+1)),
+      ap_total: gn(r,12),
+      cl: Array.from({length:11}, (_,i) => gn(r,i+13)),
+      cl_total: gn(r,24),
+    }));
+
+  const parseEquipo = r => ({
+    equipo: gs(r,0), capitan: gs(r,1),
+    jug: [2,3,4,5].map(i => gs(r,i)).filter(Boolean),
+    fechas: Array.from({length:11}, (_,i) => gn(r,i+6)),
+    pts: gn(r,17),
+  });
+
+  const equipos_ap = tAp.rows.filter(r => gv(r,0)).map(parseEquipo);
+  const equipos_cl = tCl.rows.filter(r => gv(r,0)).map(parseEquipo);
+
+  const tabla_anual = tAn.rows
+    .filter(r => gv(r,5))
+    .map(r => ({ equipo: gs(r,5), apertura: gn(r,6), clausura: gn(r,7), anual: gn(r,8) }));
+
+  let ideal_fecha = 0, ideal_jugadores = [], ideal_total = 0;
+  tDt.rows.forEach((r, i) => {
+    if (i === 0) { ideal_fecha = gn(r,4); }
+    else if (gv(r,0)) { ideal_jugadores.push({ nombre: gs(r,0), pts: gn(r,1) }); }
+    else if (gn(r,1)) { ideal_total = gn(r,1); }
+  });
+
+  const torneos = {
+    apertura: tTablas.rows.filter(r => gv(r,0)).map(r => ({ pos: gn(r,0), jugador: gs(r,1), pts: gn(r,2) })),
+    clausura: tTablas.rows.filter(r => gv(r,4)).map(r => ({ pos: gn(r,4), jugador: gs(r,5), pts: gn(r,6) })),
+    general: tTablas.rows.filter(r => gv(r,8)).map(r => ({ pos: gn(r,8), jugador: gs(r,9), pts: gn(r,10) }))
+  };
+
+  return { jugadores, equipos_ap, equipos_cl, tabla_anual, ideal: { fecha: ideal_fecha, jugadores: ideal_jugadores, total: ideal_total }, torneos };
+}
+
+// ---- helpers ----
+function fv(v) { return v && v !== 0 ? `<span class="fv">${v}</span>` : `<span class="fz">&#8212;</span>`; }
+function positionTooltip(e) {
+  const tooltip = e.currentTarget.querySelector('.rank-tooltip');
+  if (!tooltip) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  tooltip.style.left = (rect.right + 10) + 'px';
+  tooltip.style.top = (rect.top + rect.height / 2) + 'px';
+  tooltip.style.transform = 'translateY(-50%)';
+}
+function rankEl(puesto, equipo, prevEquipo) {
+  // Detectar si hay empate en puntos con el equipo anterior
+  const hasTie = prevEquipo && equipo.pts === prevEquipo.pts;
+  
+  if (!hasTie) {
+    return `<span class="rank-num">${puesto}</span>`;
+  }
+  
+  // Generar mensaje explicando por qué quedó en esta posición
+  const puestoOrdinal = puesto === 1 ? '1er' : puesto === 2 ? '2do' : puesto === 3 ? '3er' : `${puesto}to`;
+  const puestoAnterior = prevEquipo.puesto;
+  const puestoAnteriorOrdinal = puestoAnterior === 1 ? '1er' : puestoAnterior === 2 ? '2do' : puestoAnterior === 3 ? '3er' : `${puestoAnterior}to`;
+  let razon = '';
+  
+  if (equipo.fechasGanadas !== prevEquipo.fechasGanadas) {
+    razon = `tener menos fechas ganadas (${equipo.fechasGanadas} vs ${prevEquipo.fechasGanadas})`;
+  } else if (equipo.mejorFecha !== prevEquipo.mejorFecha) {
+    razon = `tener menor mejor fecha (${equipo.mejorFecha} pts vs ${prevEquipo.mejorFecha} pts)`;
+  } else {
+    razon = `orden alfabético`;
+  }
+  
+  const mensaje = `<strong>${equipo.equipo}</strong> quedó en ${puestoOrdinal} lugar por ${razon} que <strong>${prevEquipo.equipo}</strong> que quedó en ${puestoAnteriorOrdinal} lugar`;
+  const tooltip = `<span class="rank-tooltip"><span class="rank-tooltip-line">${mensaje}</span></span>`;
+  return `<span class="rank-num has-tie" onmouseenter="positionTooltip(event)">${puesto}${tooltip}</span>`;
+}
+function calcularFechasGanadas(equipos) {
+  const numFechas = equipos[0]?.fechas?.length || 11;
+  const fechasGanadas = equipos.map(() => 0);
+  
+  for (let f = 0; f < numFechas; f++) {
+    const puntajes = equipos.map(eq => eq.fechas[f] || 0);
+    const maxPuntaje = Math.max(...puntajes);
+    if (maxPuntaje > 0) {
+      puntajes.forEach((pts, idx) => {
+        if (pts === maxPuntaje) fechasGanadas[idx]++;
+      });
+    }
+  }
+  return fechasGanadas;
+}
+function sortEquiposConDesempate(equipos) {
+  const fechasGanadasArray = calcularFechasGanadas(equipos);
+  
+  // Agregar stats de desempate a cada equipo
+  equipos.forEach((eq, idx) => {
+    eq.fechasGanadas = fechasGanadasArray[idx];
+    eq.mejorFecha = Math.max(...eq.fechas.filter(v => v > 0));
+    if (eq.mejorFecha === -Infinity) eq.mejorFecha = 0;
+  });
+  
+  // Ordenar por: pts DESC, fechasGanadas DESC, mejorFecha DESC, nombre ASC
+  return [...equipos].sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    if (b.fechasGanadas !== a.fechasGanadas) return b.fechasGanadas - a.fechasGanadas;
+    if (b.mejorFecha !== a.mejorFecha) return b.mejorFecha - a.mejorFecha;
+    return a.equipo.localeCompare(b.equipo);
+  });
+}
+function calcularPuestos(equipos) {
+  let puesto = 1;
+  equipos.forEach((eq, i) => {
+    if (i > 0) {
+      const prev = equipos[i - 1];
+      // Solo incrementar puesto si hay diferencia en algún criterio
+      if (eq.pts !== prev.pts || eq.fechasGanadas !== prev.fechasGanadas || 
+          eq.mejorFecha !== prev.mejorFecha || eq.equipo !== prev.equipo) {
+        puesto++;
+      }
+    }
+    eq.puesto = puesto;
+  });
+}
+function initials(n) { return n.split(" ").slice(0,2).map(w=>w[0]||'').join("").toUpperCase(); }
+function getTeamColor(teamName) {
+  const colors = {
+    'CABRON': { bg: '#FFFFFF', text: '#000000' },
+    'MONTRE': { bg: '#00D000', text: '#FFFFFF' },
+    'FERRERO HNOS': { bg: '#8B0000', text: '#FFFFFF' },
+    'INSIDE TRENEL': { bg: '#000000', text: '#FFFFFF' },
+    'CERRAJERIA OMARCITO': { bg: '#FF8C00', text: '#FFFFFF' },
+    'AGENCIA 133': { bg: '#FF00FF', text: '#FFFFFF' },
+    'TRIBUNERAS': { bg: '#DAA520', text: '#00008B' },
+    'A LO DE JUAN': { bg: '#00008B', text: '#FFFFE0' },
+    'RADIO UNO': { bg: '#87CEEB', text: '#FFFFFF' },
+    'EL GRAN DT': { bg: '#FFD700', text: '#000000' }
+  };
+  const upperName = teamName.toUpperCase().trim();
+  return colors[upperName] || { bg: 'linear-gradient(135deg, var(--c1), var(--c2))', text: '#fff' };
+}
+function teamAvatar(name, teamName) {
+  const colors = teamName ? getTeamColor(teamName) : { bg: 'linear-gradient(135deg, var(--c1), var(--c2))', text: '#fff' };
+  const bgStyle = colors.bg.includes('gradient') ? `background: ${colors.bg}` : `background: ${colors.bg}`;
+  const style = `${bgStyle}; color: ${colors.text}`;
+  return `<span class="team-avatar" style="${style}">${initials(name)}</span>`;
+}
+
+function showTab(e, name) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("sec-"+name).classList.add("active");
+  e.currentTarget.classList.add("active");
+}
+
+// ---- renders ----
+function renderHeaderStats() {
+  const fecha = DATA.ideal.fecha || 1;
+  document.getElementById("header-subtitle").innerHTML = `Torneo Apertura &amp; Clausura &mdash; Posiciones en vivo (Fecha ${fecha})`;
+}
+
+function renderJugadores(filter) {
+  const fl = (filter||"").toLowerCase();
+  const rows = DATA.jugadores
+    .filter(j => j.equipo)
+    .filter(j => !fl || j.nombre.toLowerCase().includes(fl) || j.equipo.toLowerCase().includes(fl))
+    .sort((a,b) => b.ap_total - a.ap_total);
+  document.getElementById("jug-count").textContent = rows.length + " jugadores";
+  document.getElementById("body-jugadores").innerHTML = rows.map(j => {
+    const apF = j.ap.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
+    const clF = j.cl.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
+    return `<tr>
+      <td><div class="team-pill">${teamAvatar(j.nombre, j.equipo)}<span class="team-name">${j.nombre}</span></div></td>
+      <td style="color:var(--text2);font-size:0.83rem;font-weight:500">${j.equipo}</td>
+      ${apF}<td class="c"><span class="pts ${j.ap_total?'pts-hi':'pts-lo'}">${j.ap_total}</span></td>
+      ${clF}<td class="c"><span class="pts ${j.cl_total?'pts-hi':'pts-lo'}">${j.cl_total}</span></td>
+    </tr>`;
+  }).join("");
+}
+function filterJugadores() { renderJugadores(document.getElementById("search-jug").value); }
+
+function buildEquipoRows(rawRows, prefix, fl) {
+  const rows = sortEquiposConDesempate(rawRows);
+  calcularPuestos(rows);
+  
+  const tbody = document.getElementById("body-"+prefix);
+  tbody.innerHTML = "";
+  rows.forEach((eq, i) => {
+    const prevEq = i > 0 ? rows[i - 1] : null;
+    const fCols = eq.fechas.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="c">${rankEl(eq.puesto, eq, prevEq)}</td>
+      <td><div class="team-pill">${teamAvatar(eq.equipo, eq.equipo)}<span class="team-name">${eq.equipo}</span></div></td>
+      ${fCols}
+      <td class="c"><span class="pts ${eq.pts?'pts-hi':'pts-lo'}">${eq.pts}</span></td>
+      <td class="c"><button class="btn-expand" id="btn-${prefix}-${i}" onclick="toggleDetail('${prefix}',${i})">&#128100; Ver equipo</button></td>`;
+    tbody.appendChild(tr);
+
+    const apOrCl = prefix==="apertura"?"ap":"cl";
+    const totalKey = prefix==="apertura"?"ap_total":"cl_total";
+    const allP = [{nombre:eq.capitan,cap:true}, ...eq.jug.map(j=>(({nombre:j,cap:false})))];
+    const pRows = allP.map(p => {
+      const jd = DATA.jugadores.find(j=>j.nombre.toUpperCase()===p.nombre.toUpperCase());
+      const arr = jd ? jd[apOrCl] : Array(11).fill(0);
+      const tot = jd ? jd[totalKey] : 0;
+      const fCells = arr.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
+      const capTag = p.cap ? `<span class="tag tag-cap" style="margin-left:6px">CAP 2x</span>` : "";
+      return `<tr><td><div class="player-name-cell">${teamAvatar(p.nombre, eq.equipo)}<span style="font-weight:600;font-size:0.82rem">${p.nombre}</span>${capTag}</div></td>${fCells}<td class="c"><strong style="color:var(--c1)">${tot}</strong></td></tr>`;
+    }).join("");
+    const fHds = Array.from({length:11},(_,k)=>`<th class="c fc">${fl}${k+1}</th>`).join("");
+    const det = document.createElement("tr");
+    det.className = "detail-row"; det.id = `det-${prefix}-${i}`;
+    det.innerHTML = `<td colspan="14"><div class="detail-inner"><table><thead><tr><th>Jugador</th>${fHds}<th class="c">Total</th></tr></thead><tbody>${pRows}</tbody></table></div></td>`;
+    tbody.appendChild(det);
+  });
+}
+function toggleDetail(prefix, i) {
+  const det = document.getElementById(`det-${prefix}-${i}`);
+  const btn = document.getElementById(`btn-${prefix}-${i}`);
+  const open = det.classList.toggle("open");
+  btn.innerHTML = open ? "&#10005; Cerrar" : "&#128100; Ver equipo";
+  btn.classList.toggle("open", open);
+}
+function renderApertura() { buildEquipoRows(DATA.equipos_ap, "apertura", "F"); }
+function renderClausura() { buildEquipoRows(DATA.equipos_cl, "clausura", "C"); }
+
+function renderIdeal() {
+  const ideal = DATA.ideal;
+  document.getElementById("ideal-title").innerHTML = `Equipo Ideal &mdash; Fecha ${ideal.fecha}`;
+  const container = document.getElementById("ideal-field");
+  if (!ideal.jugadores?.length) { container.innerHTML = `<p style="color:var(--text3);padding:40px;text-align:center">Sin datos para esta fecha.</p>`; return; }
+  
+  const sorted = [...ideal.jugadores].sort((a,b) => b.pts - a.pts);
+  
+  // Obtener equipo de cada jugador
+  const playersWithTeam = sorted.map(p => {
+    const jugador = DATA.jugadores.find(j => j.nombre.toUpperCase() === p.nombre.toUpperCase());
+    return { ...p, equipo: jugador ? jugador.equipo : 'Desconocido' };
+  });
+  
+  // Distribuir jugadores en formación 1-3-1
+  const groups = [];
+  if (playersWithTeam.length >= 1) groups.push([playersWithTeam[0]]);
+  if (playersWithTeam.length >= 4) groups.push([playersWithTeam[1], playersWithTeam[2], playersWithTeam[3]]);
+  else if (playersWithTeam.length === 3) groups.push([playersWithTeam[1], playersWithTeam[2]]);
+  else if (playersWithTeam.length === 2) groups.push([playersWithTeam[1]]);
+  if (playersWithTeam.length >= 5) groups.push([playersWithTeam[4]]);
+  
+  // Generar HTML de la cancha
+  const fieldHTML = `<div class="field">${groups.map((g, idx) => {
+    const rowClass = g.length === 3 ? 'field-row center-row' : 'field-row';
+    return `<div class="${rowClass}">${g.map(p => {
+      const colors = getTeamColor(p.equipo);
+      const style = `background: ${colors.bg}; color: ${colors.text}`;
+      return `<span class="field-avatar" style="${style}" title="${p.nombre} - ${p.equipo}">${initials(p.nombre)}</span>`;
+    }).join("")}</div>`;
+  }).join("")}</div>`;
+  
+  // Generar HTML de la lista
+  const listHTML = `<div class="ideal-list">${playersWithTeam.map((p, i) => `<div class="ideal-list-item">
+    ${teamAvatar(p.nombre, p.equipo)}
+    <div class="ideal-list-info">
+      <div class="ideal-list-name">${p.nombre}</div>
+      <div class="ideal-list-team">${p.equipo}</div>
+    </div>
+    <div class="ideal-list-pts">${p.pts} <span style="font-size:0.7em;opacity:0.6">pts</span></div>
+  </div>`).join("")}</div>`;
+  
+  container.innerHTML = `<div class="ideal-container">
+    <div class="ideal-field-container">
+      ${fieldHTML}
+    </div>
+    <div class="ideal-list-container">
+      ${listHTML}
+      <div class="ideal-total">TOTAL: ${ideal.total} pts</div>
+    </div>
+  </div>`;
+}
+
+function renderAnual() {
+  // Combinar datos de apertura y clausura para calcular tabla anual
+  const equiposMap = {};
+  
+  DATA.equipos_ap.forEach(eq => {
+    equiposMap[eq.equipo] = {
+      equipo: eq.equipo,
+      apertura: eq.pts,
+      clausura: 0,
+      fechas: [...eq.fechas]
+    };
+  });
+  
+  DATA.equipos_cl.forEach(eq => {
+    if (equiposMap[eq.equipo]) {
+      equiposMap[eq.equipo].clausura = eq.pts;
+      equiposMap[eq.equipo].fechas = equiposMap[eq.equipo].fechas.concat(eq.fechas);
+    } else {
+      equiposMap[eq.equipo] = {
+        equipo: eq.equipo,
+        apertura: 0,
+        clausura: eq.pts,
+        fechas: eq.fechas
+      };
+    }
+  });
+  
+  const equiposAnual = Object.values(equiposMap).map(eq => ({
+    ...eq,
+    pts: eq.apertura + eq.clausura
+  }));
+  
+  const rows = sortEquiposConDesempate(equiposAnual);
+  calcularPuestos(rows);
+  
+  const maxPts = rows[0]?.pts || 1;
+  const posClass = ["pos-1","pos-2","pos-3"];
+  document.getElementById("anual-list").innerHTML = rows.map((r, i) => {
+    const prevR = i > 0 ? rows[i - 1] : null;
+    const pct = maxPts > 0 ? Math.round((r.pts / maxPts) * 100) : 0;
+    const rk = rankEl(r.puesto, r, prevR);
+    return `<div class="anual-row ${posClass[i]||""}">
+      <div class="ar-rank">${rk}</div>
+      <div class="ar-team">${teamAvatar(r.equipo, r.equipo)}<div><div class="ar-name">${r.equipo}</div><div class="ar-sub">${i===0?"L&iacute;der":r.pts>0?"A "+(maxPts-r.pts)+" pts del l&iacute;der":"Sin puntos"}</div></div></div>
+      <div class="ar-parciales">
+        <div class="ar-parcial"><div class="pv">${r.apertura}</div><div class="pl">Apertura</div></div>
+        <div class="ar-parcial"><div class="pv">${r.clausura}</div><div class="pl">Clausura</div></div>
+      </div>
+      <div class="ar-total"><div class="tv">${r.pts}</div><div class="tl">pts</div></div>
+      <div class="ar-bar-wrap"><div class="ar-bar" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join("");
+}
+
+function renderTorneosIndividuales() {
+  const { apertura, clausura, general } = DATA.torneos;
+  
+  // Renderizar Apertura
+  document.getElementById("body-torneos-apertura").innerHTML = apertura.map((j, i) => {
+    const posClass = i < 3 ? ["pos-1","pos-2","pos-3"][i] : "";
+    const jugadorData = DATA.jugadores.find(jug => jug.nombre.toUpperCase() === j.jugador.toUpperCase());
+    const equipo = jugadorData ? jugadorData.equipo : null;
+    return `<tr class="${posClass}">
+      <td class="c"><span class="rank-num">${j.pos}</span></td>
+      <td><div class="team-pill">${teamAvatar(j.jugador, equipo)}<span class="team-name">${j.jugador}</span></div></td>
+      <td class="c"><span class="pts ${j.pts?'pts-hi':'pts-lo'}">${j.pts}</span></td>
+    </tr>`;
+  }).join("");
+  
+  // Renderizar Clausura
+  document.getElementById("body-torneos-clausura").innerHTML = clausura.map((j, i) => {
+    const posClass = i < 3 ? ["pos-1","pos-2","pos-3"][i] : "";
+    const jugadorData = DATA.jugadores.find(jug => jug.nombre.toUpperCase() === j.jugador.toUpperCase());
+    const equipo = jugadorData ? jugadorData.equipo : null;
+    return `<tr class="${posClass}">
+      <td class="c"><span class="rank-num">${j.pos}</span></td>
+      <td><div class="team-pill">${teamAvatar(j.jugador, equipo)}<span class="team-name">${j.jugador}</span></div></td>
+      <td class="c"><span class="pts ${j.pts?'pts-hi':'pts-lo'}">${j.pts}</span></td>
+    </tr>`;
+  }).join("");
+  
+  // Renderizar General
+  document.getElementById("body-torneos-general").innerHTML = general.map((j, i) => {
+    const posClass = i < 3 ? ["pos-1","pos-2","pos-3"][i] : "";    const jugadorData = DATA.jugadores.find(jug => jug.nombre.toUpperCase() === j.jugador.toUpperCase());
+    const equipo = jugadorData ? jugadorData.equipo : null;    return `<tr class="${posClass}">
+      <td class="c"><span class="rank-num">${j.pos}</span></td>
+      <td><div class="team-pill">${teamAvatar(j.jugador, equipo)}<span class="team-name">${j.jugador}</span></div></td>
+      <td class="c"><span class="pts ${j.pts?'pts-hi':'pts-lo'}">${j.pts}</span></td>
+    </tr>`;
+  }).join("");
+}
+
+// ---- Tabs de torneos para móvil ----
+function initTorneosTabsMobile() {
+  const tabs = document.querySelectorAll('.torneo-tab');
+  const cards = document.querySelectorAll('.torneo-card');
+  
+  // Marcar la primera card como activa por defecto
+  if (cards.length > 0) {
+    cards[0].classList.add('active');
+  }
+  
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const torneoName = tab.getAttribute('data-torneo');
+      
+      // Remover clase active de todos los tabs y cards
+      tabs.forEach(t => t.classList.remove('active'));
+      cards.forEach(c => c.classList.remove('active'));
+      
+      // Agregar clase active al tab y card seleccionado
+      tab.classList.add('active');
+      const activeCard = document.querySelector(`.torneo-card[data-torneo="${torneoName}"]`);
+      if (activeCard) {
+        activeCard.classList.add('active');
+      }
+    });
+  });
+}
+
+// ---- init ----
+async function init() {
+  try {
+    DATA = await loadData();
+    document.getElementById("loading").classList.add("hidden");
+    renderHeaderStats();
+    renderJugadores();
+    renderApertura();
+    renderClausura();
+    renderIdeal();
+    renderAnual();
+    renderTorneosIndividuales();
+    initTorneosTabsMobile();
+  } catch(e) {
+    console.error(e);
+    document.getElementById("loading").classList.add("hidden");
+    document.getElementById("error-overlay").classList.add("show");
+  }
+}
+init();
+
+// ---- Orientation & Fullscreen ----
+var fullscreenBtnDismissed = false;
+
+function dismissRotateToast() {
+  document.getElementById('rotate-toast').classList.remove('show');
+}
+
+function showHelpModal() {
+  document.getElementById('help-modal').classList.add('show');
+}
+
+function closeHelpModal() {
+  document.getElementById('help-modal').classList.remove('show');
+  dismissRotateToast();
+}
+
+function dismissFullscreenBtn() {
+  document.getElementById('fullscreen-btn').classList.remove('show');
+  fullscreenBtnDismissed = true;
+}
+
+async function enterFullscreen() {
+  try {
+    await document.body.requestFullscreen();
+    if (screen.orientation && screen.orientation.lock) {
+      try {
+        await screen.orientation.lock('landscape');
+      } catch(err) {
+        console.log('No se pudo forzar landscape:', err);
+      }
+    }
+    dismissFullscreenBtn();
+  } catch(err) {
+    console.log('Error al entrar en fullscreen:', err);
+  }
+}
+
+(function() {
+  function checkOrientation() {
+    var toast = document.getElementById('rotate-toast');
+    var fullscreenBtn = document.getElementById('fullscreen-btn');
+    var isMobile = window.innerWidth <= 768;
+    var isPortrait = window.innerHeight > window.innerWidth;
+    var currentOrientation = isPortrait ? 'portrait' : 'landscape';
+    
+    // Mostrar toast en portrait
+    if (isMobile && isPortrait) {
+      toast.classList.add('show');
+    } else {
+      toast.classList.remove('show');
+    }
+    
+    // Mostrar botón fullscreen en landscape (si no fue cerrado manualmente)
+    if (isMobile && !isPortrait && !fullscreenBtnDismissed) {
+      fullscreenBtn.classList.add('show');
+    } else if (fullscreenBtnDismissed || !isMobile || isPortrait) {
+      fullscreenBtn.classList.remove('show');
+    }
+    
+    lastOrientation = currentOrientation;
+  }
+  
+  window.addEventListener('load', checkOrientation);
+  window.addEventListener('resize', checkOrientation);
+  window.addEventListener('orientationchange', checkOrientation);
+})();
+</script>
+</body>
+</html>
