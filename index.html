@@ -451,6 +451,7 @@ tbody td.c { overflow: visible; position: relative; }
     <button class="tab" onclick="showTab(event,'clausura')"><span>&#127960;</span> Clausura</button>
     <button class="tab" onclick="showTab(event,'anual')"><span>&#127942;</span> Tabla Anual</button>
     <button class="tab" onclick="showTab(event,'torneos')"><span>&#127942;</span> Torneos Individuales</button>
+    <button class="tab" onclick="showTab(event,'reglas')"><span>&#128220;</span> Reglas</button>
   </div>
 </header>
 
@@ -553,6 +554,43 @@ tbody td.c { overflow: visible; position: relative; }
         <div class="table-wrap"><table><thead><tr>
           <th class="c" style="width:52px">#</th><th>Jugador</th><th class="c">PTS</th>
         </tr></thead><tbody id="body-torneos-general"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-reglas">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">&#128220;</div><h2>Reglamento Oficial - Prode por Equipos 2026</h2></div>
+      <div style="padding: 24px; line-height: 1.8; color: var(--text);">
+        <p style="margin-bottom: 16px; font-size: 0.95rem; color: var(--text2);">El torneo se divide en tres instancias clave: Apertura, Clausura y la Gran Final Anual.</p>
+        
+        <h3 style="color: var(--c1); font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#127960;</span> Torneos Apertura y Clausura</h3>
+        <p style="margin-bottom: 8px;">Cada torneo es independiente y consagra a un <strong>Ganador de Etapa</strong>.</p>
+        <p style="margin-bottom: 8px;">Los puntos se computan fecha tras fecha según el rendimiento individual de cada integrante del equipo.</p>
+        <p style="margin-bottom: 16px;">Al finalizar cada etapa, el equipo que termine en el <strong style="color: var(--gold);">1° puesto</strong> clasifica directamente a la <strong>Gran Final Anual</strong>.</p>
+        
+        <h3 style="color: var(--c1); font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#128200;</span> Tabla Anual (La Regularidad)</h3>
+        <p style="margin-bottom: 8px;">Es la suma de todos los puntos obtenidos en el Apertura y el Clausura.</p>
+        <p style="margin-bottom: 16px;">Sirve para premiar al equipo más constante del año y definir la <strong>Ventaja Deportiva</strong>.</p>
+        
+        <h3 style="color: var(--c1); font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#127942;</span> La Gran Final Anual</h3>
+        <p style="margin-bottom: 8px;">Se define entre el <strong>Ganador del Apertura</strong> y el <strong>Ganador del Clausura</strong>:</p>
+        <ul style="margin-left: 20px; margin-bottom: 16px;">
+          <li style="margin-bottom: 6px;"><strong>Serie:</strong> Dos partidos (Ida y Vuelta).</li>
+          <li style="margin-bottom: 6px;"><strong>Desempate:</strong> Si tras los dos partidos hay igualdad en el global, se disputará un <strong>3° Partido de Desempate</strong>.</li>
+          <li style="margin-bottom: 6px;"><strong>Ventaja Deportiva:</strong> Si tras el tercer partido persiste la igualdad, el campeón será el equipo que esté mejor posicionado en la <strong>Tabla Anual</strong>.</li>
+        </ul>
+        
+        <h3 style="color: #c0392b; font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#9888;</span> REGLA DE IDENTIFICACIÓN DE JUGADORES</h3>
+        <p style="margin-bottom: 8px;">Para garantizar la transparencia:</p>
+        <ul style="margin-left: 20px; margin-bottom: 16px;">
+          <li style="margin-bottom: 6px;">Aquellos jugadores que realicen más de un Prode por semana deberán <strong>identificarlos claramente</strong> (Ej: Nahuel Mendez 1, Nahuel Mendez 2).</li>
+          <li style="margin-bottom: 6px;">Deberán <strong>aclarar cuál de esos perfiles juega para el equipo</strong> (Ej: "En el equipo juega el 1"). De no aclararse, se tomará el primer registro por defecto.</li>
+        </ul>
+        
+        <h3 style="color: var(--gold); font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#127873;</span> PREMIO MAYOR</h3>
+        <p style="margin-bottom: 8px;">El equipo que se consagre <strong style="color: var(--gold);">CAMPEÓN ANUAL</strong> recibirá:</p>
+        <p style="background: var(--gold-light); padding: 16px; border-radius: 8px; border-left: 4px solid var(--gold); font-weight: 600; color: var(--text);">&#127860; Cena de gala en la sede del Club All Boys para todo el equipo.</p>
       </div>
     </div>
   </div>
