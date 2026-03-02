@@ -894,9 +894,10 @@ function buildEquipoRows(rawRows, prefix, fl) {
       const jd = DATA.jugadores.find(j=>j.nombre.toUpperCase()===p.nombre.toUpperCase());
       const arr = jd ? jd[apOrCl] : Array(11).fill(0);
       const tot = jd ? jd[totalKey] : 0;
-      const fCells = arr.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
+      const finalTotal = p.cap ? tot * 2 : tot;
+      const fCells = arr.map(v=>`<td class="c fc">${fv(p.cap ? v * 2 : v)}</td>`).join("");
       const capTag = p.cap ? `<span class="tag tag-cap" style="margin-left:6px">CAP 2x</span>` : "";
-      return `<tr><td><div class="player-name-cell">${teamAvatar(p.nombre, eq.equipo)}<span style="font-weight:600;font-size:0.82rem">${p.nombre}</span>${capTag}</div></td>${fCells}<td class="c"><strong style="color:var(--c1)">${tot}</strong></td></tr>`;
+      return `<tr><td><div class="player-name-cell">${teamAvatar(p.nombre, eq.equipo)}<span style="font-weight:600;font-size:0.82rem">${p.nombre}</span>${capTag}</div></td>${fCells}<td class="c"><strong style="color:var(--c1)">${finalTotal}</strong></td></tr>`;
     }).join("");
     const fHds = Array.from({length:11},(_,k)=>`<th class="c fc">${fl}${k+1}</th>`).join("");
     const det = document.createElement("tr");
