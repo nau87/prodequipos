@@ -220,6 +220,8 @@ tbody td.c { overflow: visible; position: relative; }
 .search-input:focus { border-color: var(--c2); box-shadow: 0 0 0 3px rgba(26,122,60,0.1); background: #fff; }
 .search-wrap-inner { position: relative; }
 .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: var(--text3); pointer-events: none; }
+.top-scroll-wrap { overflow-x: auto; padding: 8px 20px; }
+.top-scroll-content { height: 1px; }
 .fc { min-width: 34px; text-align: center !important; white-space: nowrap; }
 
 /* IDEAL */
@@ -481,7 +483,8 @@ tbody td.c { overflow: visible; position: relative; }
     <div class="card">
       <div class="card-head"><div class="card-head-icon">&#128100;</div><h2>Tabla de Jugadores</h2><span id="jug-count"></span></div>
       <div class="search-wrap"><div class="search-wrap-inner"><span class="search-icon">&#128269;</span><input type="text" class="search-input" id="search-jug" placeholder="Buscar por nombre o equipo..." oninput="filterJugadores()"></div></div>
-      <div class="table-wrap"><table><thead><tr>
+      <div class="top-scroll-wrap" id="top-scroll-wrap"><div class="top-scroll-content" id="top-scroll-content"></div></div>
+      <div class="table-wrap" id="jug-table-wrap"><table><thead><tr>
         <th>Jugador</th><th>Equipo</th>
         <th class="c fc">F1</th><th class="c fc">F2</th><th class="c fc">F3</th><th class="c fc">F4</th><th class="c fc">F5</th><th class="c fc">F6</th><th class="c fc">F7</th><th class="c fc">F8</th><th class="c fc">F9</th><th class="c fc">F10</th><th class="c fc">F11</th><th class="c">AP</th>
         <th class="c fc">C1</th><th class="c fc">C2</th><th class="c fc">C3</th><th class="c fc">C4</th><th class="c fc">C5</th><th class="c fc">C6</th><th class="c fc">C7</th><th class="c fc">C8</th><th class="c fc">C9</th><th class="c fc">C10</th><th class="c fc">C11</th><th class="c">CL</th>
@@ -567,6 +570,7 @@ tbody td.c { overflow: visible; position: relative; }
         <h3 style="color: var(--c1); font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#127960;</span> Torneos Apertura y Clausura</h3>
         <p style="margin-bottom: 8px;">Cada torneo es independiente y consagra a un <strong>Ganador de Etapa</strong>.</p>
         <p style="margin-bottom: 8px;">Los puntos se computan fecha tras fecha según el rendimiento individual de cada integrante del equipo.</p>
+        <p style="margin-bottom: 8px;">El <strong style="color: var(--gold);">CAPITÁN</strong> del equipo suma <strong>x2</strong> (doble puntaje).</p>
         <p style="margin-bottom: 16px;">Al finalizar cada etapa, el equipo que termine en el <strong style="color: var(--gold);">1° puesto</strong> clasifica directamente a la <strong>Gran Final Anual</strong>.</p>
         
         <h3 style="color: var(--c1); font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#128200;</span> Tabla Anual (La Regularidad)</h3>
@@ -850,8 +854,20 @@ function renderJugadores(filter) {
       ${clF}<td class="c"><span class="pts ${j.cl_total?'pts-hi':'pts-lo'}">${j.cl_total}</span></td>
     </tr>`;
   }).join("");
+  syncJugadoresScroll();
 }
 function filterJugadores() { renderJugadores(document.getElementById("search-jug").value); }
+
+function syncJugadoresScroll() {
+  const topScroll = document.getElementById("top-scroll-wrap");
+  const tableWrap = document.getElementById("jug-table-wrap");
+  const topContent = document.getElementById("top-scroll-content");
+  if (!topScroll || !tableWrap || !topContent) return;
+  const table = tableWrap.querySelector("table");
+  if (table) { topContent.style.width = table.scrollWidth + "px"; }
+  topScroll.onscroll = function() { tableWrap.scrollLeft = topScroll.scrollLeft; };
+  tableWrap.onscroll = function() { topScroll.scrollLeft = tableWrap.scrollLeft; };
+}
 
 function buildEquipoRows(rawRows, prefix, fl) {
   const rows = sortEquiposConDesempate(rawRows);
