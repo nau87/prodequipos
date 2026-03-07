@@ -72,15 +72,17 @@ body:-moz-full-screen, html:-moz-full-screen { overflow-y: auto; height: auto; }
 .live-badge {
   display: inline-flex; align-items: center; gap: 5px;
   background: rgba(255,255,255,0.15); border-radius: 20px;
-  padding: 4px 10px; font-size: 0.72rem; font-weight: 700;
-  color: rgba(255,255,255,0.85); margin-left: auto;
+  padding: 6px 12px; font-size: 0.72rem; font-weight: 700;
+  color: rgba(255,255,255,0.95); margin-left: auto;
+  backdrop-filter: blur(10px);
 }
-.live-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #4ade80; box-shadow: 0 0 6px #4ade80;
-  animation: livePulse 1.5s ease-in-out infinite;
+.live-badge #visit-count {
+  font-weight: 900;
+  font-size: 0.85rem;
+  color: #fff;
+  min-width: 30px;
+  text-align: center;
 }
-@keyframes livePulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
 
 /* TABS */
 .tabs-wrap { display: flex; gap: 2px; margin-top: 24px; position: relative; z-index: 1; overflow-x: auto; scrollbar-width: none; }
@@ -100,7 +102,7 @@ body:-moz-full-screen, html:-moz-full-screen { overflow-y: auto; height: auto; }
 .sponsors-banner {
   background: linear-gradient(90deg, rgba(15,76,42,0.05), rgba(26,122,60,0.05));
   border-bottom: 1px solid var(--border);
-  padding: 20px 0;
+  padding: 8px 0;
   overflow: hidden;
   position: relative;
 }
@@ -144,7 +146,7 @@ body:-moz-full-screen, html:-moz-full-screen { overflow-y: auto; height: auto; }
   100% { transform: translateX(-50%); }
 }
 @media (max-width: 768px) {
-  .sponsors-banner { padding: 15px 0; }
+  .sponsors-banner { padding: 8px 0; }
   .sponsor-item { height: 50px; padding: 0 8px; }
   .sponsor-item img { max-height: 50px; max-width: 150px; }
 }
@@ -220,6 +222,8 @@ tbody td.c { overflow: visible; position: relative; }
 .search-input:focus { border-color: var(--c2); box-shadow: 0 0 0 3px rgba(26,122,60,0.1); background: #fff; }
 .search-wrap-inner { position: relative; }
 .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: var(--text3); pointer-events: none; }
+.top-scroll-wrap { overflow-x: auto; padding: 8px 20px; }
+.top-scroll-content { height: 1px; }
 .fc { min-width: 34px; text-align: center !important; white-space: nowrap; }
 
 /* IDEAL */
@@ -442,7 +446,11 @@ tbody td.c { overflow: visible; position: relative; }
       <h1>PRODE EQUIPOS</h1>
       <p id="header-subtitle">Torneo Apertura &amp; Clausura &mdash; Posiciones en vivo</p>
     </div>
-    <div class="live-badge"><div class="live-dot"></div> EN VIVO</div>
+    <div class="live-badge">
+      <span>👥</span>
+      <span id="visit-count">---</span>
+      <span style="font-size: 0.65rem; opacity: 0.7;">visitas</span>
+    </div>
   </div>
   <div class="tabs-wrap">
     <button class="tab active" onclick="showTab(event,'jugadores')"><span>&#128100;</span> Jugadores</button>
@@ -451,6 +459,7 @@ tbody td.c { overflow: visible; position: relative; }
     <button class="tab" onclick="showTab(event,'clausura')"><span>&#127960;</span> Clausura</button>
     <button class="tab" onclick="showTab(event,'anual')"><span>&#127942;</span> Tabla Anual</button>
     <button class="tab" onclick="showTab(event,'torneos')"><span>&#127942;</span> Torneos Individuales</button>
+    <button class="tab" onclick="showTab(event,'reglas')"><span>&#128220;</span> Reglas</button>
   </div>
 </header>
 
@@ -480,7 +489,8 @@ tbody td.c { overflow: visible; position: relative; }
     <div class="card">
       <div class="card-head"><div class="card-head-icon">&#128100;</div><h2>Tabla de Jugadores</h2><span id="jug-count"></span></div>
       <div class="search-wrap"><div class="search-wrap-inner"><span class="search-icon">&#128269;</span><input type="text" class="search-input" id="search-jug" placeholder="Buscar por nombre o equipo..." oninput="filterJugadores()"></div></div>
-      <div class="table-wrap"><table><thead><tr>
+      <div class="top-scroll-wrap" id="top-scroll-wrap"><div class="top-scroll-content" id="top-scroll-content"></div></div>
+      <div class="table-wrap" id="jug-table-wrap"><table><thead><tr>
         <th>Jugador</th><th>Equipo</th>
         <th class="c fc">F1</th><th class="c fc">F2</th><th class="c fc">F3</th><th class="c fc">F4</th><th class="c fc">F5</th><th class="c fc">F6</th><th class="c fc">F7</th><th class="c fc">F8</th><th class="c fc">F9</th><th class="c fc">F10</th><th class="c fc">F11</th><th class="c">AP</th>
         <th class="c fc">C1</th><th class="c fc">C2</th><th class="c fc">C3</th><th class="c fc">C4</th><th class="c fc">C5</th><th class="c fc">C6</th><th class="c fc">C7</th><th class="c fc">C8</th><th class="c fc">C9</th><th class="c fc">C10</th><th class="c fc">C11</th><th class="c">CL</th>
@@ -553,6 +563,44 @@ tbody td.c { overflow: visible; position: relative; }
         <div class="table-wrap"><table><thead><tr>
           <th class="c" style="width:52px">#</th><th>Jugador</th><th class="c">PTS</th>
         </tr></thead><tbody id="body-torneos-general"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-reglas">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">&#128220;</div><h2>Reglamento Oficial - Prode por Equipos 2026</h2></div>
+      <div style="padding: 24px; line-height: 1.8; color: var(--text);">
+        <p style="margin-bottom: 16px; font-size: 0.95rem; color: var(--text2);">El torneo se divide en tres instancias clave: Apertura, Clausura y la Gran Final Anual.</p>
+        
+        <h3 style="color: var(--c1); font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#127960;</span> Torneos Apertura y Clausura</h3>
+        <p style="margin-bottom: 8px;">Cada torneo es independiente y consagra a un <strong>Ganador de Etapa</strong>.</p>
+        <p style="margin-bottom: 8px;">Los puntos se computan fecha tras fecha según el rendimiento individual de cada integrante del equipo.</p>
+        <p style="margin-bottom: 8px;">El <strong style="color: var(--gold);">CAPITÁN</strong> del equipo suma <strong>x2</strong> (doble puntaje).</p>
+        <p style="margin-bottom: 16px;">Al finalizar cada etapa, el equipo que termine en el <strong style="color: var(--gold);">1° puesto</strong> clasifica directamente a la <strong>Gran Final Anual</strong>.</p>
+        
+        <h3 style="color: var(--c1); font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#128200;</span> Tabla Anual (La Regularidad)</h3>
+        <p style="margin-bottom: 8px;">Es la suma de todos los puntos obtenidos en el Apertura y el Clausura.</p>
+        <p style="margin-bottom: 16px;">Sirve para premiar al equipo más constante del año y definir la <strong>Ventaja Deportiva</strong>.</p>
+        
+        <h3 style="color: var(--c1); font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#127942;</span> La Gran Final Anual</h3>
+        <p style="margin-bottom: 8px;">Se define entre el <strong>Ganador del Apertura</strong> y el <strong>Ganador del Clausura</strong>:</p>
+        <ul style="margin-left: 20px; margin-bottom: 16px;">
+          <li style="margin-bottom: 6px;"><strong>Serie:</strong> Dos partidos (Ida y Vuelta).</li>
+          <li style="margin-bottom: 6px;"><strong>Desempate:</strong> Si tras los dos partidos hay igualdad en el global, se disputará un <strong>3° Partido de Desempate</strong>.</li>
+          <li style="margin-bottom: 6px;"><strong>Ventaja Deportiva:</strong> Si tras el tercer partido persiste la igualdad, el campeón será el equipo que esté mejor posicionado en la <strong>Tabla Anual</strong>.</li>
+        </ul>
+        
+        <h3 style="color: #c0392b; font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#9888;</span> REGLA DE IDENTIFICACIÓN DE JUGADORES</h3>
+        <p style="margin-bottom: 8px;">Para garantizar la transparencia:</p>
+        <ul style="margin-left: 20px; margin-bottom: 16px;">
+          <li style="margin-bottom: 6px;">Aquellos jugadores que realicen más de un Prode por semana deberán <strong>identificarlos claramente</strong> (Ej: Nahuel Mendez 1, Nahuel Mendez 2).</li>
+          <li style="margin-bottom: 6px;">Deberán <strong>aclarar cuál de esos perfiles juega para el equipo</strong> (Ej: "En el equipo juega el 1"). De no aclararse, se tomará el primer registro por defecto.</li>
+        </ul>
+        
+        <h3 style="color: var(--gold); font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#127873;</span> PREMIO MAYOR</h3>
+        <p style="margin-bottom: 8px;">El equipo que se consagre <strong style="color: var(--gold);">CAMPEÓN ANUAL</strong> recibirá:</p>
+        <p style="background: var(--gold-light); padding: 16px; border-radius: 8px; border-left: 4px solid var(--gold); font-weight: 600; color: var(--text);">&#127860; Cena de gala en la sede del Club All Boys para todo el equipo.</p>
       </div>
     </div>
   </div>
@@ -767,9 +815,10 @@ function getTeamColor(teamName) {
     'CERRAJERIA OMARCITO': { bg: '#FF8C00', text: '#FFFFFF' },
     'AGENCIA 133': { bg: '#FF00FF', text: '#FFFFFF' },
     'TRIBUNERAS': { bg: '#DAA520', text: '#00008B' },
-    'A LO DE JUAN': { bg: '#00008B', text: '#FFFFE0' },
+    'A LO DE JUAN': { bg: '#00008B', text: '#FFD700' },
     'RADIO UNO': { bg: '#87CEEB', text: '#FFFFFF' },
-    'EL GRAN DT': { bg: '#FFD700', text: '#000000' }
+    'EL GRAN DT': { bg: '#FFD700', text: '#000000' },
+    'FORTYUS GYM': { bg: '#8B4513', text: '#FFFFFF' }
   };
   const upperName = teamName.toUpperCase().trim();
   return colors[upperName] || { bg: 'linear-gradient(135deg, var(--c1), var(--c2))', text: '#fff' };
@@ -811,8 +860,20 @@ function renderJugadores(filter) {
       ${clF}<td class="c"><span class="pts ${j.cl_total?'pts-hi':'pts-lo'}">${j.cl_total}</span></td>
     </tr>`;
   }).join("");
+  syncJugadoresScroll();
 }
 function filterJugadores() { renderJugadores(document.getElementById("search-jug").value); }
+
+function syncJugadoresScroll() {
+  const topScroll = document.getElementById("top-scroll-wrap");
+  const tableWrap = document.getElementById("jug-table-wrap");
+  const topContent = document.getElementById("top-scroll-content");
+  if (!topScroll || !tableWrap || !topContent) return;
+  const table = tableWrap.querySelector("table");
+  if (table) { topContent.style.width = table.scrollWidth + "px"; }
+  topScroll.onscroll = function() { tableWrap.scrollLeft = topScroll.scrollLeft; };
+  tableWrap.onscroll = function() { topScroll.scrollLeft = tableWrap.scrollLeft; };
+}
 
 function buildEquipoRows(rawRows, prefix, fl) {
   const rows = sortEquiposConDesempate(rawRows);
@@ -839,9 +900,10 @@ function buildEquipoRows(rawRows, prefix, fl) {
       const jd = DATA.jugadores.find(j=>j.nombre.toUpperCase()===p.nombre.toUpperCase());
       const arr = jd ? jd[apOrCl] : Array(11).fill(0);
       const tot = jd ? jd[totalKey] : 0;
-      const fCells = arr.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
+      const finalTotal = p.cap ? tot * 2 : tot;
+      const fCells = arr.map(v=>`<td class="c fc">${fv(p.cap ? v * 2 : v)}</td>`).join("");
       const capTag = p.cap ? `<span class="tag tag-cap" style="margin-left:6px">CAP 2x</span>` : "";
-      return `<tr><td><div class="player-name-cell">${teamAvatar(p.nombre, eq.equipo)}<span style="font-weight:600;font-size:0.82rem">${p.nombre}</span>${capTag}</div></td>${fCells}<td class="c"><strong style="color:var(--c1)">${tot}</strong></td></tr>`;
+      return `<tr><td><div class="player-name-cell">${teamAvatar(p.nombre, eq.equipo)}<span style="font-weight:600;font-size:0.82rem">${p.nombre}</span>${capTag}</div></td>${fCells}<td class="c"><strong style="color:var(--c1)">${finalTotal}</strong></td></tr>`;
     }).join("");
     const fHds = Array.from({length:11},(_,k)=>`<th class="c fc">${fl}${k+1}</th>`).join("");
     const det = document.createElement("tr");
@@ -1119,6 +1181,36 @@ async function enterFullscreen() {
   window.addEventListener('load', checkOrientation);
   window.addEventListener('resize', checkOrientation);
   window.addEventListener('orientationchange', checkOrientation);
+})();
+
+// Contador de visitas con CountAPI.io
+(function() {
+  const counterEl = document.getElementById('visit-count');
+  
+  // Namespace único para este sitio específico
+  const namespace = 'prodequipos-2026-m8k3x';
+  
+  // Intentar cargar el contador global
+  fetch(`https://api.countapi.io/hit/${namespace}/visitas`)
+    .then(res => {
+      if (!res.ok) throw new Error('Network response was not ok');
+      return res.json();
+    })
+    .then(data => {
+      if (data && data.value !== undefined) {
+        counterEl.textContent = data.value.toLocaleString('es-AR');
+      } else {
+        throw new Error('Invalid data');
+      }
+    })
+    .catch(err => {
+      console.error('Error loading visit counter:', err);
+      // Usar contador local alternativo (empieza en 1)
+      let visits = localStorage.getItem('local-visits-v2') || 0;
+      visits = parseInt(visits) + 1;
+      localStorage.setItem('local-visits-v2', visits);
+      counterEl.textContent = parseInt(visits).toLocaleString('es-AR');
+    });
 })();
 </script>
 </body>
