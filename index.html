@@ -1187,15 +1187,15 @@ async function enterFullscreen() {
 (function() {
   const counterEl = document.getElementById('visit-count');
   
-  // Obtener contador total de GoatCounter
-  fetch('https://prodequipos.goatcounter.com/counter/.json')
+  // Obtener contador total del sitio desde GoatCounter
+  fetch('https://prodequipos.goatcounter.com/counter/TOTAL.json')
     .then(res => {
       if (!res.ok) throw new Error('Network response was not ok');
       return res.json();
     })
     .then(data => {
       if (data && data.count !== undefined) {
-        counterEl.textContent = parseInt(data.count).toLocaleString('es-AR');
+        counterEl.textContent = data.count; // Ya viene formateado
       } else {
         throw new Error('Invalid data');
       }
