@@ -1183,35 +1183,35 @@ async function enterFullscreen() {
   window.addEventListener('orientationchange', checkOrientation);
 })();
 
-// Contador de visitas con CountAPI.io
+// Contador de visitas con GoatCounter
 (function() {
   const counterEl = document.getElementById('visit-count');
   
-  // Namespace único para este sitio específico
-  const namespace = 'prodequipos-2026-m8k3x';
-  
-  // Intentar cargar el contador global
-  fetch(`https://api.countapi.io/hit/${namespace}/visitas`)
+  // Obtener contador total de GoatCounter
+  fetch('https://prodequipos.goatcounter.com/counter/.json')
     .then(res => {
       if (!res.ok) throw new Error('Network response was not ok');
       return res.json();
     })
     .then(data => {
-      if (data && data.value !== undefined) {
-        counterEl.textContent = data.value.toLocaleString('es-AR');
+      if (data && data.count !== undefined) {
+        counterEl.textContent = parseInt(data.count).toLocaleString('es-AR');
       } else {
         throw new Error('Invalid data');
       }
     })
     .catch(err => {
       console.error('Error loading visit counter:', err);
-      // Usar contador local alternativo (empieza en 1)
-      let visits = localStorage.getItem('local-visits-v2') || 0;
+      // Usar contador local alternativo
+      let visits = localStorage.getItem('local-visits-v3') || 0;
       visits = parseInt(visits) + 1;
-      localStorage.setItem('local-visits-v2', visits);
+      localStorage.setItem('local-visits-v3', visits);
       counterEl.textContent = parseInt(visits).toLocaleString('es-AR');
     });
 })();
 </script>
+<!-- GoatCounter Analytics -->
+<script data-goatcounter="https://prodequipos.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
