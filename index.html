@@ -423,6 +423,55 @@ tbody td.c { overflow: visible; position: relative; }
   .ar-total .tv { font-size: 1.3rem; }
   .player-card { min-width: 100px; }
 }
+
+/* FIRE STREAK */
+.fire-icon {
+  font-size: 1.1rem;
+  margin-right: 4px;
+  display: inline-block;
+  animation: fireGlow 1.5s ease-in-out infinite;
+  cursor: help;
+  position: relative;
+}
+
+@keyframes fireGlow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.1); }
+}
+
+.fire-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  font-family: 'Inter', sans-serif;
+}
+
+.fire-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #ef4444;
+}
+
+.fire-icon:hover .fire-tooltip {
+  opacity: 1;
+}
 </style>
 </head>
 <body>
@@ -843,6 +892,32 @@ function renderHeaderStats() {
   document.getElementById("header-subtitle").innerHTML = `Torneo Apertura &amp; Clausura &mdash; Posiciones en vivo (Fecha ${fecha})`;
 }
 
+// Detectar racha de fuego: 3 fechas consecutivas con 6+ puntos
+function tieneRachaFuego(fechasArray) {
+  if (!fechasArray || fechasArray.length < 3) return false;
+  
+  // Encontrar la última fecha jugada (última con valor > 0)
+  let ultimaFechaJugada = -1;
+  for (let i = fechasArray.length - 1; i >= 0; i--) {
+    if (fechasArray[i] > 0) {
+      ultimaFechaJugada = i;
+      break;
+    }
+  }
+  
+  // Si no hay fechas jugadas suficientes, no hay racha
+  if (ultimaFechaJugada < 2) return false;
+  
+  // Buscar 3 fechas consecutivas con 6+ puntos (solo hasta la última jugada)
+  for (let i = 0; i <= ultimaFechaJugada - 2; i++) {
+    if (fechasArray[i] >= 6 && fechasArray[i+1] >= 6 && fechasArray[i+2] >= 6) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
 function renderJugadores(filter) {
   const fl = (filter||"").toLowerCase();
   const rows = DATA.jugadores
@@ -853,8 +928,10 @@ function renderJugadores(filter) {
   document.getElementById("body-jugadores").innerHTML = rows.map(j => {
     const apF = j.ap.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
     const clF = j.cl.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
+    const enFuego = tieneRachaFuego(j.ap) || tieneRachaFuego(j.cl);
+    const fireIcon = enFuego ? '<span class="fire-icon">🔥<span class="fire-tooltip">3+ fechas seguidas con 6pts+</span></span>' : '';
     return `<tr>
-      <td><div class="team-pill">${teamAvatar(j.nombre, j.equipo)}<span class="team-name">${j.nombre}</span></div></td>
+      <td><div class="team-pill">${teamAvatar(j.nombre, j.equipo)}<span class="team-name">${fireIcon}${j.nombre}</span></div></td>
       <td style="color:var(--text2);font-size:0.83rem;font-weight:500">${j.equipo}</td>
       ${apF}<td class="c"><span class="pts ${j.ap_total?'pts-hi':'pts-lo'}">${j.ap_total}</span></td>
       ${clF}<td class="c"><span class="pts ${j.cl_total?'pts-hi':'pts-lo'}">${j.cl_total}</span></td>
