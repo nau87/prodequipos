@@ -1028,19 +1028,24 @@ function renderIdeal() {
     return `<div class="${rowClass}">${g.map(p => {
       const colors = getTeamColor(p.equipo);
       const style = `background: ${colors.bg}; color: ${colors.text}`;
-      return `<span class="field-avatar" style="${style}" title="${p.nombre} - ${p.equipo}">${initials(p.nombre)}</span>`;
+      const isCaptain = playersWithTeam[0] === p;
+      const titleText = isCaptain ? `${p.nombre} - ${p.equipo} (CAPITÁN x2)` : `${p.nombre} - ${p.equipo}`;
+      return `<span class="field-avatar" style="${style}" title="${titleText}">${initials(p.nombre)}</span>`;
     }).join("")}</div>`;
   }).join("")}</div>`;
   
   // Generar HTML de la lista
-  const listHTML = `<div class="ideal-list">${playersWithTeam.map((p, i) => `<div class="ideal-list-item">
+  const listHTML = `<div class="ideal-list">${playersWithTeam.map((p, i) => {
+    const capBadge = i === 0 ? `<span class="tag tag-cap" style="margin-left:6px">CAP 2x</span>` : '';
+    return `<div class="ideal-list-item">
     ${teamAvatar(p.nombre, p.equipo)}
     <div class="ideal-list-info">
-      <div class="ideal-list-name">${p.nombre}</div>
+      <div class="ideal-list-name">${p.nombre}${capBadge}</div>
       <div class="ideal-list-team">${p.equipo}</div>
     </div>
     <div class="ideal-list-pts">${p.pts} <span style="font-size:0.7em;opacity:0.6">pts</span></div>
-  </div>`).join("")}</div>`;
+  </div>`;
+  }).join("")}</div>`;
   
   container.innerHTML = `<div class="ideal-container">
     <div class="ideal-field-container">
