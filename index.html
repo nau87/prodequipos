@@ -175,7 +175,7 @@ tbody tr { transition: background 0.12s; }
 tbody tr:hover td { background: #f5f8ff; }
 
 /* RANK */
-.rank-num { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; background: var(--surface2); color: var(--text3); border: 1px solid var(--border); position: relative; }
+.rank-num { display: inline-block; font-weight: 700; font-size: 0.75rem; color: var(--text2); position: relative; min-width: 20px; text-align: left; }
 .rank-num.has-tie { cursor: help; }
 .rank-num.has-tie::after { content: "ℹ️"; position: absolute; top: -2px; right: -2px; font-size: 0.6rem; background: #0ea5e9; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
 .rank-tooltip { position: fixed; background: #1e293b; color: white; padding: 12px 14px; border-radius: 8px; font-size: 0.75rem; white-space: normal; max-width: 280px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 9999; box-shadow: 0 8px 24px rgba(0,0,0,0.4); line-height: 1.5; }
@@ -260,14 +260,14 @@ tbody td.c { overflow: visible; position: relative; }
 
 /* ANUAL LEADERBOARD */
 .anual-list { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
-.anual-row { display: flex; align-items: center; gap: 14px; background: var(--surface2); border-radius: 14px; border: 1.5px solid var(--border); padding: 14px 18px; transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s; position: relative; overflow: hidden; }
+.anual-row { display: flex; align-items: center; gap: 14px; background: var(--surface2); border-radius: 14px; border: 1.5px solid var(--border); padding: 14px 18px; transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s; position: relative; overflow: visible; }
 .anual-row::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--border); border-radius: 4px 0 0 4px; }
 .anual-row.pos-1::before { background: linear-gradient(180deg, #f5a623, #e8870a); }
 .anual-row.pos-2::before { background: linear-gradient(180deg, #b0bec5, #90a4ae); }
 .anual-row.pos-3::before { background: linear-gradient(180deg, #c87941, #a0522d); }
 .anual-row:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.09); border-color: var(--c3); transform: translateX(3px); }
 .anual-row.pos-1 { background: linear-gradient(135deg, #fffdf5, #fff); border-color: rgba(245,166,35,0.35); }
-.ar-rank { flex-shrink: 0; }
+.ar-rank { flex-shrink: 0; position: relative; overflow: visible; }
 .ar-team { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
 .ar-name { font-weight: 800; font-size: 0.95rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ar-sub { font-size: 0.75rem; color: var(--text3); font-weight: 500; margin-top: 1px; }
