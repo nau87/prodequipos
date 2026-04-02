@@ -553,9 +553,9 @@ tbody td.c { overflow: visible; position: relative; }
 
 .fire-tooltip {
   position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  transform: translateX(0);
+  bottom: 50%;
+  left: calc(100% + 50px);
+  transform: translateY(50%);
   background: linear-gradient(135deg, #f59e0b, #ef4444);
   color: white;
   padding: 8px 12px;
@@ -574,11 +574,11 @@ tbody td.c { overflow: visible; position: relative; }
 .fire-tooltip::after {
   content: '';
   position: absolute;
-  bottom: 100%;
-  left: 12px;
-  transform: translateX(0);
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
   border: 6px solid transparent;
-  border-bottom-color: #f59e0b;
+  border-right-color: #f59e0b;
 }
 
 .fire-icon:hover .fire-tooltip {
