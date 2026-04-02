@@ -553,7 +553,7 @@ tbody td.c { overflow: visible; position: relative; }
 
 .fire-tooltip {
   position: absolute;
-  bottom: calc(100% + 8px);
+  top: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
   background: linear-gradient(135deg, #f59e0b, #ef4444);
@@ -566,7 +566,7 @@ tbody td.c { overflow: visible; position: relative; }
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
-  z-index: 1000;
+  z-index: 10000;
   box-shadow: 0 4px 12px rgba(0,0,0,0.25);
   font-family: 'Inter', sans-serif;
 }
@@ -574,11 +574,11 @@ tbody td.c { overflow: visible; position: relative; }
 .fire-tooltip::after {
   content: '';
   position: absolute;
-  top: 100%;
+  bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
-  border-top-color: #ef4444;
+  border-bottom-color: #f59e0b;
 }
 
 .fire-icon:hover .fire-tooltip {
