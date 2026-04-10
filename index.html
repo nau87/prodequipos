@@ -701,6 +701,9 @@ tbody td.c { overflow: visible; position: relative; }
 .fut-col-jugadores {
   padding-left: 15px;
   flex-grow: 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .fut-ganador-item {
@@ -712,11 +715,68 @@ tbody td.c { overflow: visible; position: relative; }
   text-transform: uppercase;
 }
 
+.fut-badges-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fut-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  background: rgba(26, 60, 42, 0.4);
+  border: 1px solid rgba(60, 186, 84, 0.3);
+  white-space: nowrap;
+}
+
+.fut-badge-icon {
+  font-size: 13px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.fut-badge-text {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.fut-badge-nombre {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.fut-badge-desc {
+  font-size: 9px;
+  color: #ffffff;
+  font-weight: 300;
+  letter-spacing: 0.3px;
+  font-family: 'Roboto', 'Inter', Arial, sans-serif;
+  white-space: nowrap;
+}
+
+.fut-badge-desc::before {
+  content: ': ';
+  color: #999;
+}
+
 .fut-sorteo-box {
   background-color: #1a1a1a;
   padding: 10px;
   text-align: center;
   border-bottom: 1px solid #2d5a42;
+  height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .fut-sorteo-titulo {
@@ -783,7 +843,7 @@ tbody td.c { overflow: visible; position: relative; }
 
 .fut-stats-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 0.6fr 1fr;
   gap: 1px;
   background: #2d5a42;
 }
@@ -801,15 +861,60 @@ tbody td.c { overflow: visible; position: relative; }
   font-weight: bold;
   text-transform: uppercase;
   border-bottom: 2px solid #3cba54;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .fut-stats-col.historico .fut-stats-col-header {
   background: linear-gradient(135deg, #0f4c2a, #1a7a3c);
 }
 
+.fut-medalla-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  font-size: 32px;
+  background: rgba(26, 60, 42, 0.3);
+  border-bottom: 1px solid #2d5a42;
+  min-height: 60px;
+}
+
+.fut-desc-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: #1a1a1a;
+  border-bottom: 1px solid #2d5a42;
+  min-height: 60px;
+}
+
+.fut-desc-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fut-desc-nombre {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.fut-desc-explicacion {
+  font-size: 9px;
+  color: #aaaaaa;
+  font-weight: 300;
+  letter-spacing: 0.3px;
+}
+
 .btn-ficha {
   display: inline-flex;
   align-items: center;
+  align-self: center;
   gap: 3px;
   padding: 4px 8px;
   background: linear-gradient(135deg, var(--c1), var(--c2));
@@ -824,8 +929,9 @@ tbody td.c { overflow: visible; position: relative; }
   transition: all 0.15s ease;
   font-family: 'Inter', sans-serif;
   box-shadow: 0 1px 4px rgba(26, 122, 60, 0.3);
-  margin-left: 8px;
+  margin-left: auto;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-ficha:hover {
@@ -1673,6 +1779,56 @@ async function init() {
 init();
 
 // ---- FICHA JUGADOR (ESTILO PROMIEDOS) ----
+
+function getMedalla(cantFechas) {
+  if (cantFechas >= 100) return { emoji: '🏆', nombre: 'VETERANO', descripcion: '100+ fechas jugadas', color: '#FFD700' };
+  if (cantFechas >= 30) return { emoji: '⚽', nombre: 'AMATEUR', descripcion: '30-99 fechas jugadas', color: '#C0C0C0' };
+  return { emoji: '🌱', nombre: 'PRINCIPIANTE', descripcion: 'Menos de 30 fechas', color: '#CD7F32' };
+}
+
+function getInsignia(promedio) {
+  const p = parseFloat(promedio);
+  if (p >= 6) return { emoji: '👑', nombre: 'GOAT', descripcion: 'Promedio 6+', color: '#FFD700' };
+  if (p >= 5) return { emoji: '⭐', nombre: 'CRACK', descripcion: 'Promedio 5-5.9', color: '#4CAF50' };
+  if (p >= 4.5) return { emoji: '💪', nombre: 'REMADOR', descripcion: 'Promedio 4.5-4.9', color: '#FF9800' };
+  return { emoji: '🐕', nombre: 'PERRO', descripcion: 'Promedio -4.5', color: '#9E9E9E' };
+}
+
+function getMedallaPuesto(puesto) {
+  if (puesto === 1) return { emoji: '🥇', nombre: 'LÍDER', descripcion: 'Primer puesto', color: '#FFD700', tieneMedalla: true };
+  if (puesto === 2) return { emoji: '🥈', nombre: 'ESCOLTA', descripcion: 'Segundo puesto', color: '#C0C0C0', tieneMedalla: true };
+  if (puesto === 3) return { emoji: '🥉', nombre: 'PODIO', descripcion: 'Tercer puesto', color: '#CD7F32', tieneMedalla: true };
+  return { emoji: '', nombre: '', descripcion: 'Fuera del podio', color: '#666', tieneMedalla: false };
+}
+
+function getMedallaTotalAcumulado(puntos) {
+  if (puntos >= 300) return { emoji: '💎', nombre: 'MAESTRO', descripcion: '300+ puntos', color: '#00D9FF', tieneMedalla: true };
+  if (puntos >= 200) return { emoji: '💰', nombre: 'GRAN ACUMULADOR', descripcion: '200-299 puntos', color: '#FFD700', tieneMedalla: true };
+  if (puntos >= 100) return { emoji: '🪙', nombre: 'ACUMULADOR', descripcion: '100-199 puntos', color: '#CD7F32', tieneMedalla: true };
+  if (puntos >= 50) return { emoji: '🎲', nombre: 'NOVATO', descripcion: '50-99 puntos', color: '#9E9E9E', tieneMedalla: true };
+  return { emoji: '', nombre: '', descripcion: 'Menos de 50 puntos', color: '#666', tieneMedalla: false };
+}
+
+function getMedallaMejorFecha(puntos) {
+  if (puntos === 10) return { emoji: '💎', nombre: 'FECHA PERFECTA', descripcion: '10 puntos', color: '#00D9FF' };
+  if (puntos === 9) return { emoji: '✨', nombre: 'FECHA EXCELENTE', descripcion: '9 puntos', color: '#FFD700' };
+  if (puntos === 8) return { emoji: '⭐', nombre: 'FECHA DESTACADA', descripcion: '8 puntos', color: '#FFA500' };
+  if (puntos === 7) return { emoji: '👏', nombre: 'CONSUELO', descripcion: '7 puntos', color: '#9E9E9E' };
+  if (puntos < 7 && puntos > 0) return { emoji: '📈', nombre: 'SIGUE INTENTANDO', descripcion: 'Menos de 7 puntos', color: '#757575' };
+  return null;
+}
+
+function getMedallaEquipoIdeal(veces, equipo) {
+  if (veces >= 2) {
+    if (equipo && equipo.toUpperCase() === 'LIBRE') {
+      return { emoji: '🎯', nombre: 'JUGADOR A FICHAR', descripcion: '2+ veces sin equipo', color: '#4CAF50', tieneMedalla: true };
+    } else {
+      return { emoji: '⭐', nombre: 'ESTRELLA DE SU EQUIPO', descripcion: '2+ veces en equipo ideal', color: '#FFD700', tieneMedalla: true };
+    }
+  }
+  return { emoji: '', nombre: '', descripcion: 'Menos de 2 apariciones', color: '#666', tieneMedalla: false };
+}
+
 function openFutModal(nombreJugador) {
   // Buscar datos del jugador
   const jugador = DATA.jugadores.find(j => j.nombre === nombreJugador);
@@ -1817,6 +1973,53 @@ function openFutModal(nombreJugador) {
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">EQUIPO IDEAL (TOTAL)</div>
           <div class="fut-sorteo-ganador">${vecesIdealHistorico || 'N/D'} ${vecesIdealHistorico === 1 ? 'VEZ' : 'VECES'}</div>
+        </div>
+      </div>
+
+      <div class="fut-stats-col">
+        <div class="fut-stats-col-header">MEDALLAS</div>
+        <div class="fut-sorteo-box">
+          ${puestoGlobal !== '-' ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px;">${m.emoji}</div>` : ''; })() : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${cantFechas ? `<div class="fut-sorteo-ganador" style="font-size: 26px;">${getMedalla(cantFechas).emoji}</div>` : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${puntosHistoricosGlobal ? (() => { const m = getMedallaTotalAcumulado(puntosHistoricosGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px;">${m.emoji}</div>` : ''; })() : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${promedioHistorico ? `<div class="fut-sorteo-ganador" style="font-size: 26px;">${getInsignia(promedioHistorico).emoji}</div>` : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${mejorFechaHistorica && getMedallaMejorFecha(mejorFechaHistorica) ? `<div class="fut-sorteo-ganador" style="font-size: 26px;">${getMedallaMejorFecha(mejorFechaHistorica).emoji}</div>` : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${vecesIdealHistorico >= 0 ? (() => { const m = getMedallaEquipoIdeal(vecesIdealHistorico, jugador.equipo); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px;">${m.emoji}</div>` : ''; })() : ''}
+        </div>
+      </div>
+
+      <div class="fut-stats-col">
+        <div class="fut-stats-col-header">DESCRIPCIÓN</div>
+        <div class="fut-sorteo-box">
+          ${puestoGlobal !== '-' ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 10px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 10px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${cantFechas ? `<div class="fut-sorteo-titulo" style="color: ${getMedalla(cantFechas).color}; margin-bottom: 4px; font-size: 11px;">${getMedalla(cantFechas).nombre}</div>
+          <div class="fut-sorteo-ganador" style="font-size: 10px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getMedalla(cantFechas).descripcion}</div>` : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${puntosHistoricosGlobal ? (() => { const m = getMedallaTotalAcumulado(puntosHistoricosGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 10px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 10px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${promedioHistorico ? `<div class="fut-sorteo-titulo" style="color: ${getInsignia(promedioHistorico).color}; margin-bottom: 4px; font-size: 11px;">${getInsignia(promedioHistorico).nombre}</div>
+          <div class="fut-sorteo-ganador" style="font-size: 10px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getInsignia(promedioHistorico).descripcion}</div>` : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${mejorFechaHistorica && getMedallaMejorFecha(mejorFechaHistorica) ? `<div class="fut-sorteo-titulo" style="color: ${getMedallaMejorFecha(mejorFechaHistorica).color}; margin-bottom: 4px; font-size: 11px;">${getMedallaMejorFecha(mejorFechaHistorica).nombre}</div>
+          <div class="fut-sorteo-ganador" style="font-size: 10px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getMedallaMejorFecha(mejorFechaHistorica).descripcion}</div>` : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${vecesIdealHistorico >= 0 ? (() => { const m = getMedallaEquipoIdeal(vecesIdealHistorico, jugador.equipo); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 10px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 10px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
         </div>
       </div>
     </div>

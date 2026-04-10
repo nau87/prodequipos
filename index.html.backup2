@@ -701,6 +701,9 @@ tbody td.c { overflow: visible; position: relative; }
 .fut-col-jugadores {
   padding-left: 15px;
   flex-grow: 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .fut-ganador-item {
@@ -710,6 +713,58 @@ tbody td.c { overflow: visible; position: relative; }
   border-left: 3px solid #3cba54;
   font-weight: bold;
   text-transform: uppercase;
+}
+
+.fut-badges-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fut-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  background: rgba(26, 60, 42, 0.4);
+  border: 1px solid rgba(60, 186, 84, 0.3);
+  white-space: nowrap;
+}
+
+.fut-badge-icon {
+  font-size: 13px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.fut-badge-text {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.fut-badge-nombre {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.fut-badge-desc {
+  font-size: 9px;
+  color: #ffffff;
+  font-weight: 300;
+  letter-spacing: 0.3px;
+  font-family: 'Roboto', 'Inter', Arial, sans-serif;
+  white-space: nowrap;
+}
+
+.fut-badge-desc::before {
+  content: ': ';
+  color: #999;
 }
 
 .fut-sorteo-box {
@@ -810,6 +865,7 @@ tbody td.c { overflow: visible; position: relative; }
 .btn-ficha {
   display: inline-flex;
   align-items: center;
+  align-self: center;
   gap: 3px;
   padding: 4px 8px;
   background: linear-gradient(135deg, var(--c1), var(--c2));
@@ -824,8 +880,9 @@ tbody td.c { overflow: visible; position: relative; }
   transition: all 0.15s ease;
   font-family: 'Inter', sans-serif;
   box-shadow: 0 1px 4px rgba(26, 122, 60, 0.3);
-  margin-left: 8px;
+  margin-left: auto;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-ficha:hover {
@@ -1673,6 +1730,21 @@ async function init() {
 init();
 
 // ---- FICHA JUGADOR (ESTILO PROMIEDOS) ----
+
+function getMedalla(cantFechas) {
+  if (cantFechas >= 100) return { emoji: '🏆', nombre: 'VETERANO', descripcion: '100+ fechas jugadas', color: '#FFD700' };
+  if (cantFechas >= 30) return { emoji: '⚽', nombre: 'AMATEUR', descripcion: '30-99 fechas jugadas', color: '#C0C0C0' };
+  return { emoji: '🌱', nombre: 'PRINCIPIANTE', descripcion: 'Menos de 30 fechas', color: '#CD7F32' };
+}
+
+function getInsignia(promedio) {
+  const p = parseFloat(promedio);
+  if (p >= 6) return { emoji: '👑', nombre: 'GOAT', descripcion: 'Promedio 6+', color: '#FFD700' };
+  if (p >= 5) return { emoji: '⭐', nombre: 'CRACK', descripcion: 'Promedio 5-5.9', color: '#4CAF50' };
+  if (p >= 4.5) return { emoji: '💪', nombre: 'REMADOR', descripcion: 'Promedio 4.5-4.9', color: '#FF9800' };
+  return { emoji: '🐕', nombre: 'PERRO', descripcion: 'Promedio -4.5', color: '#9E9E9E' };
+}
+
 function openFutModal(nombreJugador) {
   // Buscar datos del jugador
   const jugador = DATA.jugadores.find(j => j.nombre === nombreJugador);
@@ -1759,6 +1831,22 @@ function openFutModal(nombreJugador) {
         </div>
         <div class="fut-col-jugadores">
           <span class="fut-ganador-item">${jugador.nombre} ${tendenciaBadge}</span>
+          <div class="fut-badges-container">
+            ${cantFechas ? `<div class="fut-badge">
+              <span class="fut-badge-icon">${getMedalla(cantFechas).emoji}</span>
+              <div class="fut-badge-text">
+                <span class="fut-badge-nombre" style="color: ${getMedalla(cantFechas).color}">${getMedalla(cantFechas).nombre}</span>
+                <span class="fut-badge-desc">${getMedalla(cantFechas).descripcion}</span>
+              </div>
+            </div>` : ''}
+            ${promedioHistorico ? `<div class="fut-badge">
+              <span class="fut-badge-icon">${getInsignia(promedioHistorico).emoji}</span>
+              <div class="fut-badge-text">
+                <span class="fut-badge-nombre" style="color: ${getInsignia(promedioHistorico).color}">${getInsignia(promedioHistorico).nombre}</span>
+                <span class="fut-badge-desc">${getInsignia(promedioHistorico).descripcion}</span>
+              </div>
+            </div>` : ''}
+          </div>
         </div>
       </div>
     </div>
