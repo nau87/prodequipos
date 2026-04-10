@@ -1205,7 +1205,7 @@ async function loadData() {
     .map(r => ({
       nombre: gs(r,0),              // A: JUGADOR
       mejorFechaHistorica: gn(r,4), // E: MEJOR_FECHA
-      vecesIdealHistorico: gn(r,3), // D: IDEAL_BASE
+      vecesIdealHistorico: gn(r,7), // H: IDEAL_ACTUAL
       puntosHistoricos: gn(r,8),    // I: TOTAL_PTS
       promedioHistorico: gn(r,10),  // K: PROMEDIO
       puestoGlobal: gn(r,11) || '-', // L: PUESTO_GLOBAL
