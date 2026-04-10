@@ -1788,8 +1788,8 @@ function getMedalla(cantFechas) {
 
 function getInsignia(promedio) {
   const p = parseFloat(promedio);
-  if (p >= 6) return { emoji: '�', nombre: 'GOAT', descripcion: 'Promedio 6+', color: '#FFD700' };
-  if (p >= 5) return { emoji: '👑', nombre: 'CRACK', descripcion: 'Promedio 5 - 5.9', color: '#4CAF50' };
+  if (p >= 6) return { emoji: '👑', nombre: 'GOAT', descripcion: 'Promedio 6+', color: '#FFD700' };
+  if (p >= 5) return { emoji: '⚡', nombre: 'CRACK', descripcion: 'Promedio 5 - 5.9', color: '#4CAF50' };
   if (p >= 4.5) return { emoji: '💪', nombre: 'REMADOR', descripcion: 'Promedio 4.5 - 4.9', color: '#FF9800' };
   return { emoji: '🐕', nombre: 'PERRO', descripcion: 'Promedio -4.5', color: '#9E9E9E' };
 }
