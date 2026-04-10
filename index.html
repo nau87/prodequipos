@@ -1789,8 +1789,8 @@ function getMedalla(cantFechas) {
 function getInsignia(promedio) {
   const p = parseFloat(promedio);
   if (p >= 6) return { emoji: '👑', nombre: 'GOAT', descripcion: 'Promedio 6+', color: '#FFD700' };
-  if (p >= 5) return { emoji: '👟', nombre: 'CRACK', descripcion: 'Promedio 5-5.9', color: '#4CAF50' };
-  if (p >= 4.5) return { emoji: '💪', nombre: 'REMADOR', descripcion: 'Promedio 4.5-4.9', color: '#FF9800' };
+  if (p >= 5) return { emoji: '👟', nombre: 'CRACK', descripcion: 'Promedio 5 - 5.9', color: '#4CAF50' };
+  if (p >= 4.5) return { emoji: '💪', nombre: 'REMADOR', descripcion: 'Promedio 4.5 - 4.9', color: '#FF9800' };
   return { emoji: '🐕', nombre: 'PERRO', descripcion: 'Promedio -4.5', color: '#9E9E9E' };
 }
 
@@ -2001,25 +2001,25 @@ function openFutModal(nombreJugador) {
       <div class="fut-stats-col">
         <div class="fut-stats-col-header">DESCRIPCIÓN</div>
         <div class="fut-sorteo-box">
-          ${puestoGlobal !== '-' ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 10px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 10px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
+          ${puestoGlobal !== '-' ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
         </div>
         <div class="fut-sorteo-box">
           ${cantFechas ? `<div class="fut-sorteo-titulo" style="color: ${getMedalla(cantFechas).color}; margin-bottom: 4px; font-size: 11px;">${getMedalla(cantFechas).nombre}</div>
-          <div class="fut-sorteo-ganador" style="font-size: 10px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getMedalla(cantFechas).descripcion}</div>` : ''}
+          <div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getMedalla(cantFechas).descripcion}</div>` : ''}
         </div>
         <div class="fut-sorteo-box">
-          ${puntosHistoricosGlobal ? (() => { const m = getMedallaTotalAcumulado(puntosHistoricosGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 10px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 10px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
+          ${puntosHistoricosGlobal ? (() => { const m = getMedallaTotalAcumulado(puntosHistoricosGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
         </div>
         <div class="fut-sorteo-box">
           ${promedioHistorico ? `<div class="fut-sorteo-titulo" style="color: ${getInsignia(promedioHistorico).color}; margin-bottom: 4px; font-size: 11px;">${getInsignia(promedioHistorico).nombre}</div>
-          <div class="fut-sorteo-ganador" style="font-size: 10px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getInsignia(promedioHistorico).descripcion}</div>` : ''}
+          <div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getInsignia(promedioHistorico).descripcion}</div>` : ''}
         </div>
         <div class="fut-sorteo-box">
           ${mejorFechaHistorica && getMedallaMejorFecha(mejorFechaHistorica) ? `<div class="fut-sorteo-titulo" style="color: ${getMedallaMejorFecha(mejorFechaHistorica).color}; margin-bottom: 4px; font-size: 11px;">${getMedallaMejorFecha(mejorFechaHistorica).nombre}</div>
-          <div class="fut-sorteo-ganador" style="font-size: 10px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getMedallaMejorFecha(mejorFechaHistorica).descripcion}</div>` : ''}
+          <div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getMedallaMejorFecha(mejorFechaHistorica).descripcion}</div>` : ''}
         </div>
         <div class="fut-sorteo-box">
-          ${vecesIdealHistorico >= 0 ? (() => { const m = getMedallaEquipoIdeal(vecesIdealHistorico, jugador.equipo); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 10px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 10px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
+          ${vecesIdealHistorico >= 0 ? (() => { const m = getMedallaEquipoIdeal(vecesIdealHistorico, jugador.equipo); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
         </div>
       </div>
     </div>
