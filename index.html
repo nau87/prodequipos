@@ -1780,7 +1780,7 @@ function openFutModal(nombreJugador) {
         </div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">PROMEDIO</div>
-          <div class="fut-sorteo-ganador">${promedio}</div>
+          <div class="fut-sorteo-ganador">${promedio ? parseFloat(promedio).toFixed(2) : '0'}</div>
         </div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">MEJOR FECHA</div>
@@ -1808,7 +1808,7 @@ function openFutModal(nombreJugador) {
         </div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">PROMEDIO GLOBAL</div>
-          <div class="fut-sorteo-ganador">${promedioHistorico || 'N/D'}</div>
+          <div class="fut-sorteo-ganador">${promedioHistorico ? parseFloat(promedioHistorico).toFixed(2) : 'N/D'}</div>
         </div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">MEJOR FECHA HISTÓRICA</div>
