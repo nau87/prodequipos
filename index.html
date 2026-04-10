@@ -1204,12 +1204,12 @@ async function loadData() {
     .filter(r => gv(r,0))
     .map(r => ({
       nombre: gs(r,0),              // A: JUGADOR
-      mejorFechaHistorica: gn(r,3), // D: MEJOR PTS
-      vecesIdealHistorico: gn(r,4), // E: VECES IDEAL
-      puntosHistoricos: gn(r,7),    // H: PUNTOS HISTORICOS
-      promedioHistorico: gn(r,8),   // I: PROMEDIO
-      puestoGlobal: gn(r,9) || '-', // J: PUESTO GLOBAL (columna 10, índice 9)
-      cantFechas: gn(r,10)          // K: CANT FECHAS
+      mejorFechaHistorica: gn(r,4), // E: MEJOR_FECHA
+      vecesIdealHistorico: gn(r,3), // D: IDEAL_BASE
+      puntosHistoricos: gn(r,8),    // I: TOTAL_PTS
+      promedioHistorico: gn(r,10),  // K: PROMEDIO
+      puestoGlobal: gn(r,11) || '-', // L: PUESTO_GLOBAL
+      cantFechas: gn(r,9)           // J: TOTAL_FECHAS
     }));
 
   return { jugadores, equipos_ap, equipos_cl, tabla_anual, ideal: { fecha: ideal_fecha, jugadores: ideal_jugadores, total: ideal_total }, torneos, jugadoresStats, historialConsolidado };
