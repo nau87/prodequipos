@@ -1789,13 +1789,13 @@ function getMedalla(cantFechas) {
 function getInsignia(promedio) {
   const p = parseFloat(promedio);
   if (p >= 6) return { emoji: '👑', nombre: 'GOAT', descripcion: 'Promedio 6+', color: '#FFD700' };
-  if (p >= 5) return { emoji: '⭐', nombre: 'CRACK', descripcion: 'Promedio 5-5.9', color: '#4CAF50' };
+  if (p >= 5) return { emoji: '👟', nombre: 'CRACK', descripcion: 'Promedio 5-5.9', color: '#4CAF50' };
   if (p >= 4.5) return { emoji: '💪', nombre: 'REMADOR', descripcion: 'Promedio 4.5-4.9', color: '#FF9800' };
   return { emoji: '🐕', nombre: 'PERRO', descripcion: 'Promedio -4.5', color: '#9E9E9E' };
 }
 
 function getMedallaPuesto(puesto) {
-  if (puesto === 1) return { emoji: '🥇', nombre: 'LÍDER', descripcion: 'Primer puesto', color: '#FFD700', tieneMedalla: true };
+  if (puesto === 1) return { emoji: '🥇', nombre: 'LÍDER GLOBAL', descripcion: 'Primer puesto', color: '#FFD700', tieneMedalla: true };
   if (puesto === 2) return { emoji: '🥈', nombre: 'ESCOLTA', descripcion: 'Segundo puesto', color: '#C0C0C0', tieneMedalla: true };
   if (puesto === 3) return { emoji: '🥉', nombre: 'PODIO', descripcion: 'Tercer puesto', color: '#CD7F32', tieneMedalla: true };
   return { emoji: '', nombre: '', descripcion: 'Fuera del podio', color: '#666', tieneMedalla: false };
@@ -1812,7 +1812,7 @@ function getMedallaTotalAcumulado(puntos) {
 function getMedallaMejorFecha(puntos) {
   if (puntos === 10) return { emoji: '💎', nombre: 'FECHA PERFECTA', descripcion: '10 puntos', color: '#00D9FF' };
   if (puntos === 9) return { emoji: '✨', nombre: 'FECHA EXCELENTE', descripcion: '9 puntos', color: '#FFD700' };
-  if (puntos === 8) return { emoji: '⭐', nombre: 'FECHA DESTACADA', descripcion: '8 puntos', color: '#FFA500' };
+  if (puntos === 8) return { emoji: '🥅', nombre: 'FECHA DESTACADA', descripcion: '8 puntos', color: '#FFA500' };
   if (puntos === 7) return { emoji: '👏', nombre: 'CONSUELO', descripcion: '7 puntos', color: '#9E9E9E' };
   if (puntos < 7 && puntos > 0) return { emoji: '📈', nombre: 'SIGUE INTENTANDO', descripcion: 'Menos de 7 puntos', color: '#757575' };
   return null;
@@ -1823,7 +1823,7 @@ function getMedallaEquipoIdeal(veces, equipo) {
     if (equipo && equipo.toUpperCase() === 'LIBRE') {
       return { emoji: '🎯', nombre: 'JUGADOR A FICHAR', descripcion: '2+ veces sin equipo', color: '#4CAF50', tieneMedalla: true };
     } else {
-      return { emoji: '⭐', nombre: 'ESTRELLA DE SU EQUIPO', descripcion: '2+ veces en equipo ideal', color: '#FFD700', tieneMedalla: true };
+      return { emoji: '🌟', nombre: 'ESTRELLA DE SU EQUIPO', descripcion: '2+ veces en equipo ideal', color: '#FFD700', tieneMedalla: true };
     }
   }
   return { emoji: '', nombre: '', descripcion: 'Menos de 2 apariciones', color: '#666', tieneMedalla: false };
@@ -1921,7 +1921,7 @@ function openFutModal(nombreJugador) {
 
     <div class="fut-stats-container">
       <div class="fut-stats-col">
-        <div class="fut-stats-col-header">🏆 TORNEO ACTUAL</div>
+        <div class="fut-stats-col-header">TORNEO ACTUAL</div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">TORNEO</div>
           <div class="fut-sorteo-ganador">${torneoActivo}</div>
@@ -1949,7 +1949,7 @@ function openFutModal(nombreJugador) {
       </div>
 
       <div class="fut-stats-col historico">
-        <div class="fut-stats-col-header">📊 HISTÓRICO GLOBAL</div>
+        <div class="fut-stats-col-header">HISTÓRICO GLOBAL</div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">PUESTO GLOBAL</div>
           <div class="fut-sorteo-ganador">${puestoGlobal !== '-' ? '#' + puestoGlobal : 'N/D'}</div>
