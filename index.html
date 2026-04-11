@@ -1493,9 +1493,13 @@ function tieneRachaFuego(fechasArray) {
   // Si no hay fechas jugadas suficientes, no hay racha
   if (ultimaFechaJugada < 2) return false;
   
-  // Buscar 3 fechas consecutivas con 6+ puntos (solo hasta la última jugada)
-  for (let i = 0; i <= ultimaFechaJugada - 2; i++) {
-    if (fechasArray[i] >= 6 && fechasArray[i+1] >= 6 && fechasArray[i+2] >= 6) {
+  // Verificar que las últimas 3 fechas JUGADAS consecutivas tengan 6+ puntos
+  // La racha debe incluir la última fecha jugada
+  if (ultimaFechaJugada >= 2) {
+    // Verificar las últimas 3 fechas consecutivas desde la última jugada
+    if (fechasArray[ultimaFechaJugada] >= 6 && 
+        fechasArray[ultimaFechaJugada - 1] >= 6 && 
+        fechasArray[ultimaFechaJugada - 2] >= 6) {
       return true;
     }
   }
