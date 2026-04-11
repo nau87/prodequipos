@@ -1493,26 +1493,31 @@ function tieneRachaFuego(fechasArray, fechaActualTorneo) {
   // Si no hay fechas jugadas suficientes, no hay racha
   if (ultimaFechaJugada < 2) return false;
   
-  // IMPORTANTE: Si el jugador no participó en la última fecha del torneo, se corta la racha
-  // La última fecha jugada debe ser al menos la fecha anterior a la actual
-  // (se permite 1 fecha de diferencia porque la fecha actual puede estar en curso)
-  const fechaActualIndex = (fechaActualTorneo || 1) - 1; // Convertir a índice 0-based
-  if (ultimaFechaJugada < fechaActualIndex - 1) {
-    return false; // No jugó en las últimas 2 fechas, racha cortada
+  // Para tener racha ACTIVA, las últimas 3 fechas deben ser:
+  // 1. Consecutivas (sin saltos)
+  // 2. Con 6+ puntos cada una
+  // 3. La última de ellas debe ser la última fecha que jugó el jugador
+  
+  // Verificar las últimas 3 fechas del jugador contando desde la última que jugó
+  const fecha1 = fechasArray[ultimaFechaJugada];
+  const fecha2 = fechasArray[ultimaFechaJugada - 1];
+  const fecha3 = fechasArray[ultimaFechaJugada - 2];
+  
+  // Todas deben tener 6+ puntos
+  if (fecha1 < 6 || fecha2 < 6 || fecha3 < 6) {
+    return false;
   }
   
-  // Verificar que las últimas 3 fechas JUGADAS consecutivas tengan 6+ puntos
-  // La racha debe incluir la última fecha jugada
-  if (ultimaFechaJugada >= 2) {
-    // Verificar las últimas 3 fechas consecutivas desde la última jugada
-    if (fechasArray[ultimaFechaJugada] >= 6 && 
-        fechasArray[ultimaFechaJugada - 1] >= 6 && 
-        fechasArray[ultimaFechaJugada - 2] >= 6) {
-      return true;
-    }
+  // Además, debe haber jugado la fecha actual del torneo (o estar muy cerca)
+  // Si estamos en fecha 4 y el jugador solo jugó hasta fecha 3, la racha se corta
+  const fechaActualIndex = (fechaActualTorneo || 1) - 1;
+  
+  // Permitir 1 fecha de diferencia (si la fecha actual está en curso y aún no jugó)
+  if (fechaActualIndex > ultimaFechaJugada + 1) {
+    return false; // El jugador dejó de participar, racha cortada
   }
   
-  return false;
+  return true;
 }
 
 function renderJugadores(filter) {
