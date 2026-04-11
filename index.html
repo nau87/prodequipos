@@ -537,55 +537,6 @@ tbody td.c { overflow: visible; position: relative; }
   .player-card { min-width: 100px; }
 }
 
-/* FIRE STREAK */
-.fire-icon {
-  font-size: 1.1rem;
-  margin-right: 4px;
-  display: inline-block;
-  animation: fireGlow 1.5s ease-in-out infinite;
-  cursor: help;
-  position: relative;
-}
-
-@keyframes fireGlow {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.1); }
-}
-
-.fire-tooltip {
-  position: absolute;
-  bottom: 50%;
-  left: calc(100% + 50px);
-  transform: translateY(50%);
-  background: linear-gradient(135deg, #f59e0b, #ef4444);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-  z-index: 10000;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  font-family: 'Inter', sans-serif;
-}
-
-.fire-tooltip::after {
-  content: '';
-  position: absolute;
-  left: -6px;
-  top: 50%;
-  transform: translateY(-50%);
-  border: 6px solid transparent;
-  border-right-color: #f59e0b;
-}
-
-.fire-icon:hover .fire-tooltip {
-  opacity: 1;
-}
-
 /* MODAL FICHA JUGADOR (ESTILO PROMIEDOS) */
 .fut-modal-overlay {
   display: none;
@@ -1477,49 +1428,6 @@ function renderHeaderStats() {
   document.getElementById("header-subtitle").innerHTML = `Torneo Apertura &amp; Clausura &mdash; Posiciones en vivo (Fecha ${fecha})`;
 }
 
-// Detectar racha de fuego: 3 fechas consecutivas con 6+ puntos
-function tieneRachaFuego(fechasArray, fechaActualTorneo) {
-  if (!fechasArray || fechasArray.length < 3) return false;
-  
-  // Encontrar la última fecha jugada (última con valor > 0)
-  let ultimaFechaJugada = -1;
-  for (let i = fechasArray.length - 1; i >= 0; i--) {
-    if (fechasArray[i] > 0) {
-      ultimaFechaJugada = i;
-      break;
-    }
-  }
-  
-  // Si no hay fechas jugadas suficientes, no hay racha
-  if (ultimaFechaJugada < 2) return false;
-  
-  // Para tener racha ACTIVA, las últimas 3 fechas deben ser:
-  // 1. Consecutivas (sin saltos)
-  // 2. Con 6+ puntos cada una
-  // 3. La última de ellas debe ser la última fecha que jugó el jugador
-  
-  // Verificar las últimas 3 fechas del jugador contando desde la última que jugó
-  const fecha1 = fechasArray[ultimaFechaJugada];
-  const fecha2 = fechasArray[ultimaFechaJugada - 1];
-  const fecha3 = fechasArray[ultimaFechaJugada - 2];
-  
-  // Todas deben tener 6+ puntos
-  if (fecha1 < 6 || fecha2 < 6 || fecha3 < 6) {
-    return false;
-  }
-  
-  // Además, debe haber jugado la fecha actual del torneo (o estar muy cerca)
-  // Si estamos en fecha 4 y el jugador solo jugó hasta fecha 3, la racha se corta
-  const fechaActualIndex = (fechaActualTorneo || 1) - 1;
-  
-  // Permitir 1 fecha de diferencia (si la fecha actual está en curso y aún no jugó)
-  if (fechaActualIndex > ultimaFechaJugada + 1) {
-    return false; // El jugador dejó de participar, racha cortada
-  }
-  
-  return true;
-}
-
 function renderJugadores(filter) {
   const fl = (filter||"").toLowerCase();
   const rows = DATA.jugadores
@@ -1530,11 +1438,8 @@ function renderJugadores(filter) {
   document.getElementById("body-jugadores").innerHTML = rows.map(j => {
     const apF = j.ap.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
     const clF = j.cl.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
-    const fechaActual = DATA.ideal.fecha || 1;
-    const enFuego = tieneRachaFuego(j.ap, fechaActual) || tieneRachaFuego(j.cl, fechaActual);
-    const fireIcon = enFuego ? '<span class="fire-icon">🔥<span class="fire-tooltip">3+ fechas seguidas con 6pts+</span></span>' : '';
     return `<tr>
-      <td><div class="team-pill">${teamAvatar(j.nombre, j.equipo)}<span class="team-name">${fireIcon}${j.nombre}</span><button class="btn-ficha" onclick="openFutModal('${j.nombre.replace(/'/g, "\\'")}')" title="Ver ficha del jugador">FICHA</button></div></td>
+      <td><div class="team-pill">${teamAvatar(j.nombre, j.equipo)}<span class="team-name">${j.nombre}</span><button class="btn-ficha" onclick="openFutModal('${j.nombre.replace(/'/g, "\\'")}')" title="Ver ficha del jugador">FICHA</button></div></td>
       <td style="color:var(--text2);font-size:0.83rem;font-weight:500">${j.equipo}</td>
       ${apF}<td class="c"><span class="pts ${j.ap_total?'pts-hi':'pts-lo'}">${j.ap_total}</span></td>
       ${clF}<td class="c"><span class="pts ${j.cl_total?'pts-hi':'pts-lo'}">${j.cl_total}</span></td>
