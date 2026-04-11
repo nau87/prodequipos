@@ -797,6 +797,32 @@ tbody td.c { overflow: visible; position: relative; }
   color: white;
 }
 
+/* BADGES ÚLTIMAS 3 FECHAS */
+.recent-scores-badges {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 18px;
+  align-items: center;
+}
+
+.score-badge-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 19px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 0.63rem;
+  color: white;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.score-badge-mini.red { background: #dc3545; }
+.score-badge-mini.yellow { background: #ffc107; color: #333; }
+.score-badge-mini.green { background: #28a745; }
+.score-badge-mini.gray { background: #666; }
+
 .fut-stats-container {
   display: grid;
   grid-template-columns: 1fr 1fr 0.6fr 1fr;
@@ -1197,6 +1223,11 @@ function gv(row, idx) {
   return row.c[idx] ? row.c[idx].v : null;
 }
 function gn(row, idx) { return Number(gv(row, idx)) || 0; }
+function gnOrNull(row, idx) { 
+  const val = gv(row, idx);
+  if (val === null || val === undefined || val === '') return null;
+  return Number(val);
+}
 function gs(row, idx) { return (gv(row, idx) || '').toString().trim(); }
 
 async function loadData() {
@@ -1215,9 +1246,9 @@ async function loadData() {
     .filter(r => gv(r,0) && gv(r,25) !== null)
     .map(r => ({
       nombre: gs(r,0), equipo: gs(r,25), modo: gs(r,26),
-      ap: Array.from({length:11}, (_,i) => gn(r,i+1)),
+      ap: Array.from({length:11}, (_,i) => gnOrNull(r,i+1)),
       ap_total: gn(r,12),
-      cl: Array.from({length:11}, (_,i) => gn(r,i+13)),
+      cl: Array.from({length:11}, (_,i) => gnOrNull(r,i+13)),
       cl_total: gn(r,24),
     }));
 
@@ -1274,7 +1305,11 @@ async function loadData() {
       cantFechas: gn(r,9)           // J: TOTAL_FECHAS
     }));
 
-  return { jugadores, equipos_ap, equipos_cl, tabla_anual, ideal: { fecha: ideal_fecha, jugadores: ideal_jugadores, total: ideal_total }, torneos, jugadoresStats, historialConsolidado };
+  // Extraer datos de DATA_TOTAL
+  const fechaActual = gn(tDt.rows[0], 4);  // E1: número de fecha actual
+  const torneoActual = gs(tDt.rows[0], 25); // Z1: torneo actual
+
+  return { jugadores, equipos_ap, equipos_cl, tabla_anual, ideal: { fecha: ideal_fecha, jugadores: ideal_jugadores, total: ideal_total }, torneos, jugadoresStats, historialConsolidado, fechaActual, torneoActual };
 }
 
 // ---- helpers ----
@@ -1757,6 +1792,51 @@ function getMedallaEquipoIdeal(veces, equipo) {
   return { emoji: '', nombre: '', descripcion: 'Menos de 2 apariciones', color: '#666', tieneMedalla: false };
 }
 
+function getRecentScoresBadges(nombreJugador) {
+  const jugador = DATA.jugadores.find(j => j.nombre === nombreJugador);
+  if (!jugador) return '';
+  
+  // Determinar cuántas fechas se han jugado según el torneo actual
+  const fechaActual = DATA.fechaActual || 0;
+  const torneoActual = DATA.torneoActual || '';
+  
+  let fechasJugadas = [];
+  
+  if (torneoActual.toUpperCase() === 'APERTURA') {
+    // Solo tomar las fechas jugadas de Apertura
+    fechasJugadas = jugador.ap.slice(0, fechaActual);
+  } else if (torneoActual.toUpperCase() === 'CLAUSURA') {
+    // Tomar todas las fechas de Apertura + las jugadas de Clausura
+    fechasJugadas = [...jugador.ap, ...jugador.cl.slice(0, fechaActual)];
+  } else {
+    // Si no hay torneo definido, tomar todo
+    fechasJugadas = [...jugador.ap, ...jugador.cl];
+  }
+  
+  // Tomar las últimas 3 fechas jugadas
+  const last3 = fechasJugadas.slice(-3);
+  if (last3.length === 0) return '';
+  
+  // Generar badges HTML con colores
+  const badgesHTML = last3.map(pts => {
+    // Si la celda está vacía (null, undefined) → no jugó
+    if (pts === null || pts === undefined) {
+      return `<span class="score-badge-mini gray">-</span>`;
+    }
+    
+    // Si tiene valor (incluso 0), convertir a número
+    const puntos = Number(pts);
+    
+    let colorClass = 'green';
+    if (puntos <= 3) colorClass = 'red';
+    else if (puntos <= 6) colorClass = 'yellow';
+    
+    return `<span class="score-badge-mini ${colorClass}">${puntos}</span>`;
+  }).join('');
+  
+  return `<span class="recent-scores-badges">${badgesHTML}</span>`;
+}
+
 function openFutModal(nombreJugador) {
   // Buscar datos del jugador
   const jugador = DATA.jugadores.find(j => j.nombre === nombreJugador);
@@ -1842,7 +1922,7 @@ function openFutModal(nombreJugador) {
           <span class="fut-txt-pts">PUESTO</span>
         </div>
         <div class="fut-col-jugadores">
-          <span class="fut-ganador-item">${jugador.nombre} ${tendenciaBadge}</span>
+          <span class="fut-ganador-item">${jugador.nombre} ${tendenciaBadge}</span>${getRecentScoresBadges(nombreJugador)}
         </div>
       </div>
     </div>
