@@ -1478,7 +1478,7 @@ function renderHeaderStats() {
 }
 
 // Detectar racha de fuego: 3 fechas consecutivas con 6+ puntos
-function tieneRachaFuego(fechasArray) {
+function tieneRachaFuego(fechasArray, fechaActualTorneo) {
   if (!fechasArray || fechasArray.length < 3) return false;
   
   // Encontrar la última fecha jugada (última con valor > 0)
@@ -1492,6 +1492,14 @@ function tieneRachaFuego(fechasArray) {
   
   // Si no hay fechas jugadas suficientes, no hay racha
   if (ultimaFechaJugada < 2) return false;
+  
+  // IMPORTANTE: Si el jugador no participó en la última fecha del torneo, se corta la racha
+  // La última fecha jugada debe ser al menos la fecha anterior a la actual
+  // (se permite 1 fecha de diferencia porque la fecha actual puede estar en curso)
+  const fechaActualIndex = (fechaActualTorneo || 1) - 1; // Convertir a índice 0-based
+  if (ultimaFechaJugada < fechaActualIndex - 1) {
+    return false; // No jugó en las últimas 2 fechas, racha cortada
+  }
   
   // Verificar que las últimas 3 fechas JUGADAS consecutivas tengan 6+ puntos
   // La racha debe incluir la última fecha jugada
@@ -1517,7 +1525,8 @@ function renderJugadores(filter) {
   document.getElementById("body-jugadores").innerHTML = rows.map(j => {
     const apF = j.ap.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
     const clF = j.cl.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
-    const enFuego = tieneRachaFuego(j.ap) || tieneRachaFuego(j.cl);
+    const fechaActual = DATA.ideal.fecha || 1;
+    const enFuego = tieneRachaFuego(j.ap, fechaActual) || tieneRachaFuego(j.cl, fechaActual);
     const fireIcon = enFuego ? '<span class="fire-icon">🔥<span class="fire-tooltip">3+ fechas seguidas con 6pts+</span></span>' : '';
     return `<tr>
       <td><div class="team-pill">${teamAvatar(j.nombre, j.equipo)}<span class="team-name">${fireIcon}${j.nombre}</span><button class="btn-ficha" onclick="openFutModal('${j.nombre.replace(/'/g, "\\'")}')" title="Ver ficha del jugador">FICHA</button></div></td>
