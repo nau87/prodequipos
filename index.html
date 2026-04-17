@@ -1184,8 +1184,8 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
       <div class="table-wrap"><table><thead><tr>
         <th class="c" style="width:52px">#</th>
         <th>Equipo</th>
-        <th class="c" style="width:70px">PJ</th>
-        <th class="c" style="width:90px">PTS</th>
+        <th class="c fc">F1</th><th class="c fc">F2</th><th class="c fc">F3</th><th class="c fc">F4</th><th class="c fc">F5</th><th class="c fc">F6</th><th class="c fc">F7</th><th class="c fc">F8</th><th class="c fc">F9</th><th class="c fc">F10</th><th class="c fc">F11</th>
+        <th class="c">PTS</th><th style="width:110px"></th>
       </tr></thead><tbody id="body-apertura"></tbody></table></div>
     </div>
   </div>
@@ -1206,8 +1206,8 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
       <div class="table-wrap"><table><thead><tr>
         <th class="c" style="width:52px">#</th>
         <th>Equipo</th>
-        <th class="c" style="width:70px">PJ</th>
-        <th class="c" style="width:90px">PTS</th>
+        <th class="c fc">C1</th><th class="c fc">C2</th><th class="c fc">C3</th><th class="c fc">C4</th><th class="c fc">C5</th><th class="c fc">C6</th><th class="c fc">C7</th><th class="c fc">C8</th><th class="c fc">C9</th><th class="c fc">C10</th><th class="c fc">C11</th>
+        <th class="c">PTS</th><th style="width:110px"></th>
       </tr></thead><tbody id="body-clausura"></tbody></table></div>
     </div>
   </div>
@@ -1524,7 +1524,7 @@ async function loadData() {
   // 2. EQUIPOS APERTURA Y CLAUSURA
   function buildEquipos(torneo) {
     const equiposMap = {};
-    const logsDelTorneo = rawLogs.filter(log => log.torneo === torneo);
+    const logsDelTorneo = rawLogs.filter(log => log.torneo === torneo && log.equipo !== 'LIBRE');
     
     logsDelTorneo.forEach(log => {
       if (!equiposMap[log.equipo]) {
@@ -1556,29 +1556,47 @@ async function loadData() {
       eq.pts += log.suma;
     });
     
+    // Agregar jugadores faltantes desde equiposData (los que no jugaron ninguna fecha)
+    Object.keys(equiposMap).forEach(nombreEquipo => {
+      const eq = equiposMap[nombreEquipo];
+      const jugadoresDelEquipo = equiposData.filter(e => e.equipo === nombreEquipo && e.equipo !== 'LIBRE');
+      
+      jugadoresDelEquipo.forEach(jugadorInfo => {
+        const jugador = jugadorInfo.jugador;
+        // Si no está como capitán ni en la lista de jugadores, agregarlo
+        if (jugador !== eq.capitan && !eq.jug.includes(jugador)) {
+          eq.jug.push(jugador);
+        }
+      });
+    });
+    
     return Object.values(equiposMap);
   }
   
-  // Usar TABLA_EQUIPOS en vez de calcular desde LOG_FECHAS
-  const equipos_ap = tablaEquiposApertura.map(eq => ({
-    equipo: eq.equipo,
-    capitan: '',
-    jug: [],
-    fechas: Array(11).fill(0),
-    pts: eq.pts,
-    puesto: eq.puesto,
-    pj: eq.pj
-  }));
+  // Usar buildEquipos para obtener info completa de jugadores y fechas desde LOG_FECHAS
+  const equipos_ap_raw = buildEquipos('APERTURA');
+  const equipos_cl_raw = buildEquipos('CLAUSURA');
   
-  const equipos_cl = tablaEquiposClausura.map(eq => ({
-    equipo: eq.equipo,
-    capitan: '',
-    jug: [],
-    fechas: Array(11).fill(0),
-    pts: eq.pts,
-    puesto: eq.puesto,
-    pj: eq.pj
-  }));
+  // Enriquecer con puestos de TABLA_EQUIPOS
+  const equipos_ap = equipos_ap_raw.map(eq => {
+    const tablaInfo = tablaEquiposApertura.find(t => t.equipo === eq.equipo);
+    return {
+      ...eq,
+      puesto: tablaInfo?.puesto || 0,
+      pj: tablaInfo?.pj || 0,
+      pts: tablaInfo?.pts || eq.pts // Usar puntos de tabla si existen
+    };
+  });
+  
+  const equipos_cl = equipos_cl_raw.map(eq => {
+    const tablaInfo = tablaEquiposClausura.find(t => t.equipo === eq.equipo);
+    return {
+      ...eq,
+      puesto: tablaInfo?.puesto || 0,
+      pj: tablaInfo?.pj || 0,
+      pts: tablaInfo?.pts || eq.pts
+    };
+  });
 
   // 3. TABLA ANUAL - Leer de TABLA_EQUIPOS columnas K-N
   const tablaAnualEquipos = tablaEquiposSheet.rows
@@ -1844,12 +1862,14 @@ function buildEquipoRows(rawRows, prefix, fl) {
 
     const apOrCl = prefix==="apertura"?"ap":"cl";
     const totalKey = prefix==="apertura"?"ap_total":"cl_total";
-    const allP = [{nombre:eq.capitan,cap:true}, ...eq.jug.map(j=>(({nombre:j,cap:false})))];
+    const allP = [{nombre:eq.capitan,cap:true}, ...eq.jug.map(j=>(({nombre:j,cap:false})))]
+      .filter(p => p.nombre && p.nombre.trim() !== ''); // Filtrar nombres vacíos
     const pRows = allP.map(p => {
       const jd = DATA.jugadores.find(j=>j.nombre.toUpperCase()===p.nombre.toUpperCase());
       const arr = jd ? jd[apOrCl] : Array(11).fill(0);
       const tot = jd ? jd[totalKey] : 0;
-      const finalTotal = p.cap ? tot * 2 : tot;
+      // El total YA viene con la multiplicación x2 del capitán desde DATA.jugadores, no multiplicar de nuevo
+      const finalTotal = tot;
       const fCells = arr.map(v=>`<td class="c fc">${fv(p.cap ? v * 2 : v)}</td>`).join("");
       const capTag = p.cap ? `<span class="tag tag-cap" style="margin-left:6px">CAP 2x</span>` : "";
       return `<tr><td><div class="player-name-cell">${teamAvatar(p.nombre, eq.equipo)}<span style="font-weight:600;font-size:0.82rem">${p.nombre}</span>${capTag}</div></td>${fCells}<td class="c"><strong style="color:var(--c1)">${finalTotal}</strong></td></tr>`;
@@ -1869,29 +1889,11 @@ function toggleDetail(prefix, i) {
   btn.classList.toggle("open", open);
 }
 function renderApertura() { 
-  // Renderizar APERTURA desde TABLA_EQUIPOS
-  const tbody = document.getElementById("body-apertura");
-  tbody.innerHTML = DATA.equipos_ap.map(eq => {
-    return `<tr>
-      <td class="c"><span class="rank-num">${eq.puesto || '-'}</span></td>
-      <td><div class="team-pill">${teamAvatar(eq.equipo, eq.equipo)}<span class="team-name">${eq.equipo}</span></div></td>
-      <td class="c">${eq.pj || 0}</td>
-      <td class="c"><span class="pts ${eq.pts?'pts-hi':'pts-lo'}">${eq.pts}</span></td>
-    </tr>`;
-  }).join("");
+  buildEquipoRows(DATA.equipos_ap, "apertura", "F");
 }
 
 function renderClausura() { 
-  // Renderizar CLAUSURA desde TABLA_EQUIPOS
-  const tbody = document.getElementById("body-clausura");
-  tbody.innerHTML = DATA.equipos_cl.map(eq => {
-    return `<tr>
-      <td class="c"><span class="rank-num">${eq.puesto || '-'}</span></td>
-      <td><div class="team-pill">${teamAvatar(eq.equipo, eq.equipo)}<span class="team-name">${eq.equipo}</span></div></td>
-      <td class="c">${eq.pj || 0}</td>
-      <td class="c"><span class="pts ${eq.pts?'pts-hi':'pts-lo'}">${eq.pts}</span></td>
-    </tr>`;
-  }).join("");
+  buildEquipoRows(DATA.equipos_cl, "clausura", "C");
 }
 
 function renderIdeal() {
