@@ -295,7 +295,7 @@ tbody tr:hover td { background: #f5f8ff; }
 .rank-num.has-tie:hover .rank-tooltip { opacity: 1; pointer-events: auto; }
 .rank-tooltip-line { display: block; line-height: 1.7; }
 .rank-tooltip-line strong { color: #60a5fa; }
-tbody td.c { overflow: visible; position: relative; }
+tbody td.c { overflow: visible; position: relative; text-align: center; }
 
 /* TEAM */
 .team-pill { display: flex; align-items: center; gap: 8px; width: 100%; }
@@ -586,7 +586,7 @@ tbody td.c { overflow: visible; position: relative; }
 
 .fut-card-header {
   background: linear-gradient(to bottom, #113a29 0%, #0d241a 100%);
-  padding: 10px;
+  padding: 16px 10px;
   text-align: center;
   border-bottom: 2px solid #3cba54;
   display: flex;
@@ -597,9 +597,10 @@ tbody td.c { overflow: visible; position: relative; }
 .fut-card-header h1 {
   color: #ffffff;
   margin: 0;
-  font-size: 18px;
+  font-size: 22px;
+  font-weight: 900;
   text-transform: uppercase;
-  font-style: italic;
+  letter-spacing: 1px;
 }
 
 .fut-sub-header {
@@ -630,6 +631,77 @@ tbody td.c { overflow: visible; position: relative; }
   border-bottom: 1px solid #1a3c2a;
   display: flex;
   align-items: center;
+}
+
+/* Nueva estructura de 3 columnas */
+.fut-fila-tres-columnas {
+  border-bottom: 1px solid #1a3c2a;
+  display: grid;
+  grid-template-columns: 100px 1fr 1fr;
+  gap: 1px;
+  background: #2d5a42;
+}
+
+.fut-col-puesto {
+  background-color: #08160f;
+  color: #3cba54;
+  font-weight: bold;
+  padding: 15px 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.fut-col-badge {
+  background-color: #0d241a;
+  padding: 15px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.fut-col-indicadores {
+  background-color: #0d241a;
+  padding: 15px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.fut-numero-grande {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.fut-txt-label {
+  font-size: 9px;
+  color: #cccccc;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fut-badge-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+}
+
+.fut-badges-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .fut-col-pts {
@@ -925,6 +997,62 @@ tbody td.c { overflow: visible; position: relative; }
 .btn-ficha:active {
   transform: translateY(0);
 }
+
+/* Responsive para modal */
+@media (max-width: 680px) {
+  .fut-card {
+    max-width: 95%;
+    margin: 0 10px;
+  }
+  
+  .fut-card-header h1 {
+    font-size: 16px;
+    letter-spacing: 0.5px;
+  }
+  
+  .fut-fila-tres-columnas {
+    grid-template-columns: 70px 1fr 1fr;
+  }
+  
+  .fut-numero-grande {
+    font-size: 24px;
+  }
+  
+  .fut-txt-label {
+    font-size: 8px;
+  }
+  
+  .fut-stats-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .score-badge-mini {
+    font-size: 0.6rem;
+    padding: 2px 4px;
+    min-width: 16px;
+  }
+  
+  .fut-badge-tendencia {
+    font-size: 8px;
+    padding: 2px 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fut-fila-tres-columnas {
+    grid-template-columns: 60px 1fr 1fr;
+  }
+  
+  .fut-col-puesto,
+  .fut-col-badge,
+  .fut-col-indicadores {
+    padding: 12px 6px;
+  }
+  
+  .fut-numero-grande {
+    font-size: 20px;
+  }
+}
 </style>
 </head>
 <body>
@@ -1006,8 +1134,8 @@ tbody td.c { overflow: visible; position: relative; }
     </div>
     <div class="menu-card" onclick="showTabFromMenu('apertura')">
       <span class="menu-icon">🏆</span>
-      <div class="menu-card-title">Torneo Apertura de Equipos</div>
-      <div class="menu-card-desc">Posiciones y puntajes del Apertura de Equipos</div>
+      <div class="menu-card-title">Apertura de Equipos</div>
+      <div class="menu-card-desc">Posiciones y puntajes del Torneo Apertura de Equipos</div>
     </div>
     <div class="menu-card" onclick="showTabFromMenu('ideal')">
       <span class="menu-icon">⭐</span>
@@ -1016,8 +1144,8 @@ tbody td.c { overflow: visible; position: relative; }
     </div>
     <div class="menu-card" onclick="showTabFromMenu('clausura')">
       <span class="menu-icon">🏆</span>
-      <div class="menu-card-title">Torneo Clausura de Equipos</div>
-      <div class="menu-card-desc">Posiciones y puntajes del Clausura de Equipos</div>
+      <div class="menu-card-title">Clausura de Equipos</div>
+      <div class="menu-card-desc">Posiciones y puntajes del Torneo Clausura de Equipos</div>
     </div>
     <div class="menu-card" onclick="showTabFromMenu('anual')">
       <span class="menu-icon">📊</span>
@@ -1040,24 +1168,24 @@ tbody td.c { overflow: visible; position: relative; }
 <div class="content">
   <div class="section" id="sec-jugadores">
     <div class="card">
-      <div class="card-head"><div class="card-head-icon">&#128100;</div><h2>Tabla de Jugadores</h2><span id="jug-count"></span></div>
+      <div class="card-head"><div class="card-head-icon">&#128100;</div><h2>Lista de Jugadores</h2><span id="jug-count"></span></div>
       <div class="search-wrap"><div class="search-wrap-inner"><span class="search-icon">&#128269;</span><input type="text" class="search-input" id="search-jug" placeholder="Buscar por nombre o equipo..." oninput="filterJugadores()"></div></div>
-      <div class="top-scroll-wrap" id="top-scroll-wrap"><div class="top-scroll-content" id="top-scroll-content"></div></div>
       <div class="table-wrap" id="jug-table-wrap"><table><thead><tr>
-        <th>Jugador</th><th>Equipo</th>
-        <th class="c fc">F1</th><th class="c fc">F2</th><th class="c fc">F3</th><th class="c fc">F4</th><th class="c fc">F5</th><th class="c fc">F6</th><th class="c fc">F7</th><th class="c fc">F8</th><th class="c fc">F9</th><th class="c fc">F10</th><th class="c fc">F11</th><th class="c">AP</th>
-        <th class="c fc">C1</th><th class="c fc">C2</th><th class="c fc">C3</th><th class="c fc">C4</th><th class="c fc">C5</th><th class="c fc">C6</th><th class="c fc">C7</th><th class="c fc">C8</th><th class="c fc">C9</th><th class="c fc">C10</th><th class="c fc">C11</th><th class="c">CL</th>
+        <th>Jugador</th>
+        <th>Equipo</th>
+        <th style="width:110px">Ficha</th>
       </tr></thead><tbody id="body-jugadores"></tbody></table></div>
     </div>
   </div>
 
   <div class="section" id="sec-apertura">
     <div class="card">
-      <div class="card-head"><div class="card-head-icon">&#127960;</div><h2>Torneo Apertura</h2></div>
+      <div class="card-head"><div class="card-head-icon">&#127960;</div><h2>Torneo Apertura - Equipos</h2></div>
       <div class="table-wrap"><table><thead><tr>
-        <th class="c" style="width:52px">#</th><th>Equipo</th>
-        <th class="c fc">F1</th><th class="c fc">F2</th><th class="c fc">F3</th><th class="c fc">F4</th><th class="c fc">F5</th><th class="c fc">F6</th><th class="c fc">F7</th><th class="c fc">F8</th><th class="c fc">F9</th><th class="c fc">F10</th><th class="c fc">F11</th>
-        <th class="c">PTS</th><th style="width:110px"></th>
+        <th class="c" style="width:52px">#</th>
+        <th>Equipo</th>
+        <th class="c" style="width:70px">PJ</th>
+        <th class="c" style="width:90px">PTS</th>
       </tr></thead><tbody id="body-apertura"></tbody></table></div>
     </div>
   </div>
@@ -1074,11 +1202,12 @@ tbody td.c { overflow: visible; position: relative; }
 
   <div class="section" id="sec-clausura">
     <div class="card">
-      <div class="card-head"><div class="card-head-icon">&#127960;</div><h2>Torneo Clausura</h2></div>
+      <div class="card-head"><div class="card-head-icon">&#127960;</div><h2>Torneo Clausura - Equipos</h2></div>
       <div class="table-wrap"><table><thead><tr>
-        <th class="c" style="width:52px">#</th><th>Equipo</th>
-        <th class="c fc">C1</th><th class="c fc">C2</th><th class="c fc">C3</th><th class="c fc">C4</th><th class="c fc">C5</th><th class="c fc">C6</th><th class="c fc">C7</th><th class="c fc">C8</th><th class="c fc">C9</th><th class="c fc">C10</th><th class="c fc">C11</th>
-        <th class="c">PTS</th><th style="width:110px"></th>
+        <th class="c" style="width:52px">#</th>
+        <th>Equipo</th>
+        <th class="c" style="width:70px">PJ</th>
+        <th class="c" style="width:90px">PTS</th>
       </tr></thead><tbody id="body-clausura"></tbody></table></div>
     </div>
   </div>
@@ -1206,7 +1335,7 @@ tbody td.c { overflow: visible; position: relative; }
 </div>
 
 <script>
-const SHEET_ID = '1rOE_0gmeYvzFz5xbIQI0fkzdYdhr6YGgaSCNsAsVU2I';
+const SHEET_ID = '1BA44xlhvKIWHMR-l8TJxVXUmfYV-NoHXr3iEdUkQ3hk'; // ← NUEVA PLANILLA
 let DATA = {};
 
 // ---- Google Sheets fetch ----
@@ -1231,85 +1360,299 @@ function gnOrNull(row, idx) {
 function gs(row, idx) { return (gv(row, idx) || '').toString().trim(); }
 
 async function loadData() {
-  const [t1, tAp, tCl, tAn, tDt, tTablas, tDataJugadores, tHistorial] = await Promise.all([
-    fetchSheet('Hoja 1'),
-    fetchSheet('APERTURA'),
-    fetchSheet('CLAUSURA'),
-    fetchSheet('TABLA ANUAL'),
+  // ===============================================
+  // NUEVA LÓGICA: Leer de LOG_FECHAS, Equipos, ESTADISTICAS_INDIVIDUALES, TABLA_EQUIPOS, DATA_TOTAL y TABLA_JUGADORES
+  // ===============================================
+  const [logFechas, equiposSheet, estadisticasSheet, tablaEquiposSheet, dataTotalSheet, tablaJugadoresSheet] = await Promise.all([
+    fetchSheet('LOG_FECHAS'),
+    fetchSheet('Equipos'),
+    fetchSheet('ESTADISTICAS_INDIVIDUALES'),
+    fetchSheet('TABLA_EQUIPOS'),
     fetchSheet('DATA_TOTAL'),
-    fetchSheet('TABLAS'),
-    fetchSheet('DATA_JUGADORES'),
-    fetchSheet('HISTORIAL_CONSOLIDADO'),
+    fetchSheet('TABLA_JUGADORES'),
   ]);
 
-  const jugadores = t1.rows
-    .filter(r => gv(r,0) && gv(r,25) !== null)
+  // Procesar LOG_FECHAS
+  const rawLogs = logFechas.rows
+    .filter(r => gv(r,0)) // Tiene jugador
     .map(r => ({
-      nombre: gs(r,0), equipo: gs(r,25), modo: gs(r,26),
-      ap: Array.from({length:11}, (_,i) => gnOrNull(r,i+1)),
-      ap_total: gn(r,12),
-      cl: Array.from({length:11}, (_,i) => gnOrNull(r,i+13)),
-      cl_total: gn(r,24),
+      jugador: gs(r,0),
+      fecha: gn(r,1),
+      puntos: gn(r,2),
+      suma: gn(r,3),
+      torneo: gs(r,4).toUpperCase(),
+      competencia: gs(r,5).toUpperCase(),
+      equipo: gs(r,7) || 'LIBRE',
+      capitan: gs(r,8) === 'SI',
+      ideal: gn(r,10),
+      temporada: gs(r,11)
     }));
 
-  const parseEquipo = r => ({
-    equipo: gs(r,0), capitan: gs(r,1),
-    jug: [2,3,4,5].map(i => gs(r,i)).filter(Boolean),
-    fechas: Array.from({length:11}, (_,i) => gn(r,i+6)),
-    pts: gn(r,17),
+  // Procesar Equipos
+  const equiposData = equiposSheet.rows
+    .filter(r => gv(r,0))
+    .map(r => ({
+      jugador: gs(r,0),
+      equipo: gs(r,1) || 'LIBRE',
+      modo: gs(r,2)
+    }));
+
+  // Procesar ESTADISTICAS_INDIVIDUALES
+  const estadisticasIndividuales = estadisticasSheet.rows
+    .filter(r => gv(r,0))
+    .map(r => ({
+      jugador: gs(r,0),
+      puestoActual: gn(r,1) || '-',
+      puestoAnterior: gn(r,2) || '-',
+      mejorFecha: gn(r,3),
+      vecesIdeal: gn(r,4),
+      equipo: gs(r,5),
+      torneo: gs(r,6),
+      puntosHistoricos: gn(r,7),
+      promedio: gn(r,8),
+      puestoGlobal: gn(r,9) || '-',
+      cantFechas: gn(r,10)
+    }));
+
+  // Procesar TABLA_EQUIPOS
+  // APERTURA: columnas A-D
+  const tablaEquiposApertura = tablaEquiposSheet.rows
+    .filter(r => gv(r,1) && gs(r,1) !== '#N/A') // Tiene nombre válido en col B
+    .map(r => ({
+      puesto: gn(r,0),   // A: #
+      equipo: gs(r,1),   // B: EQUIPO
+      pj: gn(r,2),       // C: PJ
+      pts: gn(r,3)       // D: PTS
+    }));
+  
+  // CLAUSURA: columnas F-I
+  const tablaEquiposClausura = tablaEquiposSheet.rows
+    .filter(r => gv(r,6) && gs(r,6) !== '#N/A') // Tiene nombre válido en col G
+    .map(r => ({
+      puesto: gn(r,5),   // F: #
+      equipo: gs(r,6),   // G: EQUIPO
+      pj: gn(r,7),       // H: PJ
+      pts: gn(r,8)       // I: PTS
+    }));
+
+  // Procesar DATA_TOTAL para obtener torneo actual y equipo ideal
+  const torneoActualNombre = dataTotalSheet.rows[0] ? gs(dataTotalSheet.rows[0], 7) : 'APERTURA'; // H1
+  
+  // Extraer equipo ideal de DATA_TOTAL
+  const idealFecha = dataTotalSheet.rows[0] ? gn(dataTotalSheet.rows[0], 4) : 0; // E1: Fecha
+  const idealJugadoresData = [];
+  let idealTotalData = 0;
+  
+  // Leer jugadores del equipo ideal (filas 2-6 aprox, mientras haya datos en columna A)
+  for (let i = 1; i < dataTotalSheet.rows.length; i++) {
+    const row = dataTotalSheet.rows[i];
+    const nombreJugador = gs(row, 0); // Columna A
+    const puntosJugador = gn(row, 1); // Columna B
+    
+    if (nombreJugador && nombreJugador.trim() !== '') {
+      idealJugadoresData.push({ nombre: nombreJugador, pts: puntosJugador });
+    } else if (puntosJugador > 0) {
+      // Si no hay nombre pero hay puntos, es el total
+      idealTotalData = puntosJugador;
+      break;
+    }
+  }
+  
+  // Si no encontramos total, calcularlo
+  if (idealTotalData === 0) {
+    idealTotalData = idealJugadoresData.reduce((sum, j) => sum + j.pts, 0);
+  }
+
+  // Procesar TABLA_JUGADORES para rankings de torneos individuales
+  // APERTURA: columnas A-D, CLAUSURA: columnas F-I, ANUAL: columnas K-N
+  const rankingApertura = tablaJugadoresSheet.rows
+    .filter(r => gv(r,1) && gs(r,1) !== '#N/A') // Tiene jugador válido en col B
+    .map(r => ({
+      pos: gn(r,0),        // A: #
+      jugador: gs(r,1),    // B: JUGADOR
+      pj: gn(r,2),         // C: PJ
+      pts: gn(r,3)         // D: PTS
+    }));
+  
+  const rankingClausura = tablaJugadoresSheet.rows
+    .filter(r => gv(r,6) && gs(r,6) !== '#N/A') // Tiene jugador válido en col G
+    .map(r => ({
+      pos: gs(r,5) ? parseInt(gs(r,5)) : null,  // F: #
+      jugador: gs(r,6),    // G: JUGADOR
+      pj: gs(r,7) ? parseInt(gs(r,7)) : 0,      // H: PJ
+      pts: gs(r,8) ? parseInt(gs(r,8)) : 0      // I: PTS
+    }));
+  
+  const rankingAnual = tablaJugadoresSheet.rows
+    .filter(r => gv(r,11) && gs(r,11) !== '#N/A') // Tiene jugador válido en col L
+    .map(r => ({
+      pos: gn(r,10),       // K: #
+      jugador: gs(r,11),   // L: JUGADOR
+      pj: gn(r,12),        // M: PJ
+      pts: gn(r,13)        // N: PTS
+    }));
+
+  // Construir la estructura DATA que espera el resto del código
+  
+  // 1. JUGADORES con sus puntos por fecha
+  const jugadoresMap = {};
+  rawLogs.forEach(log => {
+    if (!jugadoresMap[log.jugador]) {
+      const equipoInfo = equiposData.find(e => e.jugador === log.jugador) || {equipo: 'LIBRE', modo: null};
+      jugadoresMap[log.jugador] = {
+        nombre: log.jugador,
+        equipo: equipoInfo.equipo,
+        modo: equipoInfo.modo,
+        ap: Array(11).fill(null),
+        ap_total: 0,
+        cl: Array(11).fill(null),
+        cl_total: 0
+      };
+    }
+    const j = jugadoresMap[log.jugador];
+    const fechaIdx = log.fecha - 1;
+    if (log.torneo === 'APERTURA' && fechaIdx >= 0 && fechaIdx < 11) {
+      j.ap[fechaIdx] = log.puntos;
+      j.ap_total += log.suma;
+    } else if (log.torneo === 'CLAUSURA' && fechaIdx >= 0 && fechaIdx < 11) {
+      j.cl[fechaIdx] = log.puntos;
+      j.cl_total += log.suma;
+    }
   });
+  const jugadores = Object.values(jugadoresMap);
 
-  const equipos_ap = tAp.rows.filter(r => gv(r,0)).map(parseEquipo);
-  const equipos_cl = tCl.rows.filter(r => gv(r,0)).map(parseEquipo);
+  // 2. EQUIPOS APERTURA Y CLAUSURA
+  function buildEquipos(torneo) {
+    const equiposMap = {};
+    const logsDelTorneo = rawLogs.filter(log => log.torneo === torneo);
+    
+    logsDelTorneo.forEach(log => {
+      if (!equiposMap[log.equipo]) {
+        equiposMap[log.equipo] = {
+          equipo: log.equipo,
+          capitan: '',
+          jug: [],
+          fechas: Array(11).fill(0),
+          pts: 0
+        };
+      }
+      const eq = equiposMap[log.equipo];
+      
+      // Agregar capitán
+      if (log.capitan && !eq.capitan) {
+        eq.capitan = log.jugador;
+      }
+      
+      // Agregar jugador si no está ya
+      if (!eq.jug.includes(log.jugador) && !log.capitan) {
+        eq.jug.push(log.jugador);
+      }
+      
+      // Sumar puntos por fecha
+      const fechaIdx = log.fecha - 1;
+      if (fechaIdx >= 0 && fechaIdx < 11) {
+        eq.fechas[fechaIdx] += log.suma;
+      }
+      eq.pts += log.suma;
+    });
+    
+    return Object.values(equiposMap);
+  }
+  
+  // Usar TABLA_EQUIPOS en vez de calcular desde LOG_FECHAS
+  const equipos_ap = tablaEquiposApertura.map(eq => ({
+    equipo: eq.equipo,
+    capitan: '',
+    jug: [],
+    fechas: Array(11).fill(0),
+    pts: eq.pts,
+    puesto: eq.puesto,
+    pj: eq.pj
+  }));
+  
+  const equipos_cl = tablaEquiposClausura.map(eq => ({
+    equipo: eq.equipo,
+    capitan: '',
+    jug: [],
+    fechas: Array(11).fill(0),
+    pts: eq.pts,
+    puesto: eq.puesto,
+    pj: eq.pj
+  }));
 
-  const tabla_anual = tAn.rows
-    .filter(r => gv(r,5))
-    .map(r => ({ equipo: gs(r,5), apertura: gn(r,6), clausura: gn(r,7), anual: gn(r,8) }));
+  // 3. TABLA ANUAL - Leer de TABLA_EQUIPOS columnas K-N
+  const tablaAnualEquipos = tablaEquiposSheet.rows
+    .filter(r => gv(r,11) && gs(r,11) !== '#N/A') // Tiene nombre válido en col L (no #N/A)
+    .map(r => ({
+      puesto: gn(r,10),    // K: #
+      equipo: gs(r,11),    // L: EQUIPO
+      pj: gn(r,12),        // M: PJ
+      pts: gn(r,13)        // N: PTS
+    }));
+  
+  // Construir tabla_anual con formato esperado (apertura + clausura = anual)
+  const tabla_anual = tablaAnualEquipos.map(eq => ({
+    equipo: eq.equipo,
+    apertura: tablaEquiposApertura.find(e => e.equipo === eq.equipo)?.pts || 0,
+    clausura: tablaEquiposClausura.find(e => e.equipo === eq.equipo)?.pts || 0,
+    anual: eq.pts,
+    puesto: eq.puesto,
+    pj: eq.pj
+  }));
 
-  let ideal_fecha = 0, ideal_jugadores = [], ideal_total = 0;
-  tDt.rows.forEach((r, i) => {
-    if (i === 0) { ideal_fecha = gn(r,4); }
-    else if (gv(r,0)) { ideal_jugadores.push({ nombre: gs(r,0), pts: gn(r,1) }); }
-    else if (gn(r,1)) { ideal_total = gn(r,1); }
-  });
+  // 4. IDEAL - Usar datos de DATA_TOTAL
+  const ultimaFechaConIdeal = idealFecha;
+  const ideal_jugadores = idealJugadoresData;
+  const ideal_total = idealTotalData;
 
+  // 5. TORNEOS - Usar datos de TABLA_JUGADORES
   const torneos = {
-    apertura: tTablas.rows.filter(r => gv(r,0)).map(r => ({ pos: gn(r,0), jugador: gs(r,1), pts: gn(r,2) })),
-    clausura: tTablas.rows.filter(r => gv(r,4)).map(r => ({ pos: gn(r,4), jugador: gs(r,5), pts: gn(r,6) })),
-    general: tTablas.rows.filter(r => gv(r,8)).map(r => ({ pos: gn(r,8), jugador: gs(r,9), pts: gn(r,10) }))
+    apertura: rankingApertura,
+    clausura: rankingClausura,
+    general: rankingAnual
   };
 
-  const jugadoresStats = tDataJugadores.rows
-    .filter(r => gv(r,0))
-    .map(r => ({
-      nombre: gs(r,0),              // A: JUGADOR
-      puestoActual: gn(r,1) || '-', // B: PUESTO ACTUAL
-      puestoAnterior: gn(r,2) || '-', // C: PUESTO ANTERIOR
-      mejorFecha: gn(r,3),          // D: MEJOR PTS
-      equipoIdeal: gn(r,4),         // E: VECES IDEAL
-      equipo: gs(r,5),              // F: EQUIPO
-      torneoActivo: gs(r,6) || 'GENERAL', // G: TORNEO
-      puntosHistoricos: gn(r,7),    // H: PUNTOS HISTORICOS
-      promedio: gn(r,8)             // I: PROMEDIO
-    }));
+  // 6. JUGADORES STATS Y HISTORIAL - usar directamente ESTADISTICAS_INDIVIDUALES
+  const jugadoresStats = estadisticasIndividuales.map(stat => ({
+    nombre: stat.jugador,
+    puestoActual: stat.puestoActual,
+    puestoAnterior: stat.puestoAnterior,
+    mejorFecha: stat.mejorFecha,
+    equipoIdeal: stat.vecesIdeal,
+    equipo: stat.equipo,
+    torneoActivo: stat.torneo,
+    puntosHistoricos: stat.puntosHistoricos,
+    promedio: stat.promedio
+  }));
 
-  const historialConsolidado = tHistorial.rows
-    .filter(r => gv(r,0))
-    .map(r => ({
-      nombre: gs(r,0),              // A: JUGADOR
-      mejorFechaHistorica: gn(r,4), // E: MEJOR_FECHA
-      vecesIdealHistorico: gn(r,7), // H: IDEAL_ACTUAL
-      puntosHistoricos: gn(r,8),    // I: TOTAL_PTS
-      promedioHistorico: gn(r,10),  // K: PROMEDIO
-      puestoGlobal: gn(r,11) || '-', // L: PUESTO_GLOBAL
-      cantFechas: gn(r,9)           // J: TOTAL_FECHAS
-    }));
+  const historialConsolidado = estadisticasIndividuales.map(stat => ({
+    nombre: stat.jugador,
+    mejorFechaHistorica: stat.mejorFecha,
+    vecesIdealHistorico: stat.vecesIdeal,
+    puntosHistoricos: stat.puntosHistoricos,
+    promedioHistorico: stat.promedio,
+    puestoGlobal: stat.puestoGlobal,
+    cantFechas: stat.cantFechas
+  }));
 
-  // Extraer datos de DATA_TOTAL
-  const fechaActual = gn(tDt.rows[0], 4);  // E1: número de fecha actual
-  const torneoActual = gs(tDt.rows[0], 25); // Z1: torneo actual
+  // 7. FECHA Y TORNEO ACTUAL
+  const fechaActual = Math.max(...rawLogs.map(log => log.fecha), 0);
+  const torneoActual = torneoActualNombre; // De DATA_TOTAL H1
 
-  return { jugadores, equipos_ap, equipos_cl, tabla_anual, ideal: { fecha: ideal_fecha, jugadores: ideal_jugadores, total: ideal_total }, torneos, jugadoresStats, historialConsolidado, fechaActual, torneoActual };
+  return { 
+    jugadores, 
+    equipos_ap, 
+    equipos_cl, 
+    tabla_anual, 
+    ideal: { fecha: ultimaFechaConIdeal, jugadores: ideal_jugadores, total: ideal_total }, 
+    torneos, 
+    jugadoresStats, 
+    historialConsolidado, 
+    estadisticasIndividuales,
+    fechaActual, 
+    torneoActual,
+    torneoActualNombre
+  };
 }
 
 // ---- helpers ----
@@ -1460,7 +1803,8 @@ function showMenu() {
 // ---- renders ----
 function renderHeaderStats() {
   const fecha = DATA.ideal.fecha || 1;
-  document.getElementById("header-subtitle").innerHTML = `Torneo Apertura &amp; Clausura &mdash; Posiciones en vivo (Fecha ${fecha})`;
+  const torneoNombre = DATA.torneoActualNombre || 'Apertura';
+  document.getElementById("header-subtitle").innerHTML = `Torneo ${torneoNombre} &mdash; Posiciones en vivo (Fecha ${fecha})`;
 }
 
 function renderJugadores(filter) {
@@ -1468,32 +1812,17 @@ function renderJugadores(filter) {
   const rows = DATA.jugadores
     .filter(j => j.equipo)
     .filter(j => !fl || j.nombre.toLowerCase().includes(fl) || j.equipo.toLowerCase().includes(fl))
-    .sort((a,b) => b.ap_total - a.ap_total);
+    .sort((a,b) => (a.nombre.localeCompare(b.nombre)));
   document.getElementById("jug-count").textContent = rows.length + " jugadores";
   document.getElementById("body-jugadores").innerHTML = rows.map(j => {
-    const apF = j.ap.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
-    const clF = j.cl.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
     return `<tr>
-      <td><div class="team-pill">${teamAvatar(j.nombre, j.equipo)}<span class="team-name">${j.nombre}</span><button class="btn-ficha" onclick="openFutModal('${j.nombre.replace(/'/g, "\\'")}')" title="Ver ficha del jugador">FICHA</button></div></td>
+      <td><div class="team-pill">${teamAvatar(j.nombre, j.equipo)}<span class="team-name">${j.nombre}</span></div></td>
       <td style="color:var(--text2);font-size:0.83rem;font-weight:500">${j.equipo}</td>
-      ${apF}<td class="c"><span class="pts ${j.ap_total?'pts-hi':'pts-lo'}">${j.ap_total}</span></td>
-      ${clF}<td class="c"><span class="pts ${j.cl_total?'pts-hi':'pts-lo'}">${j.cl_total}</span></td>
+      <td class="c"><button class="btn-ficha" onclick="openFutModal('${j.nombre.replace(/'/g, "\\'")}')" title="Ver ficha del jugador">FICHA</button></td>
     </tr>`;
   }).join("");
-  syncJugadoresScroll();
 }
 function filterJugadores() { renderJugadores(document.getElementById("search-jug").value); }
-
-function syncJugadoresScroll() {
-  const topScroll = document.getElementById("top-scroll-wrap");
-  const tableWrap = document.getElementById("jug-table-wrap");
-  const topContent = document.getElementById("top-scroll-content");
-  if (!topScroll || !tableWrap || !topContent) return;
-  const table = tableWrap.querySelector("table");
-  if (table) { topContent.style.width = table.scrollWidth + "px"; }
-  topScroll.onscroll = function() { tableWrap.scrollLeft = topScroll.scrollLeft; };
-  tableWrap.onscroll = function() { topScroll.scrollLeft = tableWrap.scrollLeft; };
-}
 
 function buildEquipoRows(rawRows, prefix, fl) {
   const rows = sortEquiposConDesempate(rawRows);
@@ -1539,8 +1868,31 @@ function toggleDetail(prefix, i) {
   btn.innerHTML = open ? "&#10005; Cerrar" : "&#128100; Ver equipo";
   btn.classList.toggle("open", open);
 }
-function renderApertura() { buildEquipoRows(DATA.equipos_ap, "apertura", "F"); }
-function renderClausura() { buildEquipoRows(DATA.equipos_cl, "clausura", "C"); }
+function renderApertura() { 
+  // Renderizar APERTURA desde TABLA_EQUIPOS
+  const tbody = document.getElementById("body-apertura");
+  tbody.innerHTML = DATA.equipos_ap.map(eq => {
+    return `<tr>
+      <td class="c"><span class="rank-num">${eq.puesto || '-'}</span></td>
+      <td><div class="team-pill">${teamAvatar(eq.equipo, eq.equipo)}<span class="team-name">${eq.equipo}</span></div></td>
+      <td class="c">${eq.pj || 0}</td>
+      <td class="c"><span class="pts ${eq.pts?'pts-hi':'pts-lo'}">${eq.pts}</span></td>
+    </tr>`;
+  }).join("");
+}
+
+function renderClausura() { 
+  // Renderizar CLAUSURA desde TABLA_EQUIPOS
+  const tbody = document.getElementById("body-clausura");
+  tbody.innerHTML = DATA.equipos_cl.map(eq => {
+    return `<tr>
+      <td class="c"><span class="rank-num">${eq.puesto || '-'}</span></td>
+      <td><div class="team-pill">${teamAvatar(eq.equipo, eq.equipo)}<span class="team-name">${eq.equipo}</span></div></td>
+      <td class="c">${eq.pj || 0}</td>
+      <td class="c"><span class="pts ${eq.pts?'pts-hi':'pts-lo'}">${eq.pts}</span></td>
+    </tr>`;
+  }).join("");
+}
 
 function renderIdeal() {
   const ideal = DATA.ideal;
@@ -1838,56 +2190,28 @@ function getRecentScoresBadges(nombreJugador) {
 }
 
 function openFutModal(nombreJugador) {
-  // Buscar datos del jugador
-  const jugador = DATA.jugadores.find(j => j.nombre === nombreJugador);
-  if (!jugador) return;
-
-  // Buscar estadísticas del jugador desde DATA_JUGADORES (torneo actual)
-  const stats = DATA.jugadoresStats.find(s => s.nombre.toUpperCase() === nombreJugador.toUpperCase());
+  // Buscar datos del jugador en ESTADISTICAS_INDIVIDUALES
+  const stats = DATA.estadisticasIndividuales.find(s => s.jugador.toUpperCase() === nombreJugador.toUpperCase());
   
-  // Buscar datos históricos consolidados
-  const historial = DATA.historialConsolidado.find(h => h.nombre.toUpperCase() === nombreJugador.toUpperCase());
-  
-  // Datos del TORNEO ACTUAL
-  let puntosHistoricos, mejorPts, vecesIdeal, puestoActual, puestoAnterior, torneoActivo, promedio;
-  
-  if (stats) {
-    puntosHistoricos = stats.puntosHistoricos;
-    mejorPts = stats.mejorFecha;
-    promedio = stats.promedio;
-    vecesIdeal = stats.equipoIdeal;
-    puestoActual = stats.puestoActual;
-    puestoAnterior = stats.puestoAnterior;
-    torneoActivo = stats.torneoActivo;
-  } else {
-    // Fallback: calcular como antes
-    puntosHistoricos = jugador.ap_total + jugador.cl_total;
-    mejorPts = Math.max(...jugador.ap, ...jugador.cl);
-    promedio = puntosHistoricos > 0 ? (puntosHistoricos / 22).toFixed(1) : 0;
-    
-    const posGeneral = DATA.torneos.general.find(t => t.jugador.toUpperCase() === jugador.nombre.toUpperCase());
-    puestoActual = posGeneral ? posGeneral.pos : '-';
-    
-    const posApertura = DATA.torneos.apertura.find(t => t.jugador.toUpperCase() === jugador.nombre.toUpperCase());
-    puestoAnterior = posApertura ? posApertura.pos : '-';
-    
-    vecesIdeal = 0;
-    if (DATA.ideal && DATA.ideal.jugadores) {
-      vecesIdeal = DATA.ideal.jugadores.filter(j => j.nombre.toUpperCase() === jugador.nombre.toUpperCase()).length;
-    }
-    
-    torneoActivo = 'GENERAL';
-    if (jugador.cl_total === 0) torneoActivo = 'APERTURA';
-    else if (jugador.ap_total > 0 && jugador.cl_total > 0) torneoActivo = 'GENERAL';
+  if (!stats) {
+    console.error('No se encontraron estadísticas para:', nombreJugador);
+    return;
   }
-  
-  // Datos HISTÓRICOS CONSOLIDADOS
-  let mejorFechaHistorica = historial ? historial.mejorFechaHistorica : 0;
-  let vecesIdealHistorico = historial ? historial.vecesIdealHistorico : 0;
-  let puntosHistoricosGlobal = historial ? historial.puntosHistoricos : 0;
-  let promedioHistorico = historial ? historial.promedioHistorico : 0;
-  let puestoGlobal = historial ? historial.puestoGlobal : '-';
-  let cantFechas = historial ? historial.cantFechas : 0;
+
+  // Extraer datos directamente de ESTADISTICAS_INDIVIDUALES
+  const {
+    jugador,
+    puestoActual,
+    puestoAnterior,
+    mejorFecha,
+    vecesIdeal,
+    equipo,
+    torneo,
+    puntosHistoricos,
+    promedio,
+    puestoGlobal,
+    cantFechas
+  } = stats;
   
   // Calcular tendencia comparando puesto actual con puesto anterior
   let tendenciaBadge = '';
@@ -1910,19 +2234,24 @@ function openFutModal(nombreJugador) {
     <div class="fut-close-btn" onclick="closeFutModal()">✕</div>
     
     <div class="fut-card-header">
-      <h1>PRODER APP</h1>
+      <h1>${jugador}</h1>
     </div>
 
     <div class="fut-sub-header">ESTADÍSTICAS DEL JUGADOR</div>
 
     <div class="fut-tabla-resumen">
-      <div class="fut-fila-puntos">
-        <div class="fut-col-pts">
-          <span>${puestoActual !== '-' ? puestoActual : '?'}</span>
-          <span class="fut-txt-pts">PUESTO</span>
+      <div class="fut-fila-tres-columnas">
+        <div class="fut-col-puesto">
+          <span class="fut-numero-grande">${puestoActual !== '-' ? puestoActual : '?'}</span>
+          <span class="fut-txt-label">PUESTO</span>
         </div>
-        <div class="fut-col-jugadores">
-          <span class="fut-ganador-item">${jugador.nombre} ${tendenciaBadge}</span>${getRecentScoresBadges(nombreJugador)}
+        <div class="fut-col-badge">
+          <div class="fut-badge-wrapper">${tendenciaBadge}</div>
+          <span class="fut-txt-label">TENDENCIA</span>
+        </div>
+        <div class="fut-col-indicadores">
+          <div class="fut-badges-wrapper">${getRecentScoresBadges(nombreJugador)}</div>
+          <span class="fut-txt-label">ÚLTIMAS FECHAS</span>
         </div>
       </div>
     </div>
@@ -1932,11 +2261,11 @@ function openFutModal(nombreJugador) {
         <div class="fut-stats-col-header">TORNEO ACTUAL</div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">TORNEO</div>
-          <div class="fut-sorteo-ganador">${torneoActivo}</div>
+          <div class="fut-sorteo-ganador">${torneo}</div>
         </div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">EQUIPO</div>
-          <div class="fut-sorteo-ganador">${jugador.equipo}</div>
+          <div class="fut-sorteo-ganador">${equipo}</div>
         </div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">PUNTOS</div>
@@ -1948,7 +2277,7 @@ function openFutModal(nombreJugador) {
         </div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">MEJOR FECHA</div>
-          <div class="fut-sorteo-ganador">${mejorPts} PTS</div>
+          <div class="fut-sorteo-ganador">${mejorFecha} PTS</div>
         </div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">EQ IDEAL</div>
@@ -1968,19 +2297,19 @@ function openFutModal(nombreJugador) {
         </div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">TOTAL ACUMULADO</div>
-          <div class="fut-sorteo-ganador">${puntosHistoricosGlobal || 'N/D'} PTS</div>
+          <div class="fut-sorteo-ganador">${puntosHistoricos || 'N/D'} PTS</div>
         </div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">PROMEDIO GLOBAL</div>
-          <div class="fut-sorteo-ganador">${promedioHistorico ? parseFloat(promedioHistorico).toFixed(2) : 'N/D'}</div>
+          <div class="fut-sorteo-ganador">${promedio ? parseFloat(promedio).toFixed(2) : 'N/D'}</div>
         </div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">MEJOR FECHA HISTÓRICA</div>
-          <div class="fut-sorteo-ganador">${mejorFechaHistorica || 'N/D'} PTS</div>
+          <div class="fut-sorteo-ganador">${mejorFecha || 'N/D'} PTS</div>
         </div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">EQ IDEAL (TOTAL)</div>
-          <div class="fut-sorteo-ganador">${vecesIdealHistorico || 'N/D'}</div>
+          <div class="fut-sorteo-ganador">${vecesIdeal || 'N/D'}</div>
         </div>
       </div>
 
@@ -1993,16 +2322,16 @@ function openFutModal(nombreJugador) {
           ${cantFechas ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${getMedalla(cantFechas).color};">${getMedalla(cantFechas).emoji}</div>` : ''}
         </div>
         <div class="fut-sorteo-box">
-          ${puntosHistoricosGlobal ? (() => { const m = getMedallaTotalAcumulado(puntosHistoricosGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${m.color};">${m.emoji}</div>` : ''; })() : ''}
+          ${puntosHistoricos ? (() => { const m = getMedallaTotalAcumulado(puntosHistoricos); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${m.color};">${m.emoji}</div>` : ''; })() : ''}
         </div>
         <div class="fut-sorteo-box">
-          ${promedioHistorico ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${getInsignia(promedioHistorico).color};">${getInsignia(promedioHistorico).emoji}</div>` : ''}
+          ${promedio ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${getInsignia(promedio).color};">${getInsignia(promedio).emoji}</div>` : ''}
         </div>
         <div class="fut-sorteo-box">
-          ${mejorFechaHistorica && getMedallaMejorFecha(mejorFechaHistorica) ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${getMedallaMejorFecha(mejorFechaHistorica).color};">${getMedallaMejorFecha(mejorFechaHistorica).emoji}</div>` : ''}
+          ${mejorFecha && getMedallaMejorFecha(mejorFecha) ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${getMedallaMejorFecha(mejorFecha).color};">${getMedallaMejorFecha(mejorFecha).emoji}</div>` : ''}
         </div>
         <div class="fut-sorteo-box">
-          ${vecesIdealHistorico >= 0 ? (() => { const m = getMedallaEquipoIdeal(vecesIdealHistorico, jugador.equipo); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${m.color};">${m.emoji}</div>` : ''; })() : ''}
+          ${vecesIdeal >= 0 ? (() => { const m = getMedallaEquipoIdeal(vecesIdeal, equipo); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${m.color};">${m.emoji}</div>` : ''; })() : ''}
         </div>
       </div>
 
@@ -2016,18 +2345,18 @@ function openFutModal(nombreJugador) {
           <div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getMedalla(cantFechas).descripcion}</div>` : ''}
         </div>
         <div class="fut-sorteo-box">
-          ${puntosHistoricosGlobal ? (() => { const m = getMedallaTotalAcumulado(puntosHistoricosGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
+          ${puntosHistoricos ? (() => { const m = getMedallaTotalAcumulado(puntosHistoricos); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
         </div>
         <div class="fut-sorteo-box">
-          ${promedioHistorico ? `<div class="fut-sorteo-titulo" style="color: ${getInsignia(promedioHistorico).color}; margin-bottom: 4px; font-size: 11px;">${getInsignia(promedioHistorico).nombre}</div>
-          <div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getInsignia(promedioHistorico).descripcion}</div>` : ''}
+          ${promedio ? `<div class="fut-sorteo-titulo" style="color: ${getInsignia(promedio).color}; margin-bottom: 4px; font-size: 11px;">${getInsignia(promedio).nombre}</div>
+          <div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getInsignia(promedio).descripcion}</div>` : ''}
         </div>
         <div class="fut-sorteo-box">
-          ${mejorFechaHistorica && getMedallaMejorFecha(mejorFechaHistorica) ? `<div class="fut-sorteo-titulo" style="color: ${getMedallaMejorFecha(mejorFechaHistorica).color}; margin-bottom: 4px; font-size: 11px;">${getMedallaMejorFecha(mejorFechaHistorica).nombre}</div>
-          <div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getMedallaMejorFecha(mejorFechaHistorica).descripcion}</div>` : ''}
+          ${mejorFecha && getMedallaMejorFecha(mejorFecha) ? `<div class="fut-sorteo-titulo" style="color: ${getMedallaMejorFecha(mejorFecha).color}; margin-bottom: 4px; font-size: 11px;">${getMedallaMejorFecha(mejorFecha).nombre}</div>
+          <div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getMedallaMejorFecha(mejorFecha).descripcion}</div>` : ''}
         </div>
         <div class="fut-sorteo-box">
-          ${vecesIdealHistorico >= 0 ? (() => { const m = getMedallaEquipoIdeal(vecesIdealHistorico, jugador.equipo); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
+          ${vecesIdeal >= 0 ? (() => { const m = getMedallaEquipoIdeal(vecesIdeal, equipo); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
         </div>
       </div>
     </div>
