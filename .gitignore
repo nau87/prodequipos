@@ -2,3 +2,5 @@ nul
 *.pyc
 __pycache__/
 *_base64.txt
+sheets_info.html
+*_info.html
