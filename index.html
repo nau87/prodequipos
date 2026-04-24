@@ -452,59 +452,6 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
   }
 }
 
-/* ROTATE TOAST */
-#rotate-toast {
-  display: none;
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: linear-gradient(135deg, rgba(15,76,42,0.97), rgba(26,122,60,0.97));
-  color: #fff;
-  padding: 24px 20px; 
-  font-size: 0.9rem; font-weight: 600;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
-  z-index: 9999;
-  backdrop-filter: blur(12px);
-  animation: slideUp 0.4s ease;
-  flex-direction: column; align-items: center; gap: 16px; text-align: center;
-}
-#rotate-toast.show { display: flex; }
-.rotate-content { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-.rotate-title { font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-.rotate-phone-icon { font-size: 2rem; animation: rotatePhone 2s ease-in-out infinite; }
-.rotate-text { font-size: 0.85rem; color: rgba(255,255,255,0.9); font-weight: 500; }
-.rotate-buttons { display: flex; gap: 10px; margin-top: 8px; }
-.rotate-btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; font-family: inherit; transition: all 0.2s; }
-.rotate-btn-primary { background: white; color: var(--c1); }
-.rotate-btn-secondary { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); }
-.rotate-btn:active { transform: scale(0.95); }
-
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-@keyframes rotatePhone { 
-  0%, 100% { transform: rotate(0deg); } 
-  25% { transform: rotate(-10deg); }
-  50% { transform: rotate(90deg); } 
-  75% { transform: rotate(80deg); }
-}
-
-/* HELP MODAL */
-#help-modal {
-  display: none; position: fixed; inset: 0; z-index: 10000;
-  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
-  align-items: center; justify-content: center; padding: 20px;
-  animation: fadeIn 0.3s ease;
-}
-#help-modal.show { display: flex; }
-.help-content {
-  background: white; border-radius: 16px; padding: 28px 24px; max-width: 400px; width: 100%;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3); animation: scaleIn 0.3s ease;
-}
-.help-title { font-size: 1.2rem; font-weight: 800; color: var(--c1); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
-.help-steps { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
-.help-step { display: flex; gap: 12px; align-items: start; }
-.help-step-num { background: var(--c3); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; }
-.help-step-text { color: var(--text2); font-size: 0.9rem; line-height: 1.6; padding-top: 2px; }
-.help-close { width: 100%; padding: 12px; background: var(--c1); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: inherit; }
-@keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
 /* FULLSCREEN BUTTON */
 #fullscreen-btn {
   display: none; position: fixed; top: 80px; right: 20px; z-index: 9998;
@@ -1302,44 +1249,6 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
         <p style="background: var(--gold-light); padding: 16px; border-radius: 8px; border-left: 4px solid var(--gold); font-weight: 600; color: var(--text);">&#127860; Cena de gala en la sede del Club All Boys para todo el equipo.</p>
       </div>
     </div>
-  </div>
-</div>
-
-<div id="rotate-toast">
-  <div class="rotate-content">
-    <div class="rotate-title">
-      <span class="rotate-phone-icon">&#128241;</span>
-      ¡Mejor experiencia!
-    </div>
-    <div class="rotate-text">Gira tu teléfono horizontalmente</div>
-  </div>
-  <div class="rotate-buttons">
-    <button class="rotate-btn rotate-btn-primary" onclick="dismissRotateToast()">Entendido</button>
-    <button class="rotate-btn rotate-btn-secondary" onclick="showHelpModal()">¿Cómo hago?</button>
-  </div>
-</div>
-
-<div id="help-modal">
-  <div class="help-content">
-    <div class="help-title">
-      <span>&#128161;</span>
-      Cómo girar tu teléfono
-    </div>
-    <div class="help-steps">
-      <div class="help-step">
-        <div class="help-step-num">1</div>
-        <div class="help-step-text">Gira tu teléfono de costado (horizontal)</div>
-      </div>
-      <div class="help-step">
-        <div class="help-step-num">2</div>
-        <div class="help-step-text">Si no gira solo, desliza desde arriba de la pantalla</div>
-      </div>
-      <div class="help-step">
-        <div class="help-step-num">3</div>
-        <div class="help-step-text">Busca el ícono <strong>&#128260; Rotación automática</strong> y actívalo</div>
-      </div>
-    </div>
-    <button class="help-close" onclick="closeHelpModal()">Entendido</button>
   </div>
 </div>
 
@@ -2614,19 +2523,6 @@ document.addEventListener('keydown', function(e) {
 // ---- Orientation & Fullscreen ----
 var fullscreenBtnDismissed = false;
 
-function dismissRotateToast() {
-  document.getElementById('rotate-toast').classList.remove('show');
-}
-
-function showHelpModal() {
-  document.getElementById('help-modal').classList.add('show');
-}
-
-function closeHelpModal() {
-  document.getElementById('help-modal').classList.remove('show');
-  dismissRotateToast();
-}
-
 function dismissFullscreenBtn() {
   document.getElementById('fullscreen-btn').classList.remove('show');
   fullscreenBtnDismissed = true;
@@ -2650,18 +2546,9 @@ async function enterFullscreen() {
 
 (function() {
   function checkOrientation() {
-    var toast = document.getElementById('rotate-toast');
     var fullscreenBtn = document.getElementById('fullscreen-btn');
     var isMobile = window.innerWidth <= 768;
     var isPortrait = window.innerHeight > window.innerWidth;
-    var currentOrientation = isPortrait ? 'portrait' : 'landscape';
-    
-    // Mostrar toast en portrait
-    if (isMobile && isPortrait) {
-      toast.classList.add('show');
-    } else {
-      toast.classList.remove('show');
-    }
     
     // Mostrar botón fullscreen en landscape (si no fue cerrado manualmente)
     if (isMobile && !isPortrait && !fullscreenBtnDismissed) {
@@ -2669,8 +2556,6 @@ async function enterFullscreen() {
     } else if (fullscreenBtnDismissed || !isMobile || isPortrait) {
       fullscreenBtn.classList.remove('show');
     }
-    
-    lastOrientation = currentOrientation;
   }
   
   window.addEventListener('load', checkOrientation);
