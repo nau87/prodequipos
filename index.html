@@ -313,6 +313,51 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
 .tag-app { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
 .tag-papel { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
 
+/* CAPITÁN INDICATOR */
+.captain-indicator {
+  display: inline-block;
+  position: relative;
+  font-size: 0.85rem;
+  color: #2d3748;
+  margin-left: 2px;
+  vertical-align: middle;
+  line-height: 1;
+  cursor: help;
+}
+.captain-tooltip {
+  visibility: hidden;
+  position: absolute;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  z-index: 99999;
+  opacity: 0;
+  transition: opacity 0.2s;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  pointer-events: none;
+}
+.captain-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1e293b;
+}
+.captain-indicator:hover .captain-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
 /* EXPAND BTN */
 .btn-expand { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text2); font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: "Inter", sans-serif; }
 .btn-expand:hover, .btn-expand.open { border-color: var(--c2); color: var(--c2); background: #f0faf5; }
@@ -324,7 +369,7 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
 .detail-inner { padding: 16px 20px 20px 52px; border-top: 2px solid var(--c4); }
 .detail-inner table { border-radius: 10px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
 .detail-inner thead th { background: #e8f5ee; color: var(--c1); font-size: 0.68rem; }
-.detail-inner tbody td { background: var(--surface); font-size: 0.82rem; padding: 9px 14px; }
+.detail-inner tbody td { background: var(--surface); font-size: 0.82rem; padding: 9px 14px; position: relative; }
 .detail-inner tbody tr:hover td { background: #f5fdf8; }
 .player-name-cell { display: flex; align-items: center; gap: 6px; }
 
@@ -1808,6 +1853,8 @@ function buildEquipoRows(rawRows, prefix, fl) {
   
   const tbody = document.getElementById("body-"+prefix);
   tbody.innerHTML = "";
+  const torneo = prefix === "apertura" ? "APERTURA" : "CLAUSURA";
+  
   rows.forEach((eq, i) => {
     const prevEq = i > 0 ? rows[i - 1] : null;
     const fCols = eq.fechas.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
@@ -1828,11 +1875,26 @@ function buildEquipoRows(rawRows, prefix, fl) {
       const jd = DATA.jugadores.find(j=>j.nombre.toUpperCase()===p.nombre.toUpperCase());
       const arr = jd ? jd[apOrCl] : Array(11).fill(0);
       const tot = jd ? jd[totalKey] : 0;
-      // El total YA viene con la multiplicación x2 del capitán desde DATA.jugadores, no multiplicar de nuevo
       const finalTotal = tot;
-      const fCells = arr.map(v=>`<td class="c fc">${fv(p.cap ? v * 2 : v)}</td>`).join("");
-      const capTag = p.cap ? `<span class="tag tag-cap" style="margin-left:6px">CAP 2x</span>` : "";
-      return `<tr><td><div class="player-name-cell">${teamAvatar(p.nombre, eq.equipo)}<span style="font-weight:600;font-size:0.82rem">${p.nombre}</span>${capTag}</div></td>${fCells}<td class="c"><strong style="color:var(--c1)">${finalTotal}</strong></td></tr>`;
+      
+      // Generar celdas de fechas con indicador de capitán dinámico
+      const fCells = arr.map((v, fechaIdx) => {
+        const fechaNum = fechaIdx + 1;
+        // Buscar en rawLogs si este jugador fue capitán en esta fecha
+        const fueCapitan = DATA.rawLogs && DATA.rawLogs.some(log => 
+          log.jugador.toUpperCase() === p.nombre.toUpperCase() && 
+          log.torneo === torneo && 
+          log.fecha === fechaNum && 
+          log.capitan === true
+        );
+        
+        const puntos = fueCapitan ? v * 2 : v;
+        const capIndicator = fueCapitan ? '<span class="captain-indicator">Ⓒ<span class="captain-tooltip">Capitán x2</span></span>' : '';
+        
+        return `<td class="c fc">${fv(puntos)}${fueCapitan && v ? capIndicator : ''}</td>`;
+      }).join("");
+      
+      return `<tr><td><div class="player-name-cell">${teamAvatar(p.nombre, eq.equipo)}<span style="font-weight:600;font-size:0.82rem">${p.nombre}</span></div></td>${fCells}<td class="c"><strong style="color:var(--c1)">${finalTotal}</strong></td></tr>`;
     }).join("");
     const fHds = Array.from({length:11},(_,k)=>`<th class="c fc">${fl}${k+1}</th>`).join("");
     const det = document.createElement("tr");
@@ -2391,10 +2453,10 @@ function openFutModalEquipo(nombreEquipo) {
   );
   const nombreCapitan = capitanUltimaFecha ? capitanUltimaFecha.jugador : null;
   
-  // Crear lista de jugadores con indicador de capitán
+  // Crear lista de jugadores con indicador de capitán (última fecha)
   const jugadoresHTML = jugadoresDelEquipo.map(nombre => {
     const esCapitan = nombreCapitan && nombre.toUpperCase() === nombreCapitan.toUpperCase();
-    return esCapitan ? `${nombre} (C)` : nombre;
+    return esCapitan ? `${nombre} <span style="color:#f5a623;font-weight:900">(C)</span>` : nombre;
   }).join(' • ');
   
   // Renderizar modal
@@ -2418,7 +2480,7 @@ function openFutModalEquipo(nombreEquipo) {
         </div>
         <div class="fut-col-badge" style="grid-column: span 2;">
           <div class="fut-badge-wrapper" style="display:block;text-align:center;">
-            <div style="font-size:11px;color:#3cba54;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Integrantes (${jugadoresDelEquipo.length})</div>
+            <div style="font-size:11px;color:#3cba54;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Integrantes (${jugadoresDelEquipo.length}) ${nombreCapitan ? '• <span style="color:#f5a623">(C)</span> = Capitán actual' : ''}</div>
             <div style="font-size:13px;color:#e0e0e0;line-height:1.6;font-weight:500;">${jugadoresHTML}</div>
           </div>
         </div>
