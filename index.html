@@ -1502,7 +1502,6 @@ async function loadData() {
       if (!equiposMap[log.equipo]) {
         equiposMap[log.equipo] = {
           equipo: log.equipo,
-          capitan: '',
           jug: [],
           fechas: Array(11).fill(0),
           pts: 0
@@ -1510,13 +1509,8 @@ async function loadData() {
       }
       const eq = equiposMap[log.equipo];
       
-      // Agregar capitán
-      if (log.capitan && !eq.capitan) {
-        eq.capitan = log.jugador;
-      }
-      
-      // Agregar jugador si no está ya
-      if (!eq.jug.includes(log.jugador) && !log.capitan) {
+      // Agregar jugador si no está ya (sin importar si es capitán)
+      if (!eq.jug.includes(log.jugador)) {
         eq.jug.push(log.jugador);
       }
       
@@ -1535,8 +1529,8 @@ async function loadData() {
       
       jugadoresDelEquipo.forEach(jugadorInfo => {
         const jugador = jugadorInfo.jugador;
-        // Si no está como capitán ni en la lista de jugadores, agregarlo
-        if (jugador !== eq.capitan && !eq.jug.includes(jugador)) {
+        // Si no está en la lista de jugadores, agregarlo
+        if (!eq.jug.includes(jugador)) {
           eq.jug.push(jugador);
         }
       });
@@ -1869,10 +1863,10 @@ function buildEquipoRows(rawRows, prefix, fl) {
 
     const apOrCl = prefix==="apertura"?"ap":"cl";
     const totalKey = prefix==="apertura"?"ap_total":"cl_total";
-    const allP = [{nombre:eq.capitan,cap:true}, ...eq.jug.map(j=>(({nombre:j,cap:false})))]
-      .filter(p => p.nombre && p.nombre.trim() !== ''); // Filtrar nombres vacíos
-    const pRows = allP.map(p => {
-      const jd = DATA.jugadores.find(j=>j.nombre.toUpperCase()===p.nombre.toUpperCase());
+    // Todos los jugadores del equipo sin distinción de capitán fijo
+    const allP = eq.jug.filter(nombre => nombre && nombre.trim() !== '');
+    const pRows = allP.map(nombreJugador => {
+      const jd = DATA.jugadores.find(j=>j.nombre.toUpperCase()===nombreJugador.toUpperCase());
       const arr = jd ? jd[apOrCl] : Array(11).fill(0);
       const tot = jd ? jd[totalKey] : 0;
       const finalTotal = tot;
@@ -1882,7 +1876,7 @@ function buildEquipoRows(rawRows, prefix, fl) {
         const fechaNum = fechaIdx + 1;
         // Buscar en rawLogs si este jugador fue capitán en esta fecha
         const fueCapitan = DATA.rawLogs && DATA.rawLogs.some(log => 
-          log.jugador.toUpperCase() === p.nombre.toUpperCase() && 
+          log.jugador.toUpperCase() === nombreJugador.toUpperCase() && 
           log.torneo === torneo && 
           log.fecha === fechaNum && 
           log.capitan === true
@@ -1894,7 +1888,7 @@ function buildEquipoRows(rawRows, prefix, fl) {
         return `<td class="c fc">${fv(puntos)}${fueCapitan && v ? capIndicator : ''}</td>`;
       }).join("");
       
-      return `<tr><td><div class="player-name-cell">${teamAvatar(p.nombre, eq.equipo)}<span style="font-weight:600;font-size:0.82rem">${p.nombre}</span></div></td>${fCells}<td class="c"><strong style="color:var(--c1)">${finalTotal}</strong></td></tr>`;
+      return `<tr><td><div class="player-name-cell">${teamAvatar(nombreJugador, eq.equipo)}<span style="font-weight:600;font-size:0.82rem">${nombreJugador}</span></div></td>${fCells}<td class="c"><strong style="color:var(--c1)">${finalTotal}</strong></td></tr>`;
     }).join("");
     const fHds = Array.from({length:11},(_,k)=>`<th class="c fc">${fl}${k+1}</th>`).join("");
     const det = document.createElement("tr");
