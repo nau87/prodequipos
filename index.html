@@ -362,6 +362,50 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
 .btn-expand { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text2); font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: "Inter", sans-serif; }
 .btn-expand:hover, .btn-expand.open { border-color: var(--c2); color: var(--c2); background: #f0faf5; }
 
+/* PROVINCIAL - Zona de clasificación */
+.separator-clasificacion { position: relative; }
+.separator-clasificacion td { padding-bottom: 20px !important; }
+.separator-clasificacion::after { content: '↑ ZONA DE CLASIFICACIÓN'; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; font-weight: 700; color: #16a34a; letter-spacing: 0.5px; white-space: nowrap; background: var(--surface); padding: 0 12px; }
+
+/* PLAYOFFS BRACKET - Estilo Modal Sheets */
+#sec-playoffs .card { background: #0f0a1a; }
+#sec-playoffs .card-head { background: #0f0a1a; border-bottom: 1px solid #3d2b56; padding-bottom: 10px; margin-bottom: 20px; }
+#sec-playoffs .card-head h2 { color: #e0e0e0; font-size: 16px; font-weight: 300; text-transform: uppercase; }
+#playoffs-bracket { padding: 30px 20px 40px 20px; overflow-x: auto; }
+.titles-row { display: grid; grid-template-columns: 320px 320px 320px; gap: 50px; margin-bottom: 14px; justify-content: center; }
+.round-title { text-align: center; color: #9d50bb; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+.bracket-grid { display: grid; grid-template-columns: 320px 320px 320px; gap: 50px; align-items: start; justify-content: center; min-width: max-content; }
+.column { display: flex; flex-direction: column; }
+.col-cuartos { gap: 28px; }
+.col-semis { gap: 132px; padding-top: 42px; }
+.col-final { padding-top: 140px; align-items: center; }
+.matchup { width: 100%; background-color: #1a1425; border: 1px solid #3d2b56; border-radius: 6px; box-sizing: border-box; }
+.pending { opacity: 0.3; }
+.team-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 8px 12px; border-bottom: 1px solid #2d1f44; font-size: 13px; }
+.team-row:last-child { border-bottom: none; }
+.team-name { flex: 1 1 auto; min-width: 0; color: #bbb; white-space: normal; overflow: visible; text-overflow: unset; word-break: break-word; line-height: 1.2; font-weight: 400; }
+.winner .team-name { color: #bc13fe; font-weight: bold; text-shadow: 0 0 5px rgba(188, 19, 254, 0.2); }
+.score-box { display: flex; gap: 10px; align-items: center; flex: 0 0 auto; }
+.pts-sec { color: #666; width: 24px; text-align: center; font-size: 11.5px; font-family: 'Roboto Mono', monospace; }
+.pts-total { color: #666; width: 28px; text-align: center; font-size: 11.5px; font-family: 'Roboto Mono', monospace; }
+.winner .pts-total { color: #ffffff; font-weight: bold; font-size: 13px; }
+.champion-container { margin-top: 35px; width: 100%; display: flex; flex-direction: column; align-items: center; }
+.champion-card { text-align: center; border: 2px solid #9d50bb; padding: 10px; background: linear-gradient(145deg, #1a0533, #3d2b56); border-radius: 10px; width: 190px; box-sizing: border-box; }
+.champion-name { color: #fff; font-weight: bold; font-size: 13px; display: block; margin-top: 5px; text-transform: uppercase; line-height: 1.2; word-break: break-word; }
+.cup { font-size: 22px; display: block; }
+@media (max-width: 768px) { .bracket-grid { grid-template-columns: 1fr; gap: 30px; } .col-semis, .col-final { padding-top: 0; } }
+.match-team .team-name { flex: 1 1 auto; min-width: 0; color: #bbb; white-space: normal; overflow: visible; text-overflow: unset; word-break: break-word; line-height: 1.2; font-weight: 400; }
+.match-team.winner .team-name { color: #bc13fe; font-weight: bold; text-shadow: 0 0 5px rgba(188, 19, 254, 0.2); }
+.score-box { display: flex; gap: 10px; align-items: center; flex: 0 0 auto; }
+.pts-sec { color: #666; width: 24px; text-align: center; font-size: 11.5px; font-family: 'Roboto Mono', monospace; }
+.pts-total { color: #666; width: 28px; text-align: center; font-size: 11.5px; font-family: 'Roboto Mono', monospace; }
+.match-team.winner .pts-total { color: #ffffff; font-weight: bold; font-size: 13px; }
+.champion-container { margin-top: 35px; width: 100%; display: flex; flex-direction: column; align-items: center; }
+.champion-card { text-align: center; border: 2px solid #9d50bb; padding: 10px; background: linear-gradient(145deg, #1a0533, #3d2b56); border-radius: 10px; width: 190px; box-sizing: border-box; }
+.champion-name { color: #fff; font-weight: bold; font-size: 13px; display: block; margin-top: 5px; text-transform: uppercase; line-height: 1.2; word-break: break-word; }
+.cup { font-size: 22px; display: block; }
+@media (max-width: 768px) { .bracket-container { grid-template-columns: 1fr; gap: 30px; padding: 20px 10px; } .col-semis, .col-final { padding-top: 0; } }
+
 /* DETAIL ROW */
 .detail-row { display: none; }
 .detail-row.open { display: table-row; }
@@ -1144,6 +1188,11 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
       <div class="menu-card-title">Clausura de Equipos</div>
       <div class="menu-card-desc">Posiciones y puntajes del Torneo Clausura de Equipos</div>
     </div>
+    <div class="menu-card" onclick="showTabFromMenu('provincial')">
+      <span class="menu-icon">🏅</span>
+      <div class="menu-card-title">Torneo Provincial</div>
+      <div class="menu-card-desc">Tabla de posiciones y clasificación a Playoffs</div>
+    </div>
     <div class="menu-card" onclick="showTabFromMenu('anual')">
       <span class="menu-icon">📊</span>
       <div class="menu-card-title">Tabla Anual de Equipos</div>
@@ -1218,6 +1267,34 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
         <th class="c fc">C1</th><th class="c fc">C2</th><th class="c fc">C3</th><th class="c fc">C4</th><th class="c fc">C5</th><th class="c fc">C6</th><th class="c fc">C7</th><th class="c fc">C8</th><th class="c fc">C9</th><th class="c fc">C10</th><th class="c fc">C11</th>
         <th class="c">PTS</th><th style="width:110px"></th>
       </tr></thead><tbody id="body-clausura"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-provincial">
+    <div class="card">
+      <div class="card-head">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="card-head-icon">🏅</div>
+            <h2>Torneo Provincial - Equipos</h2>
+            <span style="font-size:0.75rem;color:var(--text3);font-weight:600;margin-left:4px;">Los primeros 8 clasifican a Playoff</span>
+          </div>
+          <button onclick="showTabFromMenu('playoffs')" style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:#fff;border:none;padding:8px 16px;border-radius:6px;font-weight:600;font-size:0.8rem;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 12px rgba(102,126,234,0.3)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">🏆 VER LLAVE PLAYOFF</button>
+        </div>
+      </div>
+      <div class="table-wrap"><table><thead><tr>
+        <th class="c" style="width:52px">#</th>
+        <th>Equipo</th>
+        <th class="c fc">F1</th><th class="c fc">F2</th><th class="c fc">F3</th><th class="c fc">F4</th><th class="c fc">F5</th><th class="c fc">F6</th><th class="c fc">F7</th><th class="c fc">F8</th><th class="c fc">F9</th><th class="c fc">F10</th><th class="c fc">F11</th><th class="c fc">F12</th>
+        <th class="c">PTS</th><th style="width:110px"></th>
+      </tr></thead><tbody id="body-provincial"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-playoffs">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">🏆</div><h2>PLAYOFFS | <span style="color:#9d50bb;font-weight:bold;">LIGA</span></h2></div>
+      <div id="playoffs-bracket"></div>
     </div>
   </div>
 
@@ -1332,9 +1409,9 @@ function gs(row, idx) { return (gv(row, idx) || '').toString().trim(); }
 
 async function loadData() {
   // ===============================================
-  // NUEVA LÓGICA: Leer de LOG_FECHAS, Equipos, ESTADISTICAS_INDIVIDUALES, ESTADISTICAS_EQUIPOS, TABLA_EQUIPOS, DATA_TOTAL y TABLA_JUGADORES
+  // NUEVA LÓGICA: Leer de LOG_FECHAS, Equipos, ESTADISTICAS_INDIVIDUALES, ESTADISTICAS_EQUIPOS, TABLA_EQUIPOS, DATA_TOTAL, TABLA_JUGADORES y PLAYOFFS
   // ===============================================
-  const [logFechas, equiposSheet, estadisticasSheet, estadisticasEquiposSheet, tablaEquiposSheet, dataTotalSheet, tablaJugadoresSheet] = await Promise.all([
+  const [logFechas, equiposSheet, estadisticasSheet, estadisticasEquiposSheet, tablaEquiposSheet, dataTotalSheet, tablaJugadoresSheet, playoffsSheet] = await Promise.all([
     fetchSheet('LOG_FECHAS'),
     fetchSheet('Equipos'),
     fetchSheet('ESTADISTICAS_INDIVIDUALES'),
@@ -1342,6 +1419,7 @@ async function loadData() {
     fetchSheet('TABLA_EQUIPOS'),
     fetchSheet('DATA_TOTAL'),
     fetchSheet('TABLA_JUGADORES'),
+    fetchSheet('PLAYOFFS'),
   ]);
 
   // Procesar LOG_FECHAS
@@ -1387,8 +1465,9 @@ async function loadData() {
     }));
 
   // Procesar TABLA_EQUIPOS
-  // APERTURA: columnas A-D
+  // APERTURA: columnas A-D (saltar fila título y encabezados)
   const tablaEquiposApertura = tablaEquiposSheet.rows
+    .slice(2) // Saltar fila 0 (APERTURA) y fila 1 (# | EQUIPO | PJ | PTS)
     .filter(r => gv(r,1) && gs(r,1) !== '#N/A') // Tiene nombre válido en col B
     .map(r => ({
       puesto: gn(r,0),   // A: #
@@ -1397,8 +1476,9 @@ async function loadData() {
       pts: gn(r,3)       // D: PTS
     }));
   
-  // CLAUSURA: columnas F-I
+  // CLAUSURA: columnas F-I (saltar fila título y encabezados)
   const tablaEquiposClausura = tablaEquiposSheet.rows
+    .slice(2) // Saltar fila 0 (CLAUSURA) y fila 1 (# | EQUIPO | PJ | PTS)
     .filter(r => gv(r,6) && gs(r,6) !== '#N/A') // Tiene nombre válido en col G
     .map(r => ({
       puesto: gn(r,5),   // F: #
@@ -1406,6 +1486,16 @@ async function loadData() {
       pj: gn(r,7),       // H: PJ
       pts: gn(r,8)       // I: PTS
     }));
+  
+  // PROVINCIAL: columnas P-S (sin headers, datos directos)
+  const tablaEquiposProvincial = tablaEquiposSheet.rows
+    .map(r => ({
+      puesto: gn(r,15),  // P: #
+      equipo: gs(r,16),  // Q: EQUIPO
+      pj: gn(r,17),      // R: PJ
+      pts: gn(r,18)      // S: PTS
+    }))
+    .filter(eq => eq.equipo && eq.equipo.trim() !== '' && eq.equipo !== '#N/A'); // Excluir vacíos y errores
 
   // Procesar DATA_TOTAL para obtener torneo actual y equipo ideal
   const torneoActualNombre = dataTotalSheet.rows[0] ? gs(dataTotalSheet.rows[0], 7) : 'APERTURA'; // H1
@@ -1478,7 +1568,9 @@ async function loadData() {
         ap: Array(11).fill(null),
         ap_total: 0,
         cl: Array(11).fill(null),
-        cl_total: 0
+        cl_total: 0,
+        prov: Array(12).fill(null),
+        prov_total: 0
       };
     }
     const j = jugadoresMap[log.jugador];
@@ -1489,12 +1581,16 @@ async function loadData() {
     } else if (log.torneo === 'CLAUSURA' && fechaIdx >= 0 && fechaIdx < 11) {
       j.cl[fechaIdx] = log.puntos;
       j.cl_total += log.suma;
+    } else if (log.torneo === 'PROVINCIAL' && fechaIdx >= 0 && fechaIdx < 12) {
+      j.prov[fechaIdx] = log.puntos;
+      j.prov_total += log.suma;
     }
   });
   const jugadores = Object.values(jugadoresMap);
 
-  // 2. EQUIPOS APERTURA Y CLAUSURA
+  // 2. EQUIPOS APERTURA, CLAUSURA Y PROVINCIAL
   function buildEquipos(torneo) {
+    const numFechas = torneo === 'PROVINCIAL' ? 12 : 11;
     const equiposMap = {};
     const logsDelTorneo = rawLogs.filter(log => log.torneo === torneo && log.equipo !== 'LIBRE');
     
@@ -1503,7 +1599,7 @@ async function loadData() {
         equiposMap[log.equipo] = {
           equipo: log.equipo,
           jug: [],
-          fechas: Array(11).fill(0),
+          fechas: Array(numFechas).fill(0),
           pts: 0
         };
       }
@@ -1516,7 +1612,7 @@ async function loadData() {
       
       // Sumar puntos por fecha
       const fechaIdx = log.fecha - 1;
-      if (fechaIdx >= 0 && fechaIdx < 11) {
+      if (fechaIdx >= 0 && fechaIdx < numFechas) {
         eq.fechas[fechaIdx] += log.suma;
       }
       eq.pts += log.suma;
@@ -1542,6 +1638,7 @@ async function loadData() {
   // Usar buildEquipos para obtener info completa de jugadores y fechas desde LOG_FECHAS
   const equipos_ap_raw = buildEquipos('APERTURA');
   const equipos_cl_raw = buildEquipos('CLAUSURA');
+  const equipos_provincial_raw = buildEquipos('PROVINCIAL');
   
   // Enriquecer con puestos de TABLA_EQUIPOS
   const equipos_ap = equipos_ap_raw.map(eq => {
@@ -1563,9 +1660,20 @@ async function loadData() {
       pts: tablaInfo?.pts || eq.pts
     };
   });
+  
+  const equipos_provincial = equipos_provincial_raw.map(eq => {
+    const tablaInfo = tablaEquiposProvincial.find(t => t.equipo === eq.equipo);
+    return {
+      ...eq,
+      puesto: tablaInfo?.puesto || 0,
+      pj: tablaInfo?.pj || 0,
+      pts: tablaInfo?.pts || eq.pts
+    };
+  });
 
   // 3. TABLA ANUAL - Leer de TABLA_EQUIPOS columnas K-N
   const tablaAnualEquipos = tablaEquiposSheet.rows
+    .slice(2) // Saltar fila 0 (ANUAL) y fila 1 (# | EQUIPO | PJ | PTS)
     .filter(r => gv(r,11) && gs(r,11) !== '#N/A') // Tiene nombre válido en col L (no #N/A)
     .map(r => ({
       puesto: gn(r,10),    // K: #
@@ -1637,11 +1745,100 @@ async function loadData() {
   const fechaActual = Math.max(...rawLogs.map(log => log.fecha), 0);
   const torneoActual = torneoActualNombre; // De DATA_TOTAL H1
 
+  // 8. PLAYOFFS - Procesar bracket
+  const playoffsData = {
+    cuartos: [],
+    semis: [],
+    final: {},
+    campeon: ''
+  };
+
+  // Procesar CUARTOS (columnas A-D, filtrar filas con equipos)
+  const cuartosRows = playoffsSheet.rows.filter(r => gs(r, 0)); // Solo filas con equipo en col A
+  for (let i = 0; i < cuartosRows.length; i += 2) {
+    const row1 = cuartosRows[i];
+    const row2 = cuartosRows[i + 1];
+    if (row1 && row2) {
+      playoffsData.cuartos.push({
+        equipo1: gs(row1, 0) || 'A definir',
+        ida1: gn(row1, 1),
+        vuelta1: gn(row1, 2),
+        global1: gn(row1, 3),
+        equipo2: gs(row2, 0) || 'A definir',
+        ida2: gn(row2, 1),
+        vuelta2: gn(row2, 2),
+        global2: gn(row2, 3)
+      });
+    }
+  }
+
+  // Procesar SEMIS (columnas F-I, filtrar filas con equipos)
+  const semisRows = playoffsSheet.rows.filter(r => gs(r, 5)); // Solo filas con equipo en col F
+  for (let i = 0; i < semisRows.length; i += 2) {
+    const row1 = semisRows[i];
+    const row2 = semisRows[i + 1];
+    if (row1 && row2) {
+      playoffsData.semis.push({
+        equipo1: gs(row1, 5) || 'A definir',
+        ida1: gn(row1, 6) || 0,
+        vuelta1: gn(row1, 7) || 0,
+        global1: gn(row1, 8) || 0,
+        equipo2: gs(row2, 5) || 'A definir',
+        ida2: gn(row2, 6) || 0,
+        vuelta2: gn(row2, 7) || 0,
+        global2: gn(row2, 8) || 0
+      });
+    }
+  }
+  
+  // Si no hay datos en SEMIS, crear estructura por defecto
+  if (playoffsData.semis.length === 0) {
+    playoffsData.semis = [
+      { equipo1: 'A definir', ida1: 0, vuelta1: 0, global1: 0, equipo2: 'A definir', ida2: 0, vuelta2: 0, global2: 0 },
+      { equipo1: 'A definir', ida1: 0, vuelta1: 0, global1: 0, equipo2: 'A definir', ida2: 0, vuelta2: 0, global2: 0 }
+    ];
+  }
+
+  // Procesar FINAL (columnas K-N, filtrar filas con equipos)
+  const finalRows = playoffsSheet.rows.filter(r => gs(r, 10)); // Solo filas con equipo en col K
+  const finalRow1 = finalRows[0];
+  const finalRow2 = finalRows[1];
+  if (finalRow1 && finalRow2) {
+    playoffsData.final = {
+      equipo1: gs(finalRow1, 10) || 'Finalista A',
+      ida1: gn(finalRow1, 11) || 0,
+      vuelta1: gn(finalRow1, 12) || 0,
+      global1: gn(finalRow1, 13) || 0,
+      equipo2: gs(finalRow2, 10) || 'Finalista B',
+      ida2: gn(finalRow2, 11) || 0,
+      vuelta2: gn(finalRow2, 12) || 0,
+      global2: gn(finalRow2, 13) || 0
+    };
+  } else {
+    // Si no hay datos, crear objeto vacío con valores por defecto
+    playoffsData.final = {
+      equipo1: 'Finalista A',
+      ida1: 0,
+      vuelta1: 0,
+      global1: 0,
+      equipo2: 'Finalista B',
+      ida2: 0,
+      vuelta2: 0,
+      global2: 0
+    };
+  }
+
+  // Procesar CAMPEON (columna P, fila 1)
+  playoffsData.campeon = playoffsSheet.rows[1] ? gs(playoffsSheet.rows[1], 15) : '';
+
   return { 
     jugadores, 
     equipos_ap, 
     equipos_cl, 
+    equipos_provincial,
     tabla_anual, 
+    tablaEquiposProvincial,
+    playoffs: playoffsData,
     ideal: { fecha: ultimaFechaConIdeal, jugadores: ideal_jugadores, total: ideal_total }, 
     torneos, 
     jugadoresStats, 
@@ -1847,27 +2044,53 @@ function buildEquipoRows(rawRows, prefix, fl) {
   
   const tbody = document.getElementById("body-"+prefix);
   tbody.innerHTML = "";
-  const torneo = prefix === "apertura" ? "APERTURA" : "CLAUSURA";
+  const torneo = prefix === "apertura" ? "APERTURA" : prefix === "clausura" ? "CLAUSURA" : "PROVINCIAL";
   
   rows.forEach((eq, i) => {
     const prevEq = i > 0 ? rows[i - 1] : null;
     const fCols = eq.fechas.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
     const tr = document.createElement("tr");
+    
+    // Fondo verde claro para puestos 1-8 en Provincial
+    if (prefix === "provincial" && eq.puesto <= 8) {
+      tr.style.background = "#f0fdf4";
+    }
+    
+    // Línea divisoria en puesto 8 para Provincial
+    if (prefix === "provincial" && eq.puesto === 8) {
+      tr.style.borderBottom = "3px solid #22c55e";
+      tr.classList.add("separator-clasificacion");
+    }
+    
+    // Estilo del nombre del equipo para puestos 1-8 en Provincial
+    const teamNameStyle = (prefix === "provincial" && eq.puesto <= 8) ? ' style="color:#16a34a;font-weight:bold"' : '';
+    
     tr.innerHTML = `
       <td class="c">${rankEl(eq.puesto, eq, prevEq)}</td>
-      <td><div class="team-pill">${teamAvatar(eq.equipo, eq.equipo)}<span class="team-name">${eq.equipo}</span></div></td>
+      <td><div class="team-pill">${teamAvatar(eq.equipo, eq.equipo)}<span class="team-name"${teamNameStyle}>${eq.equipo}</span></div></td>
       ${fCols}
       <td class="c"><span class="pts ${eq.pts?'pts-hi':'pts-lo'}">${eq.pts}</span></td>
       <td class="c"><button class="btn-expand" id="btn-${prefix}-${i}" onclick="toggleDetail('${prefix}',${i})">&#128100; Ver equipo</button></td>`;
     tbody.appendChild(tr);
 
-    const apOrCl = prefix==="apertura"?"ap":"cl";
-    const totalKey = prefix==="apertura"?"ap_total":"cl_total";
+    const apOrCl = prefix==="apertura"?"ap":prefix==="clausura"?"cl":"prov";
+    const totalKey = prefix==="apertura"?"ap_total":prefix==="clausura"?"cl_total":"prov_total";
+    const numFechas = eq.fechas.length;
+    
     // Todos los jugadores del equipo sin distinción de capitán fijo
     const allP = eq.jug.filter(nombre => nombre && nombre.trim() !== '');
     const pRows = allP.map(nombreJugador => {
       const jd = DATA.jugadores.find(j=>j.nombre.toUpperCase()===nombreJugador.toUpperCase());
-      const arr = jd ? jd[apOrCl] : Array(11).fill(0);
+      let arr = jd ? jd[apOrCl] : Array(numFechas).fill(0);
+      
+      // Si el array tiene menos fechas que numFechas, rellenar con 0
+      if (arr.length < numFechas) {
+        arr = [...arr];
+        while (arr.length < numFechas) {
+          arr.push(0);
+        }
+      }
+      
       const tot = jd ? jd[totalKey] : 0;
       const finalTotal = tot;
       
@@ -1890,10 +2113,11 @@ function buildEquipoRows(rawRows, prefix, fl) {
       
       return `<tr><td><div class="player-name-cell">${teamAvatar(nombreJugador, eq.equipo)}<span style="font-weight:600;font-size:0.82rem">${nombreJugador}</span></div></td>${fCells}<td class="c"><strong style="color:var(--c1)">${finalTotal}</strong></td></tr>`;
     }).join("");
-    const fHds = Array.from({length:11},(_,k)=>`<th class="c fc">${fl}${k+1}</th>`).join("");
+    const fHds = Array.from({length:numFechas},(_,k)=>`<th class="c fc">${fl}${k+1}</th>`).join("");
     const det = document.createElement("tr");
     det.className = "detail-row"; det.id = `det-${prefix}-${i}`;
-    det.innerHTML = `<td colspan="14"><div class="detail-inner"><table><thead><tr><th>Jugador</th>${fHds}<th class="c">Total</th></tr></thead><tbody>${pRows}</tbody></table></div></td>`;
+    const totalCols = 2 + numFechas + 2; // # + Equipo + Fechas + PTS + Botón
+    det.innerHTML = `<td colspan="${totalCols}"><div class="detail-inner"><table><thead><tr><th>Jugador</th>${fHds}<th class="c">Total</th></tr></thead><tbody>${pRows}</tbody></table></div></td>`;
     tbody.appendChild(det);
   });
 }
@@ -1910,6 +2134,100 @@ function renderApertura() {
 
 function renderClausura() { 
   buildEquipoRows(DATA.equipos_cl, "clausura", "C");
+}
+
+function renderProvincial() {
+  buildEquipoRows(DATA.equipos_provincial, "provincial", "F");
+}
+
+function renderPlayoffs() {
+  const playoffs = DATA.playoffs || {};
+  const container = document.getElementById("playoffs-bracket");
+  
+  if (!playoffs.cuartos || playoffs.cuartos.length === 0) {
+    container.innerHTML = '<p style="text-align:center;padding:60px;color:#666;font-size:1.1rem;">Los Playoffs comenzarán al finalizar el Torneo Provincial</p>';
+    return;
+  }
+  
+  // Helper para determinar ganador
+  const getWinner = (g1, g2, eq1, eq2) => {
+    if (!g1 && !g2) return null;
+    return g1 > g2 ? eq1 : eq2;
+  };
+  
+  // Helper para crear una llave estilo modal Sheets
+  const createMatch = (llave) => {
+    const equipo1 = llave.equipo1 || 'A definir';
+    const equipo2 = llave.equipo2 || 'A definir';
+    const ganador = getWinner(llave.global1, llave.global2, equipo1, equipo2);
+    const isPending = equipo1.includes('definir') || equipo1.includes('Finalista');
+    
+    return `
+      <div class="matchup ${isPending ? 'pending' : ''}">
+        <div class="team-row ${ganador === equipo1 ? 'winner' : ''}">
+          <span class="team-name">${equipo1}</span>
+          <div class="score-box">
+            <span class="pts-sec">${llave.ida1 || 0}</span>
+            <span class="pts-sec">${llave.vuelta1 || 0}</span>
+            <span class="pts-total">${llave.global1 || 0}</span>
+          </div>
+        </div>
+        <div class="team-row ${ganador === equipo2 ? 'winner' : ''}">
+          <span class="team-name">${equipo2}</span>
+          <div class="score-box">
+            <span class="pts-sec">${llave.ida2 || 0}</span>
+            <span class="pts-sec">${llave.vuelta2 || 0}</span>
+            <span class="pts-total">${llave.global2 || 0}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+  
+  // Títulos separados ANTES del grid (como en modal Sheets)
+  let html = `
+    <div class="titles-row">
+      <div class="round-title">Cuartos</div>
+      <div class="round-title">Semis</div>
+      <div class="round-title">Final</div>
+    </div>
+  `;
+  
+  html += '<div class="bracket-grid">';
+  
+  // CUARTOS
+  html += '<div class="column col-cuartos">';
+  playoffs.cuartos.forEach((llave) => {
+    html += createMatch(llave);
+  });
+  html += '</div>';
+  
+  // SEMIS
+  html += '<div class="column col-semis">';
+  playoffs.semis.forEach((llave) => {
+    html += createMatch(llave);
+  });
+  html += '</div>';
+  
+  // FINAL + CAMPEON
+  html += '<div class="column col-final">';
+  html += createMatch(playoffs.final);
+  
+  // CAMPEON
+  if (playoffs.campeon) {
+    html += `
+      <div class="champion-container">
+        <div class="round-title" style="margin-bottom: 8px;">Campeón</div>
+        <div class="champion-card">
+          <span class="cup">🏆</span>
+          <span class="champion-name">${playoffs.campeon}</span>
+        </div>
+      </div>
+    `;
+  }
+  
+  html += '</div></div>';
+  container.innerHTML = html;
 }
 
 function renderIdeal() {
@@ -2100,6 +2418,8 @@ async function init() {
     renderEquipos();
     renderApertura();
     renderClausura();
+    renderProvincial();
+    renderPlayoffs();
     renderIdeal();
     renderAnual();
     renderTorneosIndividuales();
