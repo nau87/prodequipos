@@ -622,12 +622,12 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
 
 .fut-card-header {
   background: linear-gradient(to bottom, #113a29 0%, #0d241a 100%);
-  padding: 16px 10px;
-  text-align: center;
+  padding: 16px 16px;
   border-bottom: 2px solid #3cba54;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .fut-card-header h1 {
@@ -637,6 +637,33 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 1px;
+  text-align: left;
+  flex: 1;
+}
+
+.fut-trofeos-wrapper {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.fut-medalla-torneo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 8px;
+  background: #FFD700;
+  border-radius: 4px;
+  color: #000;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+.fut-medalla-torneo .medal-icon {
+  font-size: 14px;
 }
 
 .fut-sub-header {
@@ -1461,7 +1488,10 @@ async function loadData() {
       puntosHistoricos: gn(r,7),
       promedio: gn(r,8),
       puestoGlobal: gn(r,9) || '-',
-      cantFechas: gn(r,10)
+      cantFechas: gn(r,10),
+      campeonApertura: gn(r,11) || 0,
+      campeonClausura: gn(r,12) || 0,
+      campeonAnual: gn(r,13) || 0
     }));
 
   // Procesar TABLA_EQUIPOS
@@ -1738,7 +1768,8 @@ async function loadData() {
       puestoGlobal: gn(r,4),
       campeonApertura: gn(r,5),
       campeonClausura: gn(r,6),
-      campeonProvincial: gn(r,7)
+      campeonAnual: gn(r,7),
+      campeonProvincial: gn(r,8)
     }));
 
   // 7. FECHA Y TORNEO ACTUAL
@@ -2505,6 +2536,57 @@ function getMedallaMejorFechaEquipo(puntos) {
   return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 219 256" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M216.856,175.643V254H2.144v-27.913h71.44v-24.774h67.185v-25.67H216.856z M45.918,61.625c6.611-6.189,6.907-16.487,0.67-23.047c-6.189-6.611-16.487-6.907-23.047-0.67s-6.856,16.536-0.67,23.047C29.108,67.515,39.407,67.811,45.918,61.625z M29,205.047c-2.671,5.144-0.665,11.478,4.479,14.149c1.551,0.805,3.196,1.19,4.829,1.19c3.791,0,7.454-2.065,9.332-5.657l20.052-38.599l-15.001-16.657L29,205.047z M124.407,85.048c0,0-56.152-25.398-56.516-25.505c-5.118-1.942-11.078-1.385-15.88,2.017h0c-7.665,5.43-9.477,16.045-4.047,23.709l24.738,34.921l-15.54,16.854c-5.488,5.952-6.036,14.617,0.12,21.093l32.293,34.277c2.066,2.193,4.852,3.299,7.643,3.299c2.582,0,5.169-0.947,7.197-2.857c4.22-3.976,4.418-10.62,0.443-14.84l-28.764-30.531l23.859-25.877c0.891-0.966,1.554-2.057,2.016-3.208c2.767-5.45,2.504-12.208-1.274-17.542l-9-12.705l25.974,11.767c1.093,0.496,2.238,0.73,3.364,0.73c3.108,0,6.077-1.783,7.443-4.798C130.336,91.747,128.514,86.909,124.407,85.048z M158.075,33.099L87.011,2L65.148,51.958l71.063,31.099L158.075,33.099z"/></svg>', nombre: 'SILVIDOS', descripcion: '0-14.9 puntos', color: '#757575' };
 }
 
+function getMedallasTorneos(campeonApertura, campeonClausura, campeonAnual) {
+  const medallas = [];
+  
+  // Apertura: repetir según cantidad de veces ganadas
+  for (let i = 0; i < campeonApertura; i++) {
+    medallas.push('<div class="fut-medalla-torneo" title="Campeón Apertura"><span class="medal-icon">🏆</span><span>A</span></div>');
+  }
+  
+  // Clausura: repetir según cantidad de veces ganadas
+  for (let i = 0; i < campeonClausura; i++) {
+    medallas.push('<div class="fut-medalla-torneo" title="Campeón Clausura"><span class="medal-icon">🏆</span><span>C</span></div>');
+  }
+  
+  // Anual: repetir según cantidad de veces ganadas
+  for (let i = 0; i < campeonAnual; i++) {
+    medallas.push('<div class="fut-medalla-torneo" title="Campeón Anual"><span class="medal-icon">🏆</span><span>An</span></div>');
+  }
+  
+  if (medallas.length === 0) return '';
+  
+  return `<div class="fut-trofeos-wrapper">${medallas.join('')}</div>`;
+}
+
+function getMedallasTorneosEquipo(campeonApertura, campeonClausura, campeonAnual, campeonProvincial) {
+  const medallas = [];
+  
+  // Apertura: repetir según cantidad de veces ganadas
+  for (let i = 0; i < campeonApertura; i++) {
+    medallas.push('<div class="fut-medalla-torneo" title="Campeón Apertura"><span class="medal-icon">🏆</span><span>A</span></div>');
+  }
+  
+  // Clausura: repetir según cantidad de veces ganadas
+  for (let i = 0; i < campeonClausura; i++) {
+    medallas.push('<div class="fut-medalla-torneo" title="Campeón Clausura"><span class="medal-icon">🏆</span><span>C</span></div>');
+  }
+  
+  // Anual: repetir según cantidad de veces ganadas
+  for (let i = 0; i < campeonAnual; i++) {
+    medallas.push('<div class="fut-medalla-torneo" title="Campeón Anual"><span class="medal-icon">🏆</span><span>An</span></div>');
+  }
+  
+  // Provincial: repetir según cantidad de veces ganadas
+  for (let i = 0; i < campeonProvincial; i++) {
+    medallas.push('<div class="fut-medalla-torneo" title="Campeón Provincial"><span class="medal-icon">🏆</span><span>P</span></div>');
+  }
+  
+  if (medallas.length === 0) return '';
+  
+  return `<div class="fut-trofeos-wrapper">${medallas.join('')}</div>`;
+}
+
 function getRecentScoresBadges(nombreJugador) {
   const jugador = DATA.jugadores.find(j => j.nombre === nombreJugador);
   if (!jugador) return '';
@@ -2571,7 +2653,10 @@ function openFutModal(nombreJugador) {
     puntosHistoricos,
     promedio,
     puestoGlobal,
-    cantFechas
+    cantFechas,
+    campeonApertura,
+    campeonClausura,
+    campeonAnual
   } = stats;
   
   // Calcular tendencia comparando puesto actual con puesto anterior
@@ -2596,6 +2681,7 @@ function openFutModal(nombreJugador) {
     
     <div class="fut-card-header">
       <h1>${jugador}</h1>
+      ${getMedallasTorneos(campeonApertura, campeonClausura, campeonAnual)}
     </div>
 
     <div class="fut-sub-header">ESTADÍSTICAS DEL JUGADOR</div>
@@ -2748,6 +2834,7 @@ function openFutModalEquipo(nombreEquipo) {
     puestoGlobal,
     campeonApertura,
     campeonClausura,
+    campeonAnual,
     campeonProvincial
   } = stats;
   
@@ -2782,6 +2869,7 @@ function openFutModalEquipo(nombreEquipo) {
     
     <div class="fut-card-header">
       <h1>${equipo}</h1>
+      ${getMedallasTorneosEquipo(campeonApertura, campeonClausura, campeonAnual, campeonProvincial)}
     </div>
 
     <div class="fut-sub-header">ESTADÍSTICAS DEL EQUIPO</div>
@@ -2813,12 +2901,12 @@ function openFutModalEquipo(nombreEquipo) {
           <div class="fut-sorteo-ganador">${campeonClausura ? `🏆 ${campeonClausura}` : '-'}</div>
         </div>
         <div class="fut-sorteo-box">
-          <div class="fut-sorteo-titulo">PROVINCIAL</div>
-          <div class="fut-sorteo-ganador">${campeonProvincial ? `🏆 ${campeonProvincial}` : '-'}</div>
+          <div class="fut-sorteo-titulo">ANUAL</div>
+          <div class="fut-sorteo-ganador">${campeonAnual ? `🏆 ${campeonAnual}` : '-'}</div>
         </div>
         <div class="fut-sorteo-box">
-          <div class="fut-sorteo-titulo">TOTAL</div>
-          <div class="fut-sorteo-ganador">${(campeonApertura || 0) + (campeonClausura || 0) + (campeonProvincial || 0)}</div>
+          <div class="fut-sorteo-titulo">PROVINCIAL</div>
+          <div class="fut-sorteo-ganador">${campeonProvincial ? `🏆 ${campeonProvincial}` : '-'}</div>
         </div>
       </div>
 
