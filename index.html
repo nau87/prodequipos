@@ -1241,11 +1241,12 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
 <div class="content">
   <div class="section" id="sec-jugadores">
     <div class="card">
-      <div class="card-head"><div class="card-head-icon">&#128100;</div><h2>Lista de Jugadores</h2><span id="jug-count"></span></div>
+      <div class="card-head"><div class="card-head-icon">&#128100;</div><h2>Ranking Histórico de Jugadores</h2><span id="jug-count"></span></div>
       <div class="search-wrap"><div class="search-wrap-inner"><span class="search-icon">&#128269;</span><input type="text" class="search-input" id="search-jug" placeholder="Buscar por nombre o equipo..." oninput="filterJugadores()"></div></div>
       <div class="table-wrap" id="jug-table-wrap"><table><thead><tr>
+        <th class="c" style="width:52px">#</th>
         <th>Jugador</th>
-        <th>Equipo</th>
+        <th class="c">PTS</th>
         <th style="width:110px">Ficha</th>
       </tr></thead><tbody id="body-jugadores"></tbody></table></div>
     </div>
@@ -2037,16 +2038,18 @@ function renderHeaderStats() {
 
 function renderJugadores(filter) {
   const fl = (filter||"").toLowerCase();
-  const rows = DATA.jugadores
-    .filter(j => j.equipo)
-    .filter(j => !fl || j.nombre.toLowerCase().includes(fl) || j.equipo.toLowerCase().includes(fl))
-    .sort((a,b) => (a.nombre.localeCompare(b.nombre)));
+  const rows = DATA.estadisticasIndividuales
+    .filter(j => j.jugador && j.equipo)
+    .filter(j => !fl || j.jugador.toLowerCase().includes(fl) || j.equipo.toLowerCase().includes(fl))
+    .sort((a,b) => (b.puntosHistoricos || 0) - (a.puntosHistoricos || 0));
   document.getElementById("jug-count").textContent = rows.length + " jugadores";
-  document.getElementById("body-jugadores").innerHTML = rows.map(j => {
-    return `<tr>
-      <td><div class="team-pill">${teamAvatar(j.nombre, j.equipo)}<span class="team-name">${j.nombre}</span></div></td>
-      <td style="color:var(--text2);font-size:0.83rem;font-weight:500">${j.equipo}</td>
-      <td class="c"><button class="btn-ficha" onclick="openFutModal('${j.nombre.replace(/'/g, "\\'")}')" title="Ver ficha del jugador">FICHA</button></td>
+  document.getElementById("body-jugadores").innerHTML = rows.map((j, i) => {
+    const posClass = i < 3 ? ["pos-1","pos-2","pos-3"][i] : "";
+    return `<tr class="${posClass}">
+      <td class="c"><span class="rank-num">${i+1}</span></td>
+      <td><div class="team-pill">${teamAvatar(j.jugador, j.equipo)}<span class="team-name">${j.jugador}</span></div></td>
+      <td class="c"><span class="pts ${j.puntosHistoricos?'pts-hi':'pts-lo'}">${j.puntosHistoricos || 0}</span></td>
+      <td class="c"><button class="btn-ficha" onclick="openFutModal('${j.jugador.replace(/'/g, "\\'")}')" title="Ver ficha del jugador">FICHA</button></td>
     </tr>`;
   }).join("");
 }
