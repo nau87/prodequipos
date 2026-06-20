@@ -1885,7 +1885,7 @@ async function loadData() {
 }
 
 // ---- helpers ----
-function fv(v) { return v && v !== 0 ? `<span class="fv">${v}</span>` : `<span class="fz">&#8212;</span>`; }
+function fv(v) { return v !== null && v !== undefined && v !== '' ? `<span class="fv">${v}</span>` : `<span class="fz">&#8212;</span>`; }
 function positionTooltip(e) {
   const tooltip = e.currentTarget.querySelector('.rank-tooltip');
   if (!tooltip) return;
@@ -2117,11 +2117,11 @@ function buildEquipoRows(rawRows, prefix, fl) {
       const jd = DATA.jugadores.find(j=>j.nombre.toUpperCase()===nombreJugador.toUpperCase());
       let arr = jd ? jd[apOrCl] : Array(numFechas).fill(0);
       
-      // Si el array tiene menos fechas que numFechas, rellenar con 0
+      // Si el array tiene menos fechas que numFechas, rellenar con null (jugador no jugó esa fecha)
       if (arr.length < numFechas) {
         arr = [...arr];
         while (arr.length < numFechas) {
-          arr.push(0);
+          arr.push(null);
         }
       }
       
