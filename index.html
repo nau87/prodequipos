@@ -2069,9 +2069,9 @@ function renderJugadores(filter) {
   let puntosAnterior = null;
   
   document.getElementById("body-jugadores").innerHTML = rows.map((j, i) => {
-    // Si los puntos cambian, actualizar el puesto denso
+    // Si los puntos cambian, incrementar el puesto denso en 1
     if (puntosAnterior !== null && j.puntosHistoricos !== puntosAnterior) {
-      puestoDenso = i + 1;
+      puestoDenso++;
     }
     puntosAnterior = j.puntosHistoricos;
     
