@@ -2645,49 +2645,52 @@ function getMedallasTorneosEquipo(campeonApertura, campeonClausura, campeonAnual
 }
 
 function getRecentScoresBadges(nombreJugador) {
-  const jugador = DATA.jugadores.find(j => j.nombre.toUpperCase() === nombreJugador.toUpperCase());
-  if (!jugador) {
-    console.warn('No se encontró jugador en DATA.jugadores:', nombreJugador);
+  if (!DATA.rawLogs || DATA.rawLogs.length === 0) {
+    console.warn('No hay rawLogs disponibles');
     return '';
   }
   
-  // Determinar cuántas fechas se han jugado según el torneo actual
-  const fechaActual = DATA.fechaActual || 0;
-  const torneoActual = DATA.torneoActual || '';
+  // Obtener todas las fechas únicas jugadas (formato: "TORNEO-FECHA")
+  const fechasUnicas = [...new Set(DATA.rawLogs.map(log => `${log.torneo}-${log.fecha}`))];
   
-  let fechasJugadas = [];
+  // Ordenar cronológicamente (APERTURA 1-11, CLAUSURA 1-11, PROVINCIAL 1-12)
+  fechasUnicas.sort((a, b) => {
+    const [torneoA, fechaA] = a.split('-');
+    const [torneoB, fechaB] = b.split('-');
+    
+    const ordenTorneo = { 'APERTURA': 1, 'CLAUSURA': 2, 'PROVINCIAL': 3 };
+    const ordenA = (ordenTorneo[torneoA] || 0) * 100 + parseInt(fechaA);
+    const ordenB = (ordenTorneo[torneoB] || 0) * 100 + parseInt(fechaB);
+    
+    return ordenA - ordenB;
+  });
   
-  if (torneoActual.toUpperCase() === 'APERTURA') {
-    // Solo tomar las fechas jugadas de Apertura (hasta la fecha actual)
-    fechasJugadas = jugador.ap.slice(0, fechaActual);
-  } else if (torneoActual.toUpperCase() === 'CLAUSURA') {
-    // Tomar TODAS las 11 fechas de Apertura (ya completadas) + las jugadas de Clausura
-    fechasJugadas = [...jugador.ap.slice(0, 11), ...jugador.cl.slice(0, fechaActual)];
-  } else if (torneoActual.toUpperCase() === 'PROVINCIAL') {
-    // Provincial: tomar todo lo jugado hasta la fecha actual
-    fechasJugadas = jugador.prov ? jugador.prov.slice(0, fechaActual) : [];
-  } else {
-    // Si no hay torneo definido, tomar Apertura + Clausura completos
-    fechasJugadas = [...jugador.ap.slice(0, 11), ...jugador.cl.slice(0, 11)];
-  }
+  // Tomar las últimas 3 fechas cronológicas
+  const ultimasTresFechas = fechasUnicas.slice(-3);
   
-  // Tomar las ÚLTIMAS 3 FECHAS directamente (pueden incluir nulls si no jugó)
-  const last3 = fechasJugadas.slice(-3);
-  if (last3.length === 0) {
-    console.warn('No hay fechas para:', nombreJugador);
+  if (ultimasTresFechas.length === 0) {
+    console.warn('No hay fechas jugadas en rawLogs');
     return '';
   }
   
-  // Generar badges HTML con colores (incluir "-" para fechas no jugadas)
-  const badgesHTML = last3.map(pts => {
-    // Si no jugó esta fecha (null/undefined)
-    if (pts === null || pts === undefined) {
+  // Para cada una de las últimas 3 fechas, buscar los puntos del jugador
+  const badgesHTML = ultimasTresFechas.map(fechaKey => {
+    const [torneo, fecha] = fechaKey.split('-');
+    const fechaNum = parseInt(fecha);
+    
+    // Buscar en rawLogs si este jugador jugó esta fecha
+    const logJugador = DATA.rawLogs.find(log => 
+      log.jugador.toUpperCase() === nombreJugador.toUpperCase() && 
+      log.torneo === torneo && 
+      log.fecha === fechaNum
+    );
+    
+    if (!logJugador) {
+      // No jugó esta fecha
       return `<span class="score-badge-mini gray">-</span>`;
     }
     
-    // Convertir a número
-    const puntos = Number(pts);
-    
+    const puntos = logJugador.puntos;
     let colorClass = 'green';
     if (puntos <= 3) colorClass = 'red';
     else if (puntos <= 6) colorClass = 'yellow';
@@ -2695,7 +2698,6 @@ function getRecentScoresBadges(nombreJugador) {
     return `<span class="score-badge-mini ${colorClass}">${puntos}</span>`;
   }).join('');
   
-  console.log('Badges generados para', nombreJugador, '(last3:', last3, '):', badgesHTML);
   return `<span class="recent-scores-badges">${badgesHTML}</span>`;
 }
 
