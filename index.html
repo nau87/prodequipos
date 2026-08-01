@@ -2063,8 +2063,19 @@ function renderJugadores(filter) {
     .filter(j => !fl || j.jugador.toLowerCase().includes(fl) || j.equipo.toLowerCase().includes(fl))
     .sort((a,b) => (b.puntosHistoricos || 0) - (a.puntosHistoricos || 0));
   document.getElementById("jug-count").textContent = rows.length + " jugadores";
+  
+  // Calcular ranking denso
+  let puestoDenso = 1;
+  let puntosAnterior = null;
+  
   document.getElementById("body-jugadores").innerHTML = rows.map((j, i) => {
-    const posClass = i < 3 ? ["pos-1","pos-2","pos-3"][i] : "";
+    // Si los puntos cambian, actualizar el puesto denso
+    if (puntosAnterior !== null && j.puntosHistoricos !== puntosAnterior) {
+      puestoDenso = i + 1;
+    }
+    puntosAnterior = j.puntosHistoricos;
+    
+    const posClass = puestoDenso <= 3 ? ["pos-1","pos-2","pos-3"][puestoDenso - 1] : "";
     
     // Calcular tendencia
     let tendenciaBadge = '';
@@ -2085,7 +2096,7 @@ function renderJugadores(filter) {
     const ultimos3Badges = getRecentScoresBadges(j.jugador);
     
     return `<tr class="${posClass}">
-      <td class="c"><span class="rank-num">${i+1}</span></td>
+      <td class="c"><span class="rank-num">${puestoDenso}</span></td>
       <td><div class="team-pill">${teamAvatar(j.jugador, j.equipo)}<span class="team-name">${j.jugador}</span></div></td>
       <td class="c"><span class="pts ${j.puntosHistoricos?'pts-hi':'pts-lo'}">${j.puntosHistoricos || 0}</span></td>
       <td class="c"><span style="font-weight:600;color:var(--text2);">${j.cantFechas || 0}</span></td>
