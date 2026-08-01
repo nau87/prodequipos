@@ -2591,8 +2591,11 @@ function getMedallasTorneosEquipo(campeonApertura, campeonClausura, campeonAnual
 }
 
 function getRecentScoresBadges(nombreJugador) {
-  const jugador = DATA.jugadores.find(j => j.nombre === nombreJugador);
-  if (!jugador) return '';
+  const jugador = DATA.jugadores.find(j => j.nombre.toUpperCase() === nombreJugador.toUpperCase());
+  if (!jugador) {
+    console.warn('No se encontró jugador en DATA.jugadores:', nombreJugador);
+    return '';
+  }
   
   // Determinar cuántas fechas se han jugado según el torneo actual
   const fechaActual = DATA.fechaActual || 0;
@@ -2611,18 +2614,19 @@ function getRecentScoresBadges(nombreJugador) {
     fechasJugadas = [...jugador.ap, ...jugador.cl];
   }
   
-  // Tomar las últimas 3 fechas jugadas
-  const last3 = fechasJugadas.slice(-3);
-  if (last3.length === 0) return '';
+  // Filtrar valores null/undefined antes de tomar las últimas 3
+  const fechasConPuntos = fechasJugadas.filter(pts => pts !== null && pts !== undefined);
+  
+  // Tomar las últimas 3 fechas con puntos
+  const last3 = fechasConPuntos.slice(-3);
+  if (last3.length === 0) {
+    console.warn('No hay fechas jugadas para:', nombreJugador);
+    return '';
+  }
   
   // Generar badges HTML con colores
   const badgesHTML = last3.map(pts => {
-    // Si la celda está vacía (null, undefined) → no jugó
-    if (pts === null || pts === undefined) {
-      return `<span class="score-badge-mini gray">-</span>`;
-    }
-    
-    // Si tiene valor (incluso 0), convertir a número
+    // Convertir a número
     const puntos = Number(pts);
     
     let colorClass = 'green';
@@ -2632,6 +2636,7 @@ function getRecentScoresBadges(nombreJugador) {
     return `<span class="score-badge-mini ${colorClass}">${puntos}</span>`;
   }).join('');
   
+  console.log('Badges generados para', nombreJugador, ':', badgesHTML);
   return `<span class="recent-scores-badges">${badgesHTML}</span>`;
 }
 
