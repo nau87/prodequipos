@@ -2658,24 +2658,27 @@ function getRecentScoresBadges(nombreJugador) {
   let fechasJugadas = [];
   
   if (torneoActual.toUpperCase() === 'APERTURA') {
-    // Solo tomar las fechas jugadas de Apertura
+    // Solo tomar las fechas jugadas de Apertura (hasta la fecha actual)
     fechasJugadas = jugador.ap.slice(0, fechaActual);
   } else if (torneoActual.toUpperCase() === 'CLAUSURA') {
-    // Tomar todas las fechas de Apertura + las jugadas de Clausura
-    fechasJugadas = [...jugador.ap, ...jugador.cl.slice(0, fechaActual)];
+    // Tomar TODAS las 11 fechas de Apertura (ya completadas) + las jugadas de Clausura
+    fechasJugadas = [...jugador.ap.slice(0, 11), ...jugador.cl.slice(0, fechaActual)];
+  } else if (torneoActual.toUpperCase() === 'PROVINCIAL') {
+    // Provincial: tomar todo lo jugado hasta la fecha actual
+    fechasJugadas = jugador.prov ? jugador.prov.slice(0, fechaActual) : [];
   } else {
-    // Si no hay torneo definido, tomar todo
-    fechasJugadas = [...jugador.ap, ...jugador.cl];
+    // Si no hay torneo definido, tomar Apertura + Clausura completos
+    fechasJugadas = [...jugador.ap.slice(0, 11), ...jugador.cl.slice(0, 11)];
   }
   
-  // Tomar las ÚLTIMAS 3 FECHAS directamente (sin filtrar nulls)
+  // Tomar las ÚLTIMAS 3 FECHAS directamente (pueden incluir nulls si no jugó)
   const last3 = fechasJugadas.slice(-3);
   if (last3.length === 0) {
     console.warn('No hay fechas para:', nombreJugador);
     return '';
   }
   
-  // Generar badges HTML con colores (incluir "X" para fechas no jugadas)
+  // Generar badges HTML con colores (incluir "-" para fechas no jugadas)
   const badgesHTML = last3.map(pts => {
     // Si no jugó esta fecha (null/undefined)
     if (pts === null || pts === undefined) {
@@ -2692,7 +2695,7 @@ function getRecentScoresBadges(nombreJugador) {
     return `<span class="score-badge-mini ${colorClass}">${puntos}</span>`;
   }).join('');
   
-  console.log('Badges generados para', nombreJugador, ':', badgesHTML);
+  console.log('Badges generados para', nombreJugador, '(last3:', last3, '):', badgesHTML);
   return `<span class="recent-scores-badges">${badgesHTML}</span>`;
 }
 
