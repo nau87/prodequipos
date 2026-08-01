@@ -1099,6 +1099,16 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
     font-size: 8px;
     padding: 2px 4px;
   }
+  
+  /* Ocultar columnas en móvil para tabla de jugadores */
+  #jug-table-wrap table thead tr th:nth-child(4),
+  #jug-table-wrap table tbody tr td:nth-child(4),
+  #jug-table-wrap table thead tr th:nth-child(5),
+  #jug-table-wrap table tbody tr td:nth-child(5),
+  #jug-table-wrap table thead tr th:nth-child(7),
+  #jug-table-wrap table tbody tr td:nth-child(7) {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1114,6 +1124,12 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
   
   .fut-numero-grande {
     font-size: 20px;
+  }
+  
+  /* En móviles muy pequeños, ocultar también "Últimos 3" */
+  #jug-table-wrap table thead tr th:nth-child(6),
+  #jug-table-wrap table tbody tr td:nth-child(6) {
+    display: none;
   }
 }
 </style>
@@ -1246,8 +1262,12 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
       <div class="table-wrap" id="jug-table-wrap"><table><thead><tr>
         <th class="c" style="width:52px">#</th>
         <th>Jugador</th>
-        <th class="c">PTS</th>
-        <th style="width:110px">Ficha</th>
+        <th class="c" style="width:70px">PTS</th>
+        <th class="c" style="width:60px">PJ</th>
+        <th class="c" style="width:75px">PROM</th>
+        <th class="c" style="width:140px">ÚLTIMOS 3</th>
+        <th class="c" style="width:110px">TENDENCIA</th>
+        <th class="c" style="width:100px">Ficha</th>
       </tr></thead><tbody id="body-jugadores"></tbody></table></div>
     </div>
   </div>
@@ -2045,10 +2065,33 @@ function renderJugadores(filter) {
   document.getElementById("jug-count").textContent = rows.length + " jugadores";
   document.getElementById("body-jugadores").innerHTML = rows.map((j, i) => {
     const posClass = i < 3 ? ["pos-1","pos-2","pos-3"][i] : "";
+    
+    // Calcular tendencia
+    let tendenciaBadge = '';
+    if (j.puestoActual !== '-' && j.puestoAnterior !== '-') {
+      const diff = j.puestoAnterior - j.puestoActual;
+      if (diff > 0) {
+        tendenciaBadge = `<span class="fut-badge-tendencia positivo">↗ +${Math.abs(diff)}</span>`;
+      } else if (diff < 0) {
+        tendenciaBadge = `<span class="fut-badge-tendencia negativo">↘ ${Math.abs(diff)}</span>`;
+      } else {
+        tendenciaBadge = `<span class="fut-badge-tendencia igual">→ =</span>`;
+      }
+    } else {
+      tendenciaBadge = `<span style="color:var(--text3);font-size:0.75rem;">-</span>`;
+    }
+    
+    // Obtener últimos 3 puntajes
+    const ultimos3Badges = getRecentScoresBadges(j.jugador);
+    
     return `<tr class="${posClass}">
       <td class="c"><span class="rank-num">${i+1}</span></td>
       <td><div class="team-pill">${teamAvatar(j.jugador, j.equipo)}<span class="team-name">${j.jugador}</span></div></td>
       <td class="c"><span class="pts ${j.puntosHistoricos?'pts-hi':'pts-lo'}">${j.puntosHistoricos || 0}</span></td>
+      <td class="c"><span style="font-weight:600;color:var(--text2);">${j.cantFechas || 0}</span></td>
+      <td class="c"><span style="font-weight:700;color:var(--c3);">${j.promedio ? parseFloat(j.promedio).toFixed(2) : '0.00'}</span></td>
+      <td class="c">${ultimos3Badges || '<span style="color:var(--text3);font-size:0.75rem;">-</span>'}</td>
+      <td class="c">${tendenciaBadge}</td>
       <td class="c"><button class="btn-ficha" onclick="openFutModal('${j.jugador.replace(/'/g, "\\'")}')" title="Ver ficha del jugador">FICHA</button></td>
     </tr>`;
   }).join("");
@@ -2649,6 +2692,10 @@ function openFutModal(nombreJugador) {
     return;
   }
 
+  // Buscar el equipo ACTUALIZADO en DATA.jugadores (fuente de verdad: hoja Equipos)
+  const jugadorData = DATA.jugadores.find(j => j.nombre.toUpperCase() === nombreJugador.toUpperCase());
+  const equipoActual = jugadorData ? jugadorData.equipo : 'LIBRE';
+
   // Extraer datos directamente de ESTADISTICAS_INDIVIDUALES
   const {
     jugador,
@@ -2656,7 +2703,6 @@ function openFutModal(nombreJugador) {
     puestoAnterior,
     mejorFecha,
     vecesIdeal,
-    equipo,
     torneo,
     puntosHistoricos,
     promedio,
@@ -2666,6 +2712,9 @@ function openFutModal(nombreJugador) {
     campeonClausura,
     campeonAnual
   } = stats;
+  
+  // Usar el equipo actualizado en lugar del de ESTADISTICAS_INDIVIDUALES
+  const equipo = equipoActual;
   
   // Calcular tendencia comparando puesto actual con puesto anterior
   let tendenciaBadge = '';
