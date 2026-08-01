@@ -2668,18 +2668,20 @@ function getRecentScoresBadges(nombreJugador) {
     fechasJugadas = [...jugador.ap, ...jugador.cl];
   }
   
-  // Filtrar valores null/undefined antes de tomar las últimas 3
-  const fechasConPuntos = fechasJugadas.filter(pts => pts !== null && pts !== undefined);
-  
-  // Tomar las últimas 3 fechas con puntos
-  const last3 = fechasConPuntos.slice(-3);
+  // Tomar las ÚLTIMAS 3 FECHAS directamente (sin filtrar nulls)
+  const last3 = fechasJugadas.slice(-3);
   if (last3.length === 0) {
-    console.warn('No hay fechas jugadas para:', nombreJugador);
+    console.warn('No hay fechas para:', nombreJugador);
     return '';
   }
   
-  // Generar badges HTML con colores
+  // Generar badges HTML con colores (incluir "X" para fechas no jugadas)
   const badgesHTML = last3.map(pts => {
+    // Si no jugó esta fecha (null/undefined)
+    if (pts === null || pts === undefined) {
+      return `<span class="score-badge-mini gray">-</span>`;
+    }
+    
     // Convertir a número
     const puntos = Number(pts);
     
