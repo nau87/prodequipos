@@ -1669,20 +1669,6 @@ async function loadData() {
       eq.pts += log.suma;
     });
     
-    // Agregar jugadores faltantes desde equiposData (los que no jugaron ninguna fecha)
-    Object.keys(equiposMap).forEach(nombreEquipo => {
-      const eq = equiposMap[nombreEquipo];
-      const jugadoresDelEquipo = equiposData.filter(e => e.equipo === nombreEquipo && e.equipo !== 'LIBRE');
-      
-      jugadoresDelEquipo.forEach(jugadorInfo => {
-        const jugador = jugadorInfo.jugador;
-        // Si no está en la lista de jugadores, agregarlo
-        if (!eq.jug.includes(jugador)) {
-          eq.jug.push(jugador);
-        }
-      });
-    });
-    
     return Object.values(equiposMap);
   }
   
