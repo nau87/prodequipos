@@ -605,6 +605,7 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
   justify-content: center;
   padding: 20px;
   animation: fadeIn 0.2s ease;
+  overflow-y: auto;
 }
 
 .fut-modal-overlay.show {
@@ -616,12 +617,16 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
   background-color: #0d241a;
   border: 1px solid #2d5a42;
   border-radius: 5px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   color: white;
   max-width: 600px;
+  max-height: 90vh;
   width: 100%;
   animation: cardAppear 0.3s ease;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  position: relative;
+  -webkit-overflow-scrolling: touch;
 }
 
 @keyframes cardAppear {
@@ -642,12 +647,13 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
 
 .fut-card-header {
   background: linear-gradient(to bottom, #113a29 0%, #0d241a 100%);
-  padding: 16px 16px;
+  padding: 16px 50px 16px 16px;
   border-bottom: 2px solid #3cba54;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  position: relative;
 }
 
 .fut-card-header h1 {
@@ -905,8 +911,8 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
 
 .fut-close-btn {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 12px;
+  right: 12px;
   width: 32px;
   height: 32px;
   background: rgba(255, 255, 255, 0.1);
@@ -916,7 +922,7 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 10;
+  z-index: 100;
   transition: all 0.2s ease;
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.8);
@@ -1083,9 +1089,16 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
 
 /* Responsive para modal */
 @media (max-width: 680px) {
+  .fut-modal-overlay {
+    padding: 10px;
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+  
   .fut-card {
-    max-width: 95%;
-    margin: 0 10px;
+    max-width: 100%;
+    max-height: calc(100vh - 40px);
+    margin: 0;
   }
   
   .fut-card-header h1 {
@@ -1132,6 +1145,38 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
 }
 
 @media (max-width: 480px) {
+  .fut-modal-overlay {
+    padding: 5px;
+    padding-top: 10px;
+  }
+  
+  .fut-card {
+    max-height: calc(100vh - 20px);
+    border-radius: 3px;
+  }
+  
+  .fut-card-header {
+    padding: 12px;
+    padding-right: 50px;
+    flex-wrap: wrap;
+  }
+  
+  .fut-card-header h1 {
+    font-size: 14px;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .fut-trofeos-wrapper {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .fut-medalla-torneo {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+  
   .fut-fila-tres-columnas {
     grid-template-columns: 60px 1fr 1fr;
   }
@@ -1144,6 +1189,25 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
   
   .fut-numero-grande {
     font-size: 20px;
+  }
+  
+  .fut-sorteo-box {
+    padding: 8px;
+    height: 60px;
+  }
+  
+  .fut-sorteo-titulo {
+    font-size: 8px;
+  }
+  
+  .fut-sorteo-ganador {
+    font-size: 14px;
+  }
+  
+  .fut-stats-col-header {
+    padding: 6px;
+    font-size: 10px;
+    height: 32px;
   }
   
   /* En móviles muy pequeños, ocultar también "Últimos 3" */
@@ -3241,8 +3305,8 @@ async function enterFullscreen() {
 </script>
 
 <!-- MODAL FICHA JUGADOR -->
-<div class="fut-modal-overlay" id="fut-modal">
-  <div class="fut-card">
+<div class="fut-modal-overlay" id="fut-modal" onclick="closeFutModal()">
+  <div class="fut-card" onclick="event.stopPropagation()">
     <!-- Contenido generado dinámicamente por JavaScript -->
   </div>
 </div>
