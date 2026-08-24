@@ -1480,6 +1480,7 @@ async function loadData() {
       suma: gn(r,3),
       torneo: gs(r,4).toUpperCase(),
       competencia: gs(r,5).toUpperCase(),
+      timestamp: gv(r,6),
       equipo: gs(r,7) || 'LIBRE',
       capitan: gs(r,8) === 'SI',
       ideal: gn(r,10),
@@ -1500,15 +1501,15 @@ async function loadData() {
     .filter(r => gv(r,0))
     .map(r => ({
       jugador: gs(r,0),
-      puestoActual: gn(r,1) || '-',
-      puestoAnterior: gn(r,2) || '-',
+      puestoActual: gnOrNull(r,1),
+      puestoAnterior: gnOrNull(r,2),
       mejorFecha: gn(r,3),
       vecesIdeal: gn(r,4),
       equipo: gs(r,5),
       torneo: gs(r,6),
       puntosHistoricos: gn(r,7),
       promedio: gn(r,8),
-      puestoGlobal: gn(r,9) || '-',
+      puestoGlobal: gnOrNull(r,9),
       cantFechas: gn(r,10),
       campeonApertura: gn(r,11) || 0,
       campeonClausura: gn(r,12) || 0,
@@ -2065,7 +2066,7 @@ function renderJugadores(filter) {
     
     // Calcular tendencia
     let tendenciaBadge = '';
-    if (j.puestoActual !== '-' && j.puestoAnterior !== '-') {
+    if (j.puestoActual !== null && j.puestoAnterior !== null) {
       const diff = j.puestoAnterior - j.puestoActual;
       if (diff > 0) {
         tendenciaBadge = `<span class="fut-badge-tendencia positivo">↗ +${Math.abs(diff)}</span>`;
@@ -2636,39 +2637,36 @@ function getRecentScoresBadges(nombreJugador) {
     return '';
   }
   
-  // Obtener todas las fechas únicas jugadas (formato: "TORNEO-FECHA")
-  const fechasUnicas = [...new Set(DATA.rawLogs.map(log => `${log.torneo}-${log.fecha}`))];
-  
-  // Ordenar cronológicamente (APERTURA 1-11, CLAUSURA 1-11, PROVINCIAL 1-12)
-  fechasUnicas.sort((a, b) => {
-    const [torneoA, fechaA] = a.split('-');
-    const [torneoB, fechaB] = b.split('-');
-    
-    const ordenTorneo = { 'APERTURA': 1, 'CLAUSURA': 2, 'PROVINCIAL': 3 };
-    const ordenA = (ordenTorneo[torneoA] || 0) * 100 + parseInt(fechaA);
-    const ordenB = (ordenTorneo[torneoB] || 0) * 100 + parseInt(fechaB);
-    
-    return ordenA - ordenB;
+  // Agrupar por ID_FECHA único para identificar cada fecha jugada del sistema
+  const fechasMap = new Map();
+  DATA.rawLogs.forEach(log => {
+    const key = `${log.torneo}-${log.fecha}`;
+    if (!fechasMap.has(key)) {
+      fechasMap.set(key, {
+        torneo: log.torneo,
+        fecha: log.fecha,
+        timestamp: log.timestamp || new Date(0)
+      });
+    }
   });
   
-  // Tomar las últimas 3 fechas cronológicas
-  const ultimasTresFechas = fechasUnicas.slice(-3);
+  // Convertir a array y ordenar por el orden de aparición en rawLogs (ya viene cronológico)
+  const fechasOrdenadas = Array.from(fechasMap.values());
+  
+  // Tomar las últimas 3 fechas globales
+  const ultimasTresFechas = fechasOrdenadas.slice(-3);
   
   if (ultimasTresFechas.length === 0) {
     console.warn('No hay fechas jugadas en rawLogs');
     return '';
   }
   
-  // Para cada una de las últimas 3 fechas, buscar los puntos del jugador
-  const badgesHTML = ultimasTresFechas.map(fechaKey => {
-    const [torneo, fecha] = fechaKey.split('-');
-    const fechaNum = parseInt(fecha);
-    
-    // Buscar en rawLogs si este jugador jugó esta fecha
+  // Para cada una de las últimas 3 fechas globales, buscar si el jugador jugó
+  const badgesHTML = ultimasTresFechas.map(fechaInfo => {
     const logJugador = DATA.rawLogs.find(log => 
       log.jugador.toUpperCase() === nombreJugador.toUpperCase() && 
-      log.torneo === torneo && 
-      log.fecha === fechaNum
+      log.torneo === fechaInfo.torneo && 
+      log.fecha === fechaInfo.fecha
     );
     
     if (!logJugador) {
@@ -2722,7 +2720,7 @@ function openFutModal(nombreJugador) {
   
   // Calcular tendencia comparando puesto actual con puesto anterior
   let tendenciaBadge = '';
-  if (puestoActual !== '-' && puestoAnterior !== '-') {
+  if (puestoActual !== null && puestoAnterior !== null) {
     const diff = puestoAnterior - puestoActual;
     if (diff > 0) {
       tendenciaBadge = `<span class="fut-badge-tendencia positivo">↗ +${Math.abs(diff)}</span>`;
@@ -2731,6 +2729,8 @@ function openFutModal(nombreJugador) {
     } else {
       tendenciaBadge = `<span class="fut-badge-tendencia igual">→ =</span>`;
     }
+  } else {
+    tendenciaBadge = `<span style="color:var(--text3);font-size:0.75rem;">-</span>`;
   }
   
   // Renderizar modal
@@ -2750,7 +2750,7 @@ function openFutModal(nombreJugador) {
     <div class="fut-tabla-resumen">
       <div class="fut-fila-tres-columnas">
         <div class="fut-col-puesto">
-          <span class="fut-numero-grande">${puestoActual !== '-' ? puestoActual : '?'}</span>
+          <span class="fut-numero-grande">${puestoActual !== null ? puestoActual : '?'}</span>
           <span class="fut-txt-label">PUESTO</span>
         </div>
         <div class="fut-col-badge">
@@ -2797,7 +2797,7 @@ function openFutModal(nombreJugador) {
         <div class="fut-stats-col-header">HISTÓRICO GLOBAL</div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">PUESTO GLOBAL</div>
-          <div class="fut-sorteo-ganador">${puestoGlobal !== '-' ? '#' + puestoGlobal : 'N/D'}</div>
+          <div class="fut-sorteo-ganador">${puestoGlobal !== null ? '#' + puestoGlobal : 'N/D'}</div>
         </div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">FECHAS JUGADAS</div>
@@ -2824,7 +2824,7 @@ function openFutModal(nombreJugador) {
       <div class="fut-stats-col">
         <div class="fut-stats-col-header">MEDALLAS</div>
         <div class="fut-sorteo-box">
-          ${puestoGlobal !== '-' ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${m.color};">${m.emoji}</div>` : ''; })() : ''}
+          ${puestoGlobal !== null ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${m.color};">${m.emoji}</div>` : ''; })() : ''}
         </div>
         <div class="fut-sorteo-box">
           ${cantFechas ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${getMedalla(cantFechas).color};">${getMedalla(cantFechas).emoji}</div>` : ''}
@@ -2846,7 +2846,7 @@ function openFutModal(nombreJugador) {
       <div class="fut-stats-col">
         <div class="fut-stats-col-header">DESCRIPCIÓN</div>
         <div class="fut-sorteo-box">
-          ${puestoGlobal !== '-' ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
+          ${puestoGlobal !== null ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
         </div>
         <div class="fut-sorteo-box">
           ${cantFechas ? `<div class="fut-sorteo-titulo" style="color: ${getMedalla(cantFechas).color}; margin-bottom: 4px; font-size: 11px;">${getMedalla(cantFechas).nombre}</div>
@@ -2905,14 +2905,23 @@ function openFutModalEquipo(nombreEquipo) {
     .map(j => j.nombre)
     .sort();
   
-  // Buscar quién fue capitán en la última fecha del equipo
+  // Buscar quién fue capitán en la última fecha del equipo (por timestamp más reciente)
   const logsDelEquipo = DATA.rawLogs || [];
-  const ultimaFecha = Math.max(...logsDelEquipo.filter(l => l.equipo.toUpperCase() === equipo.toUpperCase()).map(l => l.fecha), 0);
-  const capitanUltimaFecha = logsDelEquipo.find(l => 
-    l.equipo.toUpperCase() === equipo.toUpperCase() && 
-    l.fecha === ultimaFecha && 
-    l.capitan === true
-  );
+  const logsEquipoFiltrados = logsDelEquipo.filter(l => l.equipo.toUpperCase() === equipo.toUpperCase());
+  
+  // Encontrar el timestamp más reciente
+  const ultimoTimestamp = logsEquipoFiltrados.reduce((max, log) => {
+    if (!log.timestamp) return max;
+    const logDate = new Date(log.timestamp);
+    return logDate > max ? logDate : max;
+  }, new Date(0));
+  
+  // Buscar quién es capitán en ese timestamp
+  const capitanUltimaFecha = logsEquipoFiltrados.find(l => {
+    if (!l.timestamp || !l.capitan) return false;
+    const logDate = new Date(l.timestamp);
+    return logDate.getTime() === ultimoTimestamp.getTime() && l.capitan === true;
+  });
   const nombreCapitan = capitanUltimaFecha ? capitanUltimaFecha.jugador : null;
   
   // Crear lista de jugadores con indicador de capitán (última fecha)
@@ -2938,7 +2947,7 @@ function openFutModalEquipo(nombreEquipo) {
     <div class="fut-tabla-resumen">
       <div class="fut-fila-tres-columnas">
         <div class="fut-col-puesto">
-          <span class="fut-numero-grande">${puestoGlobal !== '-' ? puestoGlobal : '?'}</span>
+          <span class="fut-numero-grande">${puestoGlobal !== null ? puestoGlobal : '?'}</span>
           <span class="fut-txt-label">PUESTO GLOBAL</span>
         </div>
         <div class="fut-col-badge" style="grid-column: span 2;">
@@ -2975,7 +2984,7 @@ function openFutModalEquipo(nombreEquipo) {
         <div class="fut-stats-col-header">ESTADÍSTICAS GENERALES</div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">PUESTO GLOBAL</div>
-          <div class="fut-sorteo-ganador">#${puestoGlobal !== '-' ? puestoGlobal : 'N/D'}</div>
+          <div class="fut-sorteo-ganador">#${puestoGlobal !== null ? puestoGlobal : 'N/D'}</div>
         </div>
         <div class="fut-sorteo-box">
           <div class="fut-sorteo-titulo">PUNTOS HISTÓRICOS</div>
@@ -2994,7 +3003,7 @@ function openFutModalEquipo(nombreEquipo) {
       <div class="fut-stats-col">
         <div class="fut-stats-col-header">MEDALLAS</div>
         <div class="fut-sorteo-box">
-          ${puestoGlobal !== '-' ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${m.color};">${m.emoji}</div>` : ''; })() : ''}
+          ${puestoGlobal !== null ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${m.color};">${m.emoji}</div>` : ''; })() : ''}
         </div>
         <div class="fut-sorteo-box">
           ${puntosHistoricos ? (() => { const m = getMedallaTotalAcumuladoEquipo(puntosHistoricos); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${m.color};">${m.emoji}</div>` : ''; })() : ''}
@@ -3010,7 +3019,7 @@ function openFutModalEquipo(nombreEquipo) {
       <div class="fut-stats-col">
         <div class="fut-stats-col-header">DESCRIPCIÓN</div>
         <div class="fut-sorteo-box">
-          ${puestoGlobal !== '-' ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
+          ${puestoGlobal !== null ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
         </div>
         <div class="fut-sorteo-box">
           ${puntosHistoricos ? (() => { const m = getMedallaTotalAcumuladoEquipo(puntosHistoricos); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
