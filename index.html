@@ -486,27 +486,34 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
 /* TORNEOS INDIVIDUALES */
 .torneos-tabs-mobile {
   display: none;
-  gap: 8px;
-  margin-bottom: 20px;
+  gap: 4px;
+  margin-bottom: 16px;
   background: var(--surface);
-  padding: 8px;
-  border-radius: 12px;
+  padding: 4px;
+  border-radius: 10px;
   border: 1.5px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.torneos-tabs-mobile::-webkit-scrollbar {
+  display: none;
 }
 
 .torneo-tab {
   flex: 1;
-  padding: 10px 16px;
+  padding: 8px 12px;
   border: none;
   background: transparent;
   color: var(--text2);
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 600;
   font-family: "Inter", sans-serif;
-  border-radius: 8px;
+  border-radius: 7px;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  min-width: fit-content;
 }
 
 .torneo-tab:hover {
@@ -520,7 +527,11 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
   font-weight: 700;
 }
 
-.torneos-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+.torneos-container { 
+  display: grid; 
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 20px; 
+}
 
 /* En móvil, mostrar tabs y solo una tabla a la vez */
 @media (max-width: 768px) { 
@@ -530,6 +541,7 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
   
   .torneos-container { 
     grid-template-columns: 1fr;
+    gap: 0;
   }
   
   .torneo-card {
@@ -538,6 +550,14 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
   
   .torneo-card.active {
     display: block;
+  }
+}
+
+/* En pantallas muy pequeñas */
+@media (max-width: 380px) {
+  .torneo-tab {
+    font-size: 0.7rem;
+    padding: 7px 10px;
   }
 }
 
@@ -1209,12 +1229,12 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
     <div class="menu-card" onclick="showTabFromMenu('jugadores')">
       <span class="menu-icon">👥</span>
       <div class="menu-card-title">Jugadores</div>
-      <div class="menu-card-desc">Desempeño y Perfil de todos los Jugadores</div>
+      <div class="menu-card-desc">Ranking histórico y Logros de cada Jugador</div>
     </div>
     <div class="menu-card" onclick="showTabFromMenu('equipos')">
       <span class="menu-icon">🏅</span>
       <div class="menu-card-title">Equipos</div>
-      <div class="menu-card-desc">Estadísticas y Perfil de todos los Equipos</div>
+      <div class="menu-card-desc">Ranking histórico y Logros de cada Equipo</div>
     </div>
     <div class="menu-card" onclick="showTabFromMenu('apertura')">
       <span class="menu-icon">🏆</span>
@@ -1358,7 +1378,8 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
     <div class="torneos-tabs-mobile">
       <button class="torneo-tab active" data-torneo="apertura">Apertura</button>
       <button class="torneo-tab" data-torneo="clausura">Clausura</button>
-      <button class="torneo-tab" data-torneo="general">General</button>
+      <button class="torneo-tab" data-torneo="provincial">Provincial</button>
+      <button class="torneo-tab" data-torneo="anual">Anual</button>
     </div>
     
     <div class="torneos-container">
@@ -1374,11 +1395,17 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
           <th class="c" style="width:52px">#</th><th>Jugador</th><th class="c">PTS</th>
         </tr></thead><tbody id="body-torneos-clausura"></tbody></table></div>
       </div>
-      <div class="card torneo-card" data-torneo="general">
-        <div class="card-head"><div class="card-head-icon">&#127942;</div><h2>Torneo General</h2></div>
+      <div class="card torneo-card" data-torneo="provincial">
+        <div class="card-head"><div class="card-head-icon">&#127942;</div><h2>Torneo Provincial</h2></div>
         <div class="table-wrap"><table><thead><tr>
           <th class="c" style="width:52px">#</th><th>Jugador</th><th class="c">PTS</th>
-        </tr></thead><tbody id="body-torneos-general"></tbody></table></div>
+        </tr></thead><tbody id="body-torneos-provincial"></tbody></table></div>
+      </div>
+      <div class="card torneo-card" data-torneo="anual">
+        <div class="card-head"><div class="card-head-icon">&#127942;</div><h2>Tabla Anual</h2></div>
+        <div class="table-wrap"><table><thead><tr>
+          <th class="c" style="width:52px">#</th><th>Jugador</th><th class="c">PTS</th>
+        </tr></thead><tbody id="body-torneos-anual"></tbody></table></div>
       </div>
     </div>
   </div>
@@ -1454,6 +1481,42 @@ function gnOrNull(row, idx) {
   return Number(val);
 }
 function gs(row, idx) { return (gv(row, idx) || '').toString().trim(); }
+function gd(row, idx) {
+  // Obtener fecha/timestamp de Google Sheets
+  const val = gv(row, idx);
+  if (!val) return null;
+  
+  // Google Sheets devuelve el timestamp como string "Date(2026,2,15,11,15,0)"
+  // donde los meses están indexados desde 0 (enero=0, febrero=1, marzo=2, etc.)
+  if (typeof val === 'string' && val.startsWith('Date(')) {
+    const match = val.match(/Date\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)/);
+    if (match) {
+      const [, year, month, day, hour, minute, second] = match.map(Number);
+      // Los meses ya están indexados desde 0, así que no restamos 1
+      return new Date(year, month, day, hour, minute, second);
+    }
+  }
+  
+  // Si es Date object directo
+  if (val instanceof Date) {
+    return val;
+  }
+  
+  // Si es string con formato "DD/MM/YYYY HH:MM:SS"
+  if (typeof val === 'string') {
+    const parts = val.match(/(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+):(\d+)/);
+    if (parts) {
+      const [, day, month, year, hour, minute, second] = parts.map(Number);
+      return new Date(year, month - 1, day, hour, minute, second);
+    }
+    
+    // Intentar parse directo
+    const parsed = new Date(val);
+    if (!isNaN(parsed.getTime())) return parsed;
+  }
+  
+  return null;
+}
 
 async function loadData() {
   // ===============================================
@@ -1480,7 +1543,7 @@ async function loadData() {
       suma: gn(r,3),
       torneo: gs(r,4).toUpperCase(),
       competencia: gs(r,5).toUpperCase(),
-      timestamp: gv(r,6),
+      timestamp: gd(r,6),
       equipo: gs(r,7) || 'LIBRE',
       capitan: gs(r,8) === 'SI',
       ideal: gn(r,10),
@@ -1578,7 +1641,7 @@ async function loadData() {
   }
 
   // Procesar TABLA_JUGADORES para rankings de torneos individuales
-  // APERTURA: columnas A-D, CLAUSURA: columnas F-I, ANUAL: columnas K-N
+  // APERTURA: columnas A-D, CLAUSURA: columnas F-I, PROVINCIAL: columnas K-N, ANUAL: columnas P-S
   const rankingApertura = tablaJugadoresSheet.rows
     .filter(r => gv(r,1) && gs(r,1) !== '#N/A') // Tiene jugador válido en col B
     .map(r => ({
@@ -1597,7 +1660,7 @@ async function loadData() {
       pts: gs(r,8) ? parseInt(gs(r,8)) : 0      // I: PTS
     }));
   
-  const rankingAnual = tablaJugadoresSheet.rows
+  const rankingProvincial = tablaJugadoresSheet.rows
     .filter(r => gv(r,11) && gs(r,11) !== '#N/A') // Tiene jugador válido en col L
     .map(r => ({
       pos: gn(r,10),       // K: #
@@ -1605,18 +1668,47 @@ async function loadData() {
       pj: gn(r,12),        // M: PJ
       pts: gn(r,13)        // N: PTS
     }));
+  
+  const rankingAnual = tablaJugadoresSheet.rows
+    .filter(r => gv(r,16) && gs(r,16) !== '#N/A') // Tiene jugador válido en col Q
+    .map(r => ({
+      pos: gn(r,15),       // P: #
+      jugador: gs(r,16),   // Q: JUGADOR
+      pj: gn(r,17),        // R: PJ
+      pts: gn(r,18)        // S: PTS
+    }));
 
   // Construir la estructura DATA que espera el resto del código
   
   // 1. JUGADORES con sus puntos por fecha
+  // Primero ordenar logs por timestamp para obtener el equipo más reciente de cada jugador
+  const logsOrdenados = rawLogs
+    .filter(l => l.timestamp)
+    .sort((a, b) => {
+      const dateA = new Date(a.timestamp);
+      const dateB = new Date(b.timestamp);
+      return dateB - dateA; // Más reciente primero
+    });
+  
+  // Crear un mapa con el equipo más reciente de cada jugador
+  const equipoMasReciente = {};
+  logsOrdenados.forEach(log => {
+    if (!equipoMasReciente[log.jugador]) {
+      equipoMasReciente[log.jugador] = log.equipo;
+    }
+  });
+  
   const jugadoresMap = {};
   rawLogs.forEach(log => {
     if (!jugadoresMap[log.jugador]) {
-      const equipoInfo = equiposData.find(e => e.jugador === log.jugador) || {equipo: 'LIBRE', modo: null};
+      const equipoInfo = equiposData.find(e => e.jugador === log.jugador);
+      const equipoActual = equipoMasReciente[log.jugador] || 'LIBRE';
+      const modo = equipoInfo ? equipoInfo.modo : null;
+      
       jugadoresMap[log.jugador] = {
         nombre: log.jugador,
-        equipo: equipoInfo.equipo,
-        modo: equipoInfo.modo,
+        equipo: equipoActual,
+        modo: modo,
         ap: Array(11).fill(null),
         ap_total: 0,
         cl: Array(11).fill(null),
@@ -1739,7 +1831,8 @@ async function loadData() {
   const torneos = {
     apertura: rankingApertura,
     clausura: rankingClausura,
-    general: rankingAnual
+    provincial: rankingProvincial,
+    anual: rankingAnual
   };
 
   // 6. JUGADORES STATS Y HISTORIAL - usar directamente ESTADISTICAS_INDIVIDUALES
@@ -2418,7 +2511,7 @@ function renderAnual() {
 }
 
 function renderTorneosIndividuales() {
-  const { apertura, clausura, general } = DATA.torneos;
+  const { apertura, clausura, provincial, anual } = DATA.torneos;
   
   // Renderizar Apertura
   document.getElementById("body-torneos-apertura").innerHTML = apertura.map((j, i) => {
@@ -2444,10 +2537,24 @@ function renderTorneosIndividuales() {
     </tr>`;
   }).join("");
   
-  // Renderizar General
-  document.getElementById("body-torneos-general").innerHTML = general.map((j, i) => {
-    const posClass = i < 3 ? ["pos-1","pos-2","pos-3"][i] : "";    const jugadorData = DATA.jugadores.find(jug => jug.nombre.toUpperCase() === j.jugador.toUpperCase());
-    const equipo = jugadorData ? jugadorData.equipo : null;    return `<tr class="${posClass}">
+  // Renderizar Provincial
+  document.getElementById("body-torneos-provincial").innerHTML = provincial.map((j, i) => {
+    const posClass = i < 3 ? ["pos-1","pos-2","pos-3"][i] : "";
+    const jugadorData = DATA.jugadores.find(jug => jug.nombre.toUpperCase() === j.jugador.toUpperCase());
+    const equipo = jugadorData ? jugadorData.equipo : null;
+    return `<tr class="${posClass}">
+      <td class="c"><span class="rank-num">${j.pos}</span></td>
+      <td><div class="team-pill">${teamAvatar(j.jugador, equipo)}<span class="team-name">${j.jugador}</span></div></td>
+      <td class="c"><span class="pts ${j.pts?'pts-hi':'pts-lo'}">${j.pts}</span></td>
+    </tr>`;
+  }).join("");
+  
+  // Renderizar Anual
+  document.getElementById("body-torneos-anual").innerHTML = anual.map((j, i) => {
+    const posClass = i < 3 ? ["pos-1","pos-2","pos-3"][i] : "";
+    const jugadorData = DATA.jugadores.find(jug => jug.nombre.toUpperCase() === j.jugador.toUpperCase());
+    const equipo = jugadorData ? jugadorData.equipo : null;
+    return `<tr class="${posClass}">
       <td class="c"><span class="rank-num">${j.pos}</span></td>
       <td><div class="team-pill">${teamAvatar(j.jugador, equipo)}<span class="team-name">${j.jugador}</span></div></td>
       <td class="c"><span class="pts ${j.pts?'pts-hi':'pts-lo'}">${j.pts}</span></td>
@@ -2909,20 +3016,28 @@ function openFutModalEquipo(nombreEquipo) {
   const logsDelEquipo = DATA.rawLogs || [];
   const logsEquipoFiltrados = logsDelEquipo.filter(l => l.equipo.toUpperCase() === equipo.toUpperCase());
   
-  // Encontrar el timestamp más reciente
-  const ultimoTimestamp = logsEquipoFiltrados.reduce((max, log) => {
-    if (!log.timestamp) return max;
-    const logDate = new Date(log.timestamp);
-    return logDate > max ? logDate : max;
-  }, new Date(0));
+  // Encontrar el timestamp más reciente del equipo
+  const logsConTimestamp = logsEquipoFiltrados.filter(l => l.timestamp && l.timestamp instanceof Date && !isNaN(l.timestamp.getTime()));
   
-  // Buscar quién es capitán en ese timestamp
-  const capitanUltimaFecha = logsEquipoFiltrados.find(l => {
-    if (!l.timestamp || !l.capitan) return false;
-    const logDate = new Date(l.timestamp);
-    return logDate.getTime() === ultimoTimestamp.getTime() && l.capitan === true;
-  });
-  const nombreCapitan = capitanUltimaFecha ? capitanUltimaFecha.jugador : null;
+  let nombreCapitan = null;
+  
+  if (logsConTimestamp.length > 0) {
+    const timestampMasReciente = logsConTimestamp.reduce((max, log) => {
+      return log.timestamp > max ? log.timestamp : max;
+    }, new Date(0));
+    
+    // Buscar todos los logs de esa fecha más reciente (mismo día, puede haber diferencias de minutos)
+    const logsUltimaFecha = logsConTimestamp.filter(l => {
+      // Comparar solo año, mes y día (ignorar horas/minutos)
+      return l.timestamp.getFullYear() === timestampMasReciente.getFullYear() &&
+             l.timestamp.getMonth() === timestampMasReciente.getMonth() &&
+             l.timestamp.getDate() === timestampMasReciente.getDate();
+    });
+    
+    // Buscar el capitán en esa última fecha
+    const capitanUltimaFecha = logsUltimaFecha.find(l => l.capitan === true);
+    nombreCapitan = capitanUltimaFecha ? capitanUltimaFecha.jugador : null;
+  }
   
   // Crear lista de jugadores con indicador de capitán (última fecha)
   const jugadoresHTML = jugadoresDelEquipo.map(nombre => {
