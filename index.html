@@ -1361,12 +1361,15 @@ tbody td.c { overflow: visible; position: relative; text-align: center; }
 
   <div class="section" id="sec-equipos">
     <div class="card">
-      <div class="card-head"><div class="card-head-icon">&#127941;</div><h2>Lista de Equipos</h2><span id="eq-count"></span></div>
+      <div class="card-head"><div class="card-head-icon">&#127941;</div><h2>Ranking Histórico de Equipos</h2><span id="eq-count"></span></div>
       <div class="search-wrap"><div class="search-wrap-inner"><span class="search-icon">&#128269;</span><input type="text" class="search-input" id="search-eq" placeholder="Buscar equipo..." oninput="filterEquipos()"></div></div>
       <div class="table-wrap" id="eq-table-wrap"><table><thead><tr>
+        <th class="c" style="width:52px">#</th>
         <th>Equipo</th>
-        <th>Puesto</th>
-        <th style="width:110px">Ficha</th>
+        <th class="c" style="width:70px">PTS</th>
+        <th class="c" style="width:60px">PJ</th>
+        <th class="c" style="width:75px">PROM</th>
+        <th class="c" style="width:100px">Ficha</th>
       </tr></thead><tbody id="body-equipos"></tbody></table></div>
     </div>
   </div>
@@ -2272,14 +2275,34 @@ function renderEquipos(filter) {
   const rows = DATA.estadisticasEquipos
     .filter(eq => eq.equipo && eq.equipo !== 'LIBRE')
     .filter(eq => !fl || eq.equipo.toLowerCase().includes(fl))
-    .sort((a,b) => a.puestoGlobal - b.puestoGlobal);
+    .sort((a,b) => (b.puntosHistoricos || 0) - (a.puntosHistoricos || 0));
   document.getElementById("eq-count").textContent = rows.length + " equipos";
-  document.getElementById("body-equipos").innerHTML = rows.map(eq => {
+  
+  // Calcular ranking denso
+  let puestoDenso = 1;
+  let puntosAnterior = null;
+  
+  document.getElementById("body-equipos").innerHTML = rows.map((eq, i) => {
+    // Si los puntos cambian, incrementar el puesto denso en 1
+    if (puntosAnterior !== null && eq.puntosHistoricos !== puntosAnterior) {
+      puestoDenso++;
+    }
+    puntosAnterior = eq.puntosHistoricos;
+    
+    const posClass = puestoDenso <= 3 ? ["pos-1","pos-2","pos-3"][puestoDenso - 1] : "";
+    
     // Calcular total de torneos ganados
     const torneosGanados = (eq.campeonApertura || 0) + (eq.campeonClausura || 0) + (eq.campeonAnual || 0) + (eq.campeonProvincial || 0);
-    return `<tr>
+    
+    // Calcular PJ (partidos jugados) = PTS / PROM
+    const pj = (eq.promedio && eq.promedio > 0) ? Math.round(eq.puntosHistoricos / eq.promedio) : 0;
+    
+    return `<tr class="${posClass}">
+      <td class="c"><span class="rank-num">${puestoDenso}</span></td>
       <td><div class="team-pill">${teamAvatar(eq.equipo, eq.equipo, torneosGanados)}<span class="team-name">${eq.equipo}</span></div></td>
-      <td class="c"><span class="pts pts-hi">#${eq.puestoGlobal}</span></td>
+      <td class="c"><span class="pts ${eq.puntosHistoricos?'pts-hi':'pts-lo'}">${eq.puntosHistoricos || 0}</span></td>
+      <td class="c"><span style="font-weight:600;color:var(--text2);">${pj}</span></td>
+      <td class="c"><span style="font-weight:700;color:var(--c3);">${eq.promedio ? parseFloat(eq.promedio).toFixed(2) : '0.00'}</span></td>
       <td class="c"><button class="btn-ficha" onclick="openFutModalEquipo('${eq.equipo.replace(/'/g, "\\'")}')" title="Ver ficha del equipo">FICHA</button></td>
     </tr>`;
   }).join("");
