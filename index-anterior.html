@@ -1,0 +1,3361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prode Equipos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --c1: #0f4c2a; --c2: #1a7a3c; --c3: #22a855; --c4: #d4f5e2;
+  --gold: #f5a623; --gold-light: #fff3dc;
+  --bg: #f0f2f5; --surface: #ffffff; --surface2: #f7f9fb;
+  --border: #e4e8ee; --text: #0d1117; --text2: #4a5568; --text3: #8a93a2;
+  --radius: 14px; --shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: auto; min-height: 100vh; overflow-y: auto; }
+body { font-family: "Inter", sans-serif; background: var(--bg); color: var(--text); }
+
+/* Asegurar scroll en fullscreen */
+body:fullscreen, html:fullscreen { overflow-y: auto; height: auto; }
+body:-webkit-full-screen, html:-webkit-full-screen { overflow-y: auto; height: auto; }
+body:-moz-full-screen, html:-moz-full-screen { overflow-y: auto; height: auto; }
+
+/* LOADING */
+.loading-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: linear-gradient(135deg, #0b3520, #1a7a3c);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+}
+.loading-overlay.hidden { display: none; }
+.spinner {
+  width: 52px; height: 52px;
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { color: rgba(255,255,255,0.85); font-size: 0.9rem; font-weight: 600; letter-spacing: 0.5px; }
+.loading-ball { font-size: 2.5rem; animation: ballBounce 1s ease-in-out infinite; }
+.error-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: #fff; display: none;
+  flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 32px;
+}
+.error-overlay.show { display: flex; }
+.error-overlay h2 { color: #c0392b; font-size: 1.1rem; }
+.error-overlay p { color: var(--text2); font-size: 0.9rem; text-align: center; max-width: 400px; }
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, #0b3520 0%, #0f5c2e 40%, #1a7a3c 100%);
+  position: relative; overflow: hidden; padding: 32px 28px 0;
+}
+.header::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 80% 50%, rgba(34,168,85,0.15) 0%, transparent 60%),
+              radial-gradient(circle at 10% 80%, rgba(245,166,35,0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+.header-top { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
+.header-ball { font-size: 2.8rem; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); animation: ballBounce 3s ease-in-out infinite; }
+@keyframes ballBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.header-title h1 { font-size: 2rem; font-weight: 900; color: #fff; letter-spacing: -0.5px; line-height: 1; text-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.header-title p { font-size: 0.85rem; color: rgba(255,255,255,0.65); margin-top: 4px; font-weight: 500; }
+.header-stats { display: flex; gap: 24px; margin-top: 20px; position: relative; z-index: 1; }
+.hstat .val { font-size: 1.4rem; font-weight: 800; color: #fff; line-height: 1; }
+.hstat .lbl { font-size: 0.7rem; color: rgba(255,255,255,0.55); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.live-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.15); border-radius: 20px;
+  padding: 6px 12px; font-size: 0.72rem; font-weight: 700;
+  color: rgba(255,255,255,0.95); margin-left: auto;
+  backdrop-filter: blur(10px);
+}
+.live-badge #visit-count {
+  font-weight: 900;
+  font-size: 0.85rem;
+  color: #fff;
+  min-width: 30px;
+  text-align: center;
+}
+
+/* TABS */
+.tabs-wrap { display: none; gap: 2px; margin-top: 24px; position: relative; z-index: 1; overflow-x: auto; scrollbar-width: none; }
+.tabs-wrap::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 12px 22px; border: none;
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.65);
+  cursor: pointer;
+  font-size: 0.82rem; font-weight: 700; letter-spacing: 0.3px;
+  transition: all 0.2s ease; white-space: nowrap;
+  font-family: "Inter", sans-serif; text-transform: uppercase;
+}
+.tab:hover { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); }
+.tab.active { background: var(--bg); color: var(--c1); font-weight: 800; }
+
+/* MENU PRINCIPAL */
+.main-menu {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  animation: fadeIn 0.3s ease;
+}
+.main-menu.hidden { display: none; }
+.menu-title {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.menu-title h2 {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--c1);
+  margin-bottom: 8px;
+}
+.menu-title p {
+  font-size: 1rem;
+  color: var(--text2);
+  font-weight: 500;
+}
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.menu-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.menu-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  border-color: var(--c2);
+  background: linear-gradient(135deg, #ffffff, #f7fdf9);
+}
+.menu-card:active {
+  transform: translateY(-2px);
+}
+.menu-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+.menu-card-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+.menu-card-desc {
+  font-size: 0.85rem;
+  color: var(--text2);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* HAMBURGER BUTTON */
+.hamburger-btn {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  background: linear-gradient(135deg, var(--c1), var(--c2));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(26,122,60,0.4);
+  transition: all 0.3s ease;
+  animation: slideInLeft 0.4s ease;
+}
+.hamburger-btn.show { display: flex; align-items: center; gap: 8px; }
+.hamburger-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(26,122,60,0.6);
+}
+.hamburger-btn:active {
+  transform: scale(0.98);
+}
+.hamburger-text {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@media (max-width: 680px) {
+  .menu-grid { grid-template-columns: 1fr; }
+  .menu-title h2 { font-size: 1.6rem; }
+  .hamburger-text { display: none; }
+  .hamburger-btn { padding: 12px; }
+}
+
+/* SPONSORS BANNER */
+.sponsors-banner {
+  background: linear-gradient(90deg, rgba(15,76,42,0.05), rgba(26,122,60,0.05));
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
+  overflow: hidden;
+  position: relative;
+}
+.sponsors-container {
+  display: flex;
+  align-items: center;
+  animation: scroll 30s linear infinite;
+  gap: 20px;
+}
+.sponsors-container:hover {
+  animation-play-state: paused;
+}
+.sponsor-item {
+  flex-shrink: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  transition: transform 0.3s ease;
+}
+.sponsor-item:hover {
+  transform: scale(1.05);
+}
+.sponsor-item img {
+  max-height: 60px;
+  max-width: 200px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: grayscale(0%);
+  opacity: 0.85;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+.sponsor-item:hover img {
+  opacity: 1;
+  filter: grayscale(0%);
+}
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@media (max-width: 768px) {
+  .sponsors-banner { padding: 8px 0; }
+  .sponsor-item { height: 50px; padding: 0 8px; }
+  .sponsor-item img { max-height: 50px; max-width: 150px; }
+}
+
+/* CONTENT */
+.content { max-width: 1160px; margin: 0 auto; padding: 28px 20px; }
+.section { display: none; animation: fadeIn 0.25s ease; }
+.section.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* CARD */
+.card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); overflow: visible; margin-bottom: 20px; border: 1px solid var(--border); }
+.card-head { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+.card-head-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--c1), var(--c2)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; box-shadow: 0 2px 8px rgba(26,122,60,0.25); }
+.card-head h2 { font-size: 0.95rem; font-weight: 800; color: var(--text); }
+.card-head span { font-size: 0.78rem; color: var(--text3); font-weight: 500; margin-left: auto; }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th { padding: 11px 8px; text-align: left; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); background: var(--surface2); border-bottom: 1px solid var(--border); white-space: nowrap; }
+thead th.c { text-align: center; }
+tbody td { padding: 13px 8px; border-bottom: 1px solid #f0f2f5; font-size: 0.875rem; color: var(--text); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr { transition: background 0.12s; }
+tbody tr:hover td { background: #f5f8ff; }
+
+/* RANK */
+.rank-num { display: inline-block; font-weight: 700; font-size: 0.75rem; color: var(--text2); position: relative; min-width: 20px; text-align: left; }
+.rank-num.has-tie { cursor: help; }
+.rank-num.has-tie::after { content: "ℹ️"; position: absolute; top: -2px; right: -2px; font-size: 0.6rem; background: #0ea5e9; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
+.rank-tooltip { position: fixed; background: #1e293b; color: white; padding: 12px 14px; border-radius: 8px; font-size: 0.75rem; white-space: normal; max-width: 280px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 99999; box-shadow: 0 8px 24px rgba(0,0,0,0.4); line-height: 1.5; will-change: opacity; }
+.rank-num.has-tie:hover .rank-tooltip { opacity: 1; pointer-events: auto; }
+.rank-tooltip-line { display: block; line-height: 1.7; }
+.rank-tooltip-line strong { color: #60a5fa; }
+tbody td.c { overflow: visible; position: relative; text-align: center; }
+
+/* TEAM */
+.team-pill { display: flex; align-items: center; gap: 8px; width: 100%; }
+.team-avatar { width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 900; color: #fff; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+.team-pill .team-name { font-weight: 700; font-size: 0.9rem; color: #000000 !important; }
+/* Avatar con estrellas de torneos ganados */
+.team-avatar-wrapper { position: relative; display: inline-block; }
+.team-avatar-trophy { position: absolute; top: -8px; left: 32px; display: flex; gap: 0px; z-index: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); font-size: 14px; line-height: 1; letter-spacing: -2px; }
+
+/* BADGES */
+.pts { display: inline-flex; align-items: center; justify-content: center; min-width: 52px; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; }
+.pts-hi { background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; box-shadow: 0 2px 8px rgba(26,122,60,0.3); }
+.pts-lo { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+.fv { font-weight: 600; color: var(--c1); font-size: 0.85rem; }
+.fz { color: #d0d5dd; font-size: 0.85rem; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.3px; }
+.tag-cap { background: var(--gold-light); color: #a0620e; border: 1px solid rgba(245,166,35,0.3); }
+.tag-app { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
+.tag-papel { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+
+/* CAPITÁN INDICATOR */
+.captain-indicator {
+  display: inline-block;
+  position: relative;
+  font-size: 0.85rem;
+  color: #2d3748;
+  margin-left: 2px;
+  vertical-align: middle;
+  line-height: 1;
+  cursor: help;
+}
+.captain-tooltip {
+  visibility: hidden;
+  position: absolute;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  z-index: 99999;
+  opacity: 0;
+  transition: opacity 0.2s;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  pointer-events: none;
+}
+.captain-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1e293b;
+}
+.captain-indicator:hover .captain-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* EXPAND BTN */
+.btn-expand { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text2); font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: "Inter", sans-serif; }
+.btn-expand:hover, .btn-expand.open { border-color: var(--c2); color: var(--c2); background: #f0faf5; }
+
+/* PROVINCIAL - Zona de clasificación */
+.separator-clasificacion { position: relative; }
+.separator-clasificacion td { padding-bottom: 20px !important; }
+.separator-clasificacion::after { content: '↑ ZONA DE CLASIFICACIÓN'; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; font-weight: 700; color: #16a34a; letter-spacing: 0.5px; white-space: nowrap; background: var(--surface); padding: 0 12px; }
+
+/* PLAYOFFS BRACKET - Estilo Modal Sheets */
+#sec-playoffs .card { background: #0f0a1a; }
+#sec-playoffs .card-head { background: #0f0a1a; border-bottom: 1px solid #3d2b56; padding-bottom: 10px; margin-bottom: 20px; }
+#sec-playoffs .card-head h2 { color: #e0e0e0; font-size: 16px; font-weight: 300; text-transform: uppercase; }
+#playoffs-bracket { padding: 30px 20px 40px 20px; overflow-x: auto; }
+.titles-row { display: grid; grid-template-columns: 320px 320px 320px; gap: 50px; margin-bottom: 14px; justify-content: center; }
+.round-title { text-align: center; color: #9d50bb; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+.bracket-grid { display: grid; grid-template-columns: 320px 320px 320px; gap: 50px; align-items: start; justify-content: center; min-width: max-content; }
+.column { display: flex; flex-direction: column; }
+.col-cuartos { gap: 28px; }
+.col-semis { gap: 132px; padding-top: 42px; }
+.col-final { padding-top: 140px; align-items: center; }
+.matchup { width: 100%; background-color: #1a1425; border: 1px solid #3d2b56; border-radius: 6px; box-sizing: border-box; }
+.pending { opacity: 0.3; }
+.team-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 8px 12px; border-bottom: 1px solid #2d1f44; font-size: 13px; }
+.team-row:last-child { border-bottom: none; }
+.team-name { flex: 1 1 auto; min-width: 0; color: #e0e0e0; white-space: normal; overflow: visible; text-overflow: unset; word-break: break-word; line-height: 1.2; font-weight: 400; }
+.winner .team-name { color: #bc13fe; font-weight: bold; text-shadow: 0 0 5px rgba(188, 19, 254, 0.2); }
+.score-box { display: flex; gap: 10px; align-items: center; flex: 0 0 auto; }
+.pts-sec { color: #666; width: 24px; text-align: center; font-size: 11.5px; font-family: 'Roboto Mono', monospace; }
+.pts-total { color: #666; width: 28px; text-align: center; font-size: 11.5px; font-family: 'Roboto Mono', monospace; }
+.winner .pts-total { color: #ffffff; font-weight: bold; font-size: 13px; }
+.champion-container { margin-top: 35px; width: 100%; display: flex; flex-direction: column; align-items: center; }
+.champion-card { text-align: center; border: 2px solid #9d50bb; padding: 10px; background: linear-gradient(145deg, #1a0533, #3d2b56); border-radius: 10px; width: 190px; box-sizing: border-box; }
+.champion-name { color: #fff; font-weight: bold; font-size: 13px; display: block; margin-top: 5px; text-transform: uppercase; line-height: 1.2; word-break: break-word; }
+.cup { font-size: 22px; display: block; }
+@media (max-width: 768px) { .bracket-grid { grid-template-columns: 1fr; gap: 30px; } .col-semis, .col-final { padding-top: 0; } }
+.match-team .team-name { flex: 1 1 auto; min-width: 0; color: #e0e0e0; white-space: normal; overflow: visible; text-overflow: unset; word-break: break-word; line-height: 1.2; font-weight: 400; }
+.match-team.winner .team-name { color: #bc13fe; font-weight: bold; text-shadow: 0 0 5px rgba(188, 19, 254, 0.2); }
+.score-box { display: flex; gap: 10px; align-items: center; flex: 0 0 auto; }
+.pts-sec { color: #666; width: 24px; text-align: center; font-size: 11.5px; font-family: 'Roboto Mono', monospace; }
+.pts-total { color: #666; width: 28px; text-align: center; font-size: 11.5px; font-family: 'Roboto Mono', monospace; }
+.match-team.winner .pts-total { color: #ffffff; font-weight: bold; font-size: 13px; }
+.champion-container { margin-top: 35px; width: 100%; display: flex; flex-direction: column; align-items: center; }
+.champion-card { text-align: center; border: 2px solid #9d50bb; padding: 10px; background: linear-gradient(145deg, #1a0533, #3d2b56); border-radius: 10px; width: 190px; box-sizing: border-box; }
+.champion-name { color: #fff; font-weight: bold; font-size: 13px; display: block; margin-top: 5px; text-transform: uppercase; line-height: 1.2; word-break: break-word; }
+.cup { font-size: 22px; display: block; }
+@media (max-width: 768px) { .bracket-container { grid-template-columns: 1fr; gap: 30px; padding: 20px 10px; } .col-semis, .col-final { padding-top: 0; } }
+
+/* DETAIL ROW */
+.detail-row { display: none; }
+.detail-row.open { display: table-row; }
+.detail-row td { padding: 0; border: none; background: #f7fbf9; }
+.detail-inner { padding: 16px 20px 20px 52px; border-top: 2px solid var(--c4); }
+.detail-inner table { border-radius: 10px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+.detail-inner thead th { background: #e8f5ee; color: var(--c1); font-size: 0.68rem; }
+.detail-inner tbody td { background: var(--surface); font-size: 0.82rem; padding: 9px 14px; position: relative; }
+.detail-inner tbody tr:hover td { background: #f5fdf8; }
+.player-name-cell { display: flex; align-items: center; gap: 6px; }
+
+/* SEARCH */
+.search-wrap { padding: 16px 20px 4px; }
+.search-input { width: 100%; padding: 11px 16px 11px 42px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 0.9rem; font-family: "Inter", sans-serif; color: var(--text); background: var(--surface2); outline: none; transition: border 0.15s, box-shadow 0.15s; }
+.search-input::placeholder { color: var(--text3); }
+.search-input:focus { border-color: var(--c2); box-shadow: 0 0 0 3px rgba(26,122,60,0.1); background: #fff; }
+.search-wrap-inner { position: relative; }
+.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: var(--text3); pointer-events: none; }
+.top-scroll-wrap { overflow-x: auto; padding: 8px 20px; }
+.top-scroll-content { height: 1px; }
+.fc { min-width: 34px; text-align: center !important; white-space: nowrap; }
+
+/* IDEAL */
+.ideal-wrap { padding: 24px 20px; }
+.ideal-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.ideal-field-container { display: flex; flex-direction: column; gap: 16px; }
+.field {
+  position: relative; border-radius: 16px; overflow: hidden;
+  background: #1e7d3c;
+  background-image: 
+    linear-gradient(180deg, rgba(30,108,56,0.3) 0%, rgba(36,132,60,0.3) 50%, rgba(30,108,56,0.3) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 336 512'%3E%3Cdefs%3E%3Cpattern id='grass' width='4' height='4' patternUnits='userSpaceOnUse'%3E%3Crect width='4' height='4' fill='%231e7d3c'/%3E%3Crect width='2' height='4' fill='%23227a38'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='336' height='512' fill='url(%23grass)'/%3E%3Cline x1='0' y1='256' x2='336' y2='256' stroke='white' stroke-width='3' opacity='0.8'/%3E%3Ccircle cx='168' cy='256' r='50' fill='none' stroke='white' stroke-width='3' opacity='0.8'/%3E%3Crect x='76' y='4' width='184' height='60' fill='none' stroke='white' stroke-width='3' opacity='0.8'/%3E%3Crect x='122' y='4' width='92' height='24' fill='none' stroke='white' stroke-width='3' opacity='0.8'/%3E%3Crect x='76' y='448' width='184' height='60' fill='none' stroke='white' stroke-width='3' opacity='0.8'/%3E%3Crect x='122' y='484' width='92' height='24' fill='none' stroke='white' stroke-width='3' opacity='0.8'/%3E%3C/svg%3E");
+  background-size: cover;
+  background-position: center;
+  padding: 40px 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; gap: 24px;
+  box-shadow: inset 0 0 60px rgba(0,0,0,0.2), 0 4px 24px rgba(0,0,0,0.15);
+  min-height: 500px;
+}
+.field-row { display: flex; justify-content: center; gap: 20px; position: relative; z-index: 2; flex-wrap: wrap; }
+.field-row.center-row { gap: 45px; }
+.field-avatar { width: 60px; height: 60px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 900; color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.4); border: 3px solid rgba(255,255,255,0.3); transition: transform 0.2s ease; }
+.field-avatar:hover { transform: scale(1.1); }
+.ideal-list-container { background: var(--surface2); border-radius: 14px; padding: 20px; border: 1px solid var(--border); }
+.ideal-list { display: flex; flex-direction: column; gap: 12px; }
+.ideal-list-item { display: flex; align-items: center; gap: 12px; background: var(--surface); border-radius: 12px; padding: 14px 16px; border: 1px solid var(--border); transition: box-shadow 0.15s, transform 0.15s; }
+.ideal-list-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateX(3px); }
+.ideal-list-num { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; font-size: 0.85rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ideal-list-info { flex: 1; min-width: 0; }
+.ideal-list-name { font-weight: 700; font-size: 0.9rem; color: var(--text); }
+.ideal-list-team { font-size: 0.75rem; color: var(--text3); font-weight: 500; margin-top: 2px; }
+.ideal-list-pts { font-size: 1.4rem; font-weight: 900; color: var(--c1); flex-shrink: 0; }
+.ideal-total { background: linear-gradient(135deg, #f5a623, #e8870a); color: #fff; padding: 14px 24px; border-radius: 12px; font-weight: 900; font-size: 1.1rem; text-align: center; box-shadow: 0 4px 16px rgba(245,166,35,0.4); margin-top: 16px; }
+@media (max-width: 968px) { .ideal-container { grid-template-columns: 1fr; } }
+
+/* ANUAL LEADERBOARD */
+.anual-list { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+.anual-row { display: flex; align-items: center; gap: 14px; background: var(--surface2); border-radius: 14px; border: 1.5px solid var(--border); padding: 14px 18px; transition: box-shadow 0.15s, border-color 0.15s, margin-left 0.15s; position: relative; overflow: visible; }
+.anual-row::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--border); border-radius: 4px 0 0 4px; }
+.anual-row.pos-1::before { background: linear-gradient(180deg, #f5a623, #e8870a); }
+.anual-row.pos-2::before { background: linear-gradient(180deg, #b0bec5, #90a4ae); }
+.anual-row.pos-3::before { background: linear-gradient(180deg, #c87941, #a0522d); }
+.anual-row:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.09); border-color: var(--c3); margin-left: 3px; }
+.anual-row.pos-1 { background: linear-gradient(135deg, #fffdf5, #fff); border-color: rgba(245,166,35,0.35); }
+.ar-rank { flex-shrink: 0; position: relative; overflow: visible; }
+.ar-team { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
+.ar-name { font-weight: 800; font-size: 0.95rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ar-sub { font-size: 0.75rem; color: var(--text3); font-weight: 500; margin-top: 1px; }
+.ar-parciales { display: flex; gap: 20px; flex-shrink: 0; }
+.ar-parcial { text-align: center; }
+.ar-parcial .pv { font-size: 1rem; font-weight: 700; color: var(--text2); }
+.ar-parcial .pl { font-size: 0.62rem; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+.ar-total { flex-shrink: 0; text-align: right; }
+.ar-total .tv { font-size: 1.6rem; font-weight: 900; color: var(--c1); line-height: 1; }
+.ar-total .tl { font-size: 0.62rem; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.ar-bar-wrap { position: absolute; bottom: 0; left: 4px; right: 0; height: 3px; background: var(--border); }
+.ar-bar { height: 100%; background: linear-gradient(90deg, var(--c2), var(--c3)); border-radius: 0 2px 2px 0; transition: width 0.6s ease; }
+
+/* TORNEOS INDIVIDUALES */
+.torneos-tabs-mobile {
+  display: none;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.torneos-tabs-mobile::-webkit-scrollbar {
+  display: none;
+}
+
+.torneo-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+.torneo-tab:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.torneo-tab.active {
+  background: var(--c1);
+  color: white;
+  font-weight: 700;
+}
+
+.torneos-container { 
+  display: grid; 
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 20px; 
+}
+
+/* En móvil, mostrar tabs y solo una tabla a la vez */
+@media (max-width: 768px) { 
+  .torneos-tabs-mobile {
+    display: flex;
+  }
+  
+  .torneos-container { 
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .torneo-card {
+    display: none;
+  }
+  
+  .torneo-card.active {
+    display: block;
+  }
+}
+
+/* En pantallas muy pequeñas */
+@media (max-width: 380px) {
+  .torneo-tab {
+    font-size: 0.7rem;
+    padding: 7px 10px;
+  }
+}
+
+/* FULLSCREEN BUTTON */
+#fullscreen-btn {
+  display: none; position: fixed; top: 80px; right: 20px; z-index: 9998;
+  background: linear-gradient(135deg, var(--c1), var(--c2)); color: white;
+  border-radius: 12px;
+  font-size: 0.85rem; font-weight: 700;
+  box-shadow: 0 4px 16px rgba(26,122,60,0.4);
+  animation: slideInRight 0.4s ease, pulse 2s ease-in-out infinite;
+  align-items: center; gap: 0; font-family: inherit;
+}
+#fullscreen-btn.show { display: flex; }
+#fullscreen-btn .btn-main { display: flex; align-items: center; gap: 8px; padding: 12px 18px; cursor: pointer; flex: 1; }
+#fullscreen-btn .btn-main:hover { background: rgba(255,255,255,0.1); }
+#fullscreen-btn .btn-icon { font-size: 1.2rem; }
+#fullscreen-btn .btn-close { padding: 12px 14px; opacity: 0.7; cursor: pointer; border-left: 1px solid rgba(255,255,255,0.2); }
+#fullscreen-btn .btn-close:hover { opacity: 1; background: rgba(255,255,255,0.1); }
+@keyframes slideInRight { from { transform: translateX(120%); } to { transform: translateX(0); } }
+@keyframes pulse { 0%, 100% { box-shadow: 0 4px 16px rgba(26,122,60,0.4); } 50% { box-shadow: 0 4px 24px rgba(26,122,60,0.7); } }
+
+@media (max-width: 680px) {
+  .header { padding: 20px 16px 0; }
+  .header-title h1 { font-size: 1.5rem; }
+  .header-stats { gap: 16px; }
+  .fc { display: none; }
+  .content { padding: 16px 12px; }
+  .tab { padding: 10px 14px; font-size: 0.78rem; }
+  .detail-inner { padding: 12px 12px 16px 20px; }
+  .ar-parciales { gap: 12px; }
+  .ar-total .tv { font-size: 1.3rem; }
+  .player-card { min-width: 100px; }
+}
+
+/* MODAL FICHA JUGADOR (ESTILO PROMIEDOS) */
+.fut-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+  overflow-y: auto;
+}
+
+.fut-modal-overlay.show {
+  display: flex;
+}
+
+.fut-card {
+  font-family: 'Roboto', Arial, sans-serif;
+  background-color: #0d241a;
+  border: 1px solid #2d5a42;
+  border-radius: 5px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  color: white;
+  max-width: 600px;
+  max-height: 90vh;
+  width: 100%;
+  animation: cardAppear 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+@keyframes cardAppear {
+  from { 
+    transform: translateY(20px); 
+    opacity: 0; 
+  }
+  to { 
+    transform: translateY(0); 
+    opacity: 1; 
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fut-card-header {
+  background: linear-gradient(to bottom, #113a29 0%, #0d241a 100%);
+  padding: 16px 50px 16px 16px;
+  border-bottom: 2px solid #3cba54;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: relative;
+}
+
+.fut-card-header h1 {
+  color: #ffffff;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: left;
+  flex: 1;
+}
+
+.fut-trofeos-wrapper {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.fut-medalla-torneo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 8px;
+  background: #FFD700;
+  border-radius: 4px;
+  color: #000;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+.fut-medalla-torneo .medal-icon {
+  font-size: 14px;
+}
+
+.fut-sub-header {
+  background-color: #3cba54;
+  color: #000;
+  font-weight: bold;
+  padding: 4px;
+  text-align: center;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.fut-info-bar {
+  background-color: #1a3c2a;
+  padding: 8px;
+  display: flex;
+  justify-content: space-around;
+  font-size: 10px;
+  border-bottom: 1px solid #2d5a42;
+  color: #e0e0e0;
+}
+
+.fut-tabla-resumen {
+  width: 100%;
+}
+
+.fut-fila-puntos {
+  border-bottom: 1px solid #1a3c2a;
+  display: flex;
+  align-items: center;
+}
+
+/* Nueva estructura de 3 columnas */
+.fut-fila-tres-columnas {
+  border-bottom: 1px solid #1a3c2a;
+  display: grid;
+  grid-template-columns: 100px 1fr 1fr;
+  gap: 1px;
+  background: #2d5a42;
+}
+
+.fut-col-puesto {
+  background-color: #08160f;
+  color: #3cba54;
+  font-weight: bold;
+  padding: 15px 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.fut-col-badge {
+  background-color: #0d241a;
+  padding: 15px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.fut-col-indicadores {
+  background-color: #0d241a;
+  padding: 15px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.fut-numero-grande {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.fut-txt-label {
+  font-size: 9px;
+  color: #cccccc;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fut-badge-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+}
+
+.fut-badges-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.fut-col-pts {
+  background-color: #08160f;
+  color: #3cba54;
+  font-weight: bold;
+  width: 80px;
+  padding: 10px;
+  text-align: center;
+  font-size: 20px;
+  border-right: 1px solid #2d5a42;
+}
+
+.fut-txt-pts {
+  font-size: 9px;
+  color: #cccccc;
+  font-weight: normal;
+  display: block;
+}
+
+.fut-col-jugadores {
+  padding-left: 15px;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.fut-ganador-item {
+  background: #1a3c2a;
+  padding: 5px 12px;
+  border-radius: 2px;
+  border-left: 3px solid #3cba54;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.fut-badges-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fut-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  background: rgba(26, 60, 42, 0.4);
+  border: 1px solid rgba(60, 186, 84, 0.3);
+  white-space: nowrap;
+}
+
+.fut-badge-icon {
+  font-size: 13px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.fut-badge-text {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.fut-badge-nombre {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.fut-badge-desc {
+  font-size: 9px;
+  color: #ffffff;
+  font-weight: 300;
+  letter-spacing: 0.3px;
+  font-family: 'Roboto', 'Inter', Arial, sans-serif;
+  white-space: nowrap;
+}
+
+.fut-badge-desc::before {
+  content: ': ';
+  color: #999;
+}
+
+.fut-sorteo-box {
+  background-color: #1a1a1a;
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #2d5a42;
+  height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.fut-sorteo-titulo {
+  color: #aaaaaa;
+  font-size: 9px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.fut-sorteo-ganador {
+  font-size: 16px;
+  color: #3cba54;
+  font-weight: bold;
+}
+
+.fut-sorteo-ganador i {
+  font-size: 26px;
+}
+
+.fut-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.2s ease;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.fut-close-btn:hover {
+  background: rgba(239, 68, 68, 0.8);
+  border-color: rgba(239, 68, 68, 1);
+  color: #fff;
+}
+
+.fut-badge-tendencia {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: bold;
+  margin-left: 6px;
+}
+
+.fut-badge-tendencia.positivo {
+  background: #22a855;
+  color: white;
+}
+
+.fut-badge-tendencia.negativo {
+  background: #c0392b;
+  color: white;
+}
+
+.fut-badge-tendencia.igual {
+  background: #555;
+  color: white;
+}
+
+/* BADGES ÚLTIMAS 3 FECHAS */
+.recent-scores-badges {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 18px;
+  align-items: center;
+}
+
+.score-badge-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 19px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 0.63rem;
+  color: white;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.score-badge-mini.red { background: #dc3545; }
+.score-badge-mini.yellow { background: #ffc107; color: #333; }
+.score-badge-mini.green { background: #28a745; }
+.score-badge-mini.gray { background: #666; }
+
+.fut-stats-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.6fr 1fr;
+  gap: 1px;
+  background: #2d5a42;
+}
+
+.fut-stats-col {
+  background: #0d241a;
+}
+
+.fut-stats-col-header {
+  background: linear-gradient(135deg, #1a7a3c, #22a855);
+  color: #fff;
+  padding: 8px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-bottom: 2px solid #3cba54;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.fut-stats-col.historico .fut-stats-col-header {
+  background: linear-gradient(135deg, #0f4c2a, #1a7a3c);
+}
+
+.fut-medalla-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  font-size: 32px;
+  background: rgba(26, 60, 42, 0.3);
+  border-bottom: 1px solid #2d5a42;
+  min-height: 60px;
+}
+
+.fut-desc-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: #1a1a1a;
+  border-bottom: 1px solid #2d5a42;
+  min-height: 60px;
+}
+
+.fut-desc-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fut-desc-nombre {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.fut-desc-explicacion {
+  font-size: 9px;
+  color: #aaaaaa;
+  font-weight: 300;
+  letter-spacing: 0.3px;
+}
+
+.btn-ficha {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 3px;
+  padding: 4px 8px;
+  background: linear-gradient(135deg, var(--c1), var(--c2));
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 1px 4px rgba(26, 122, 60, 0.3);
+  margin-left: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-ficha:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(26, 122, 60, 0.5);
+  background: linear-gradient(135deg, var(--c2), var(--c3));
+}
+
+.btn-ficha:active {
+  transform: translateY(0);
+}
+
+/* Responsive para modal */
+@media (max-width: 680px) {
+  .fut-modal-overlay {
+    padding: 10px;
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+  
+  .fut-card {
+    max-width: 100%;
+    max-height: calc(100vh - 40px);
+    margin: 0;
+  }
+  
+  .fut-card-header h1 {
+    font-size: 16px;
+    letter-spacing: 0.5px;
+  }
+  
+  .fut-fila-tres-columnas {
+    grid-template-columns: 70px 1fr 1fr;
+  }
+  
+  .fut-numero-grande {
+    font-size: 24px;
+  }
+  
+  .fut-txt-label {
+    font-size: 8px;
+  }
+  
+  .fut-stats-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .score-badge-mini {
+    font-size: 0.6rem;
+    padding: 2px 4px;
+    min-width: 16px;
+  }
+  
+  .fut-badge-tendencia {
+    font-size: 8px;
+    padding: 2px 4px;
+  }
+  
+  /* Ocultar columnas en móvil para tabla de jugadores */
+  #jug-table-wrap table thead tr th:nth-child(4),
+  #jug-table-wrap table tbody tr td:nth-child(4),
+  #jug-table-wrap table thead tr th:nth-child(5),
+  #jug-table-wrap table tbody tr td:nth-child(5),
+  #jug-table-wrap table thead tr th:nth-child(7),
+  #jug-table-wrap table tbody tr td:nth-child(7) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .fut-modal-overlay {
+    padding: 5px;
+    padding-top: 10px;
+  }
+  
+  .fut-card {
+    max-height: calc(100vh - 20px);
+    border-radius: 3px;
+  }
+  
+  .fut-card-header {
+    padding: 12px;
+    padding-right: 50px;
+    flex-wrap: wrap;
+  }
+  
+  .fut-card-header h1 {
+    font-size: 14px;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .fut-trofeos-wrapper {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .fut-medalla-torneo {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+  
+  .fut-fila-tres-columnas {
+    grid-template-columns: 60px 1fr 1fr;
+  }
+  
+  .fut-col-puesto,
+  .fut-col-badge,
+  .fut-col-indicadores {
+    padding: 12px 6px;
+  }
+  
+  .fut-numero-grande {
+    font-size: 20px;
+  }
+  
+  .fut-sorteo-box {
+    padding: 8px;
+    height: 60px;
+  }
+  
+  .fut-sorteo-titulo {
+    font-size: 8px;
+  }
+  
+  .fut-sorteo-ganador {
+    font-size: 14px;
+  }
+  
+  .fut-stats-col-header {
+    padding: 6px;
+    font-size: 10px;
+    height: 32px;
+  }
+  
+  /* En móviles muy pequeños, ocultar también "Últimos 3" */
+  #jug-table-wrap table thead tr th:nth-child(6),
+  #jug-table-wrap table tbody tr td:nth-child(6) {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="loading-ball">&#9917;</div>
+  <div class="spinner"></div>
+  <div class="loading-text">Cargando datos...</div>
+</div>
+
+<div class="error-overlay" id="error-overlay">
+  <h2>&#9888; No se pudieron cargar los datos</h2>
+  <p>Verific&aacute; tu conexi&oacute;n a internet y recarg&aacute; la p&aacute;gina.</p>
+  <button onclick="location.reload()" style="margin-top:12px;padding:10px 24px;background:var(--c2);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit">Reintentar</button>
+</div>
+
+<header class="header">
+  <div class="header-top">
+    <div class="header-ball">&#9917;</div>
+    <div class="header-title">
+      <h1>PRODE EQUIPOS</h1>
+      <p id="header-subtitle">Torneo Apertura &amp; Clausura &mdash; Posiciones en vivo</p>
+    </div>
+    <div class="live-badge">
+      <span>👥</span>
+      <span id="visit-count">---</span>
+      <span style="font-size: 0.65rem; opacity: 0.7;">visitas</span>
+    </div>
+  </div>
+  <div class="tabs-wrap">
+    <button class="tab active" onclick="showTab(event,'jugadores')">Jugadores</button>
+    <button class="tab" onclick="showTab(event,'apertura')">Apertura</button>
+    <button class="tab" onclick="showTab(event,'ideal')">Ideal</button>
+    <button class="tab" onclick="showTab(event,'clausura')">Clausura</button>
+    <button class="tab" onclick="showTab(event,'anual')">Tabla Anual</button>
+    <button class="tab" onclick="showTab(event,'torneos')">Torneos Individuales</button>
+    <button class="tab" onclick="showTab(event,'reglas')">Reglas</button>
+  </div>
+</header>
+
+<!-- Sponsors Banner -->
+<div class="sponsors-banner">
+  <div class="sponsors-container">
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/fullana.png" alt="Estudio Contable Fullana"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/huachuma.png" alt="Huachuma Growshop"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/montre%20prode.png" alt="Montré Agroveterinaria"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/agencia%20133%20prode.png" alt="Agencia 133"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/BOOM%20PRODE.png" alt="Boom Party"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/CABRON%20PRODE.png" alt="Cabron Ind"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/FERRERO%20PRODE.png" alt="Ferrero Hnos. Coca-Cola"></div>
+    <!-- Duplicar para efecto continuo -->
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/fullana.png" alt="Estudio Contable Fullana"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/huachuma.png" alt="Huachuma Growshop"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/montre%20prode.png" alt="Montré Agroveterinaria"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/agencia%20133%20prode.png" alt="Agencia 133"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/BOOM%20PRODE.png" alt="Boom Party"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/CABRON%20PRODE.png" alt="Cabron Ind"></div>
+    <div class="sponsor-item"><img src="https://raw.githubusercontent.com/nau87/prodequipos/main/sponsors/FERRERO%20PRODE.png" alt="Ferrero Hnos. Coca-Cola"></div>
+  </div>
+</div>
+
+<!-- Hamburger Button -->
+<button class="hamburger-btn" id="hamburger-btn" onclick="showMenu()">
+  <span>☰</span>
+  <span class="hamburger-text">MENÚ</span>
+</button>
+
+<!-- Main Menu -->
+<div class="main-menu" id="main-menu">
+  <div class="menu-title">
+    <h2>¿Qué querés ver?</h2>
+    <p>Elegí una sección para comenzar</p>
+  </div>
+  <div class="menu-grid">
+    <div class="menu-card" onclick="showTabFromMenu('jugadores')">
+      <span class="menu-icon">👥</span>
+      <div class="menu-card-title">Jugadores</div>
+      <div class="menu-card-desc">Ranking histórico y Logros de cada Jugador</div>
+    </div>
+    <div class="menu-card" onclick="showTabFromMenu('equipos')">
+      <span class="menu-icon">🏅</span>
+      <div class="menu-card-title">Equipos</div>
+      <div class="menu-card-desc">Ranking histórico y Logros de cada Equipo</div>
+    </div>
+    <div class="menu-card" onclick="showTabFromMenu('apertura')">
+      <span class="menu-icon">🏆</span>
+      <div class="menu-card-title">Apertura de Equipos</div>
+      <div class="menu-card-desc">Posiciones y puntajes del Torneo Apertura de Equipos</div>
+    </div>
+    <div class="menu-card" onclick="showTabFromMenu('ideal')">
+      <span class="menu-icon">⭐</span>
+      <div class="menu-card-title">Equipo Ideal</div>
+      <div class="menu-card-desc">La formación que mas sumaría</div>
+    </div>
+    <div class="menu-card" onclick="showTabFromMenu('clausura')">
+      <span class="menu-icon">🏆</span>
+      <div class="menu-card-title">Clausura de Equipos</div>
+      <div class="menu-card-desc">Posiciones y puntajes del Torneo Clausura de Equipos</div>
+    </div>
+    <div class="menu-card" onclick="showTabFromMenu('provincial')">
+      <span class="menu-icon">🏅</span>
+      <div class="menu-card-title">Torneo Provincial</div>
+      <div class="menu-card-desc">Tabla de posiciones y clasificación a Playoffs</div>
+    </div>
+    <div class="menu-card" onclick="showTabFromMenu('anual')">
+      <span class="menu-icon">📊</span>
+      <div class="menu-card-title">Tabla Anual de Equipos</div>
+      <div class="menu-card-desc">Clasificación general del año en Equipo</div>
+    </div>
+    <div class="menu-card" onclick="showTabFromMenu('torneos')">
+      <span class="menu-icon">🎯</span>
+      <div class="menu-card-title">Torneos Individuales</div>
+      <div class="menu-card-desc">Competencias de todos los Jugadores individualmente</div>
+    </div>
+    <div class="menu-card" onclick="showTabFromMenu('reglas')">
+      <span class="menu-icon">📋</span>
+      <div class="menu-card-title">Reglas</div>
+      <div class="menu-card-desc">Cómo funciona el prode y el puntaje</div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="section" id="sec-jugadores">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">&#128100;</div><h2>Ranking Histórico de Jugadores</h2><span id="jug-count"></span></div>
+      <div class="search-wrap"><div class="search-wrap-inner"><span class="search-icon">&#128269;</span><input type="text" class="search-input" id="search-jug" placeholder="Buscar por nombre o equipo..." oninput="filterJugadores()"></div></div>
+      <div class="table-wrap" id="jug-table-wrap"><table><thead><tr>
+        <th class="c" style="width:52px">#</th>
+        <th>Jugador</th>
+        <th class="c" style="width:70px">PTS</th>
+        <th class="c" style="width:60px">PJ</th>
+        <th class="c" style="width:75px">PROM</th>
+        <th class="c" style="width:140px">ÚLTIMOS 3</th>
+        <th class="c" style="width:110px">TENDENCIA</th>
+        <th class="c" style="width:100px">Ficha</th>
+      </tr></thead><tbody id="body-jugadores"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-equipos">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">&#127941;</div><h2>Ranking Histórico de Equipos</h2><span id="eq-count"></span></div>
+      <div class="search-wrap"><div class="search-wrap-inner"><span class="search-icon">&#128269;</span><input type="text" class="search-input" id="search-eq" placeholder="Buscar equipo..." oninput="filterEquipos()"></div></div>
+      <div class="table-wrap" id="eq-table-wrap"><table><thead><tr>
+        <th class="c" style="width:52px">#</th>
+        <th>Equipo</th>
+        <th class="c" style="width:70px">PTS</th>
+        <th class="c" style="width:60px">PJ</th>
+        <th class="c" style="width:75px">PROM</th>
+        <th class="c" style="width:100px">Ficha</th>
+      </tr></thead><tbody id="body-equipos"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-apertura">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">&#127960;</div><h2>Torneo Apertura - Equipos</h2></div>
+      <div class="table-wrap"><table><thead><tr>
+        <th class="c" style="width:52px">#</th>
+        <th>Equipo</th>
+        <th class="c fc">F1</th><th class="c fc">F2</th><th class="c fc">F3</th><th class="c fc">F4</th><th class="c fc">F5</th><th class="c fc">F6</th><th class="c fc">F7</th><th class="c fc">F8</th><th class="c fc">F9</th><th class="c fc">F10</th><th class="c fc">F11</th>
+        <th class="c">PTS</th><th style="width:110px"></th>
+      </tr></thead><tbody id="body-apertura"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-ideal">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">&#11088;</div><h2 id="ideal-title">Equipo Ideal &mdash; Fecha ?</h2></div>
+      <div class="ideal-wrap">
+        <p class="ideal-subtitle">Los capitanes acumulan puntaje x2 &mdash; los valores ya incluyen la multiplicaci&oacute;n</p>
+        <div class="field" id="ideal-field"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-clausura">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">&#127960;</div><h2>Torneo Clausura - Equipos</h2></div>
+      <div class="table-wrap"><table><thead><tr>
+        <th class="c" style="width:52px">#</th>
+        <th>Equipo</th>
+        <th class="c fc">C1</th><th class="c fc">C2</th><th class="c fc">C3</th><th class="c fc">C4</th><th class="c fc">C5</th><th class="c fc">C6</th><th class="c fc">C7</th><th class="c fc">C8</th><th class="c fc">C9</th><th class="c fc">C10</th><th class="c fc">C11</th>
+        <th class="c">PTS</th><th style="width:110px"></th>
+      </tr></thead><tbody id="body-clausura"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-provincial">
+    <div class="card">
+      <div class="card-head">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="card-head-icon">🏅</div>
+            <h2>Torneo Provincial - Equipos</h2>
+            <span style="font-size:0.75rem;color:var(--text3);font-weight:600;margin-left:4px;">Los primeros 8 clasifican a Playoff</span>
+          </div>
+          <button onclick="showTabFromMenu('playoffs')" style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:#fff;border:none;padding:8px 16px;border-radius:6px;font-weight:600;font-size:0.8rem;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 12px rgba(102,126,234,0.3)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">🏆 VER LLAVE PLAYOFF</button>
+        </div>
+      </div>
+      <div class="table-wrap"><table><thead><tr>
+        <th class="c" style="width:52px">#</th>
+        <th>Equipo</th>
+        <th class="c fc">F1</th><th class="c fc">F2</th><th class="c fc">F3</th><th class="c fc">F4</th><th class="c fc">F5</th><th class="c fc">F6</th><th class="c fc">F7</th><th class="c fc">F8</th><th class="c fc">F9</th><th class="c fc">F10</th><th class="c fc">F11</th><th class="c fc">F12</th>
+        <th class="c">PTS</th><th style="width:110px"></th>
+      </tr></thead><tbody id="body-provincial"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-playoffs">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">🏆</div><h2>PLAYOFFS | <span style="color:#9d50bb;font-weight:bold;">LIGA</span></h2></div>
+      <div id="playoffs-bracket"></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-anual">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">&#127942;</div><h2>Tabla Anual de Posiciones</h2></div>
+      <div class="anual-list" id="anual-list"></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-torneos">
+    <!-- Tabs para móvil -->
+    <div class="torneos-tabs-mobile">
+      <button class="torneo-tab active" data-torneo="apertura">Apertura</button>
+      <button class="torneo-tab" data-torneo="clausura">Clausura</button>
+      <button class="torneo-tab" data-torneo="provincial">Provincial</button>
+      <button class="torneo-tab" data-torneo="anual">Anual</button>
+    </div>
+    
+    <div class="torneos-container">
+      <div class="card torneo-card" data-torneo="apertura">
+        <div class="card-head"><div class="card-head-icon">&#127942;</div><h2>Torneo Apertura</h2></div>
+        <div class="table-wrap"><table><thead><tr>
+          <th class="c" style="width:52px">#</th><th>Jugador</th><th class="c">PTS</th>
+        </tr></thead><tbody id="body-torneos-apertura"></tbody></table></div>
+      </div>
+      <div class="card torneo-card" data-torneo="clausura">
+        <div class="card-head"><div class="card-head-icon">&#127942;</div><h2>Torneo Clausura</h2></div>
+        <div class="table-wrap"><table><thead><tr>
+          <th class="c" style="width:52px">#</th><th>Jugador</th><th class="c">PTS</th>
+        </tr></thead><tbody id="body-torneos-clausura"></tbody></table></div>
+      </div>
+      <div class="card torneo-card" data-torneo="provincial">
+        <div class="card-head"><div class="card-head-icon">&#127942;</div><h2>Torneo Provincial</h2></div>
+        <div class="table-wrap"><table><thead><tr>
+          <th class="c" style="width:52px">#</th><th>Jugador</th><th class="c">PTS</th>
+        </tr></thead><tbody id="body-torneos-provincial"></tbody></table></div>
+      </div>
+      <div class="card torneo-card" data-torneo="anual">
+        <div class="card-head"><div class="card-head-icon">&#127942;</div><h2>Tabla Anual</h2></div>
+        <div class="table-wrap"><table><thead><tr>
+          <th class="c" style="width:52px">#</th><th>Jugador</th><th class="c">PTS</th>
+        </tr></thead><tbody id="body-torneos-anual"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-reglas">
+    <div class="card">
+      <div class="card-head"><div class="card-head-icon">&#128220;</div><h2>Reglamento Oficial - Prode por Equipos 2026</h2></div>
+      <div style="padding: 24px; line-height: 1.8; color: var(--text);">
+        <p style="margin-bottom: 16px; font-size: 0.95rem; color: var(--text2);">El torneo se divide en tres instancias clave: Apertura, Clausura y la Gran Final Anual.</p>
+        
+        <h3 style="color: var(--c1); font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#127960;</span> Torneos Apertura y Clausura</h3>
+        <p style="margin-bottom: 8px;">Cada torneo es independiente y consagra a un <strong>Ganador de Etapa</strong>.</p>
+        <p style="margin-bottom: 8px;">Los puntos se computan fecha tras fecha según el rendimiento individual de cada integrante del equipo.</p>
+        <p style="margin-bottom: 8px;">El <strong style="color: var(--gold);">CAPITÁN</strong> del equipo suma <strong>x2</strong> (doble puntaje).</p>
+        <p style="margin-bottom: 16px;">Al finalizar cada etapa, el equipo que termine en el <strong style="color: var(--gold);">1° puesto</strong> clasifica directamente a la <strong>Gran Final Anual</strong>.</p>
+        
+        <h3 style="color: var(--c1); font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#128200;</span> Tabla Anual (La Regularidad)</h3>
+        <p style="margin-bottom: 8px;">Es la suma de todos los puntos obtenidos en el Apertura y el Clausura.</p>
+        <p style="margin-bottom: 16px;">Sirve para premiar al equipo más constante del año y definir la <strong>Ventaja Deportiva</strong>.</p>
+        
+        <h3 style="color: var(--c1); font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#127942;</span> La Gran Final Anual</h3>
+        <p style="margin-bottom: 8px;">Se define entre el <strong>Ganador del Apertura</strong> y el <strong>Ganador del Clausura</strong>:</p>
+        <ul style="margin-left: 20px; margin-bottom: 16px;">
+          <li style="margin-bottom: 6px;"><strong>Serie:</strong> Dos partidos (Ida y Vuelta).</li>
+          <li style="margin-bottom: 6px;"><strong>Desempate:</strong> Si tras los dos partidos hay igualdad en el global, se disputará un <strong>3° Partido de Desempate</strong>.</li>
+          <li style="margin-bottom: 6px;"><strong>Ventaja Deportiva:</strong> Si tras el tercer partido persiste la igualdad, el campeón será el equipo que esté mejor posicionado en la <strong>Tabla Anual</strong>.</li>
+        </ul>
+        
+        <h3 style="color: #c0392b; font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#9888;</span> REGLA DE IDENTIFICACIÓN DE JUGADORES</h3>
+        <p style="margin-bottom: 8px;">Para garantizar la transparencia:</p>
+        <ul style="margin-left: 20px; margin-bottom: 16px;">
+          <li style="margin-bottom: 6px;">Aquellos jugadores que realicen más de un Prode por semana deberán <strong>identificarlos claramente</strong> (Ej: Nahuel Mendez 1, Nahuel Mendez 2).</li>
+          <li style="margin-bottom: 6px;">Deberán <strong>aclarar cuál de esos perfiles juega para el equipo</strong> (Ej: "En el equipo juega el 1"). De no aclararse, se tomará el primer registro por defecto.</li>
+        </ul>
+        
+        <h3 style="color: var(--gold); font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;"><span>&#127873;</span> PREMIO MAYOR</h3>
+        <p style="margin-bottom: 8px;">El equipo que se consagre <strong style="color: var(--gold);">CAMPEÓN ANUAL</strong> recibirá:</p>
+        <p style="background: var(--gold-light); padding: 16px; border-radius: 8px; border-left: 4px solid var(--gold); font-weight: 600; color: var(--text);">&#127860; Cena de gala en la sede del Club All Boys para todo el equipo.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="fullscreen-btn">
+  <div class="btn-main" onclick="enterFullscreen()">
+    <span class="btn-icon">&#128250;</span>
+    <span>Pantalla Completa</span>
+  </div>
+  <span class="btn-close" onclick="dismissFullscreenBtn()">&#10005;</span>
+</div>
+
+<script>
+const SHEET_ID = '1BA44xlhvKIWHMR-l8TJxVXUmfYV-NoHXr3iEdUkQ3hk'; // ← NUEVA PLANILLA
+let DATA = {};
+
+// ---- Google Sheets fetch ----
+async function fetchSheet(name) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`;
+  const res = await fetch(url);
+  const text = await res.text();
+  const jsonStr = text.replace(/^[\s\S]*?setResponse\(/, '').replace(/\);?\s*$/, '');
+  return JSON.parse(jsonStr).table;
+}
+
+function gv(row, idx) {
+  if (!row || !row.c || row.c[idx] == null) return null;
+  return row.c[idx] ? row.c[idx].v : null;
+}
+function gn(row, idx) { return Number(gv(row, idx)) || 0; }
+function gnOrNull(row, idx) { 
+  const val = gv(row, idx);
+  if (val === null || val === undefined || val === '') return null;
+  return Number(val);
+}
+function gs(row, idx) { return (gv(row, idx) || '').toString().trim(); }
+function gd(row, idx) {
+  // Obtener fecha/timestamp de Google Sheets
+  const val = gv(row, idx);
+  if (!val) return null;
+  
+  // Google Sheets devuelve el timestamp como string "Date(2026,2,15,11,15,0)"
+  // donde los meses están indexados desde 0 (enero=0, febrero=1, marzo=2, etc.)
+  if (typeof val === 'string' && val.startsWith('Date(')) {
+    const match = val.match(/Date\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)/);
+    if (match) {
+      const [, year, month, day, hour, minute, second] = match.map(Number);
+      // Los meses ya están indexados desde 0, así que no restamos 1
+      return new Date(year, month, day, hour, minute, second);
+    }
+  }
+  
+  // Si es Date object directo
+  if (val instanceof Date) {
+    return val;
+  }
+  
+  // Si es string con formato "DD/MM/YYYY HH:MM:SS"
+  if (typeof val === 'string') {
+    const parts = val.match(/(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+):(\d+)/);
+    if (parts) {
+      const [, day, month, year, hour, minute, second] = parts.map(Number);
+      return new Date(year, month - 1, day, hour, minute, second);
+    }
+    
+    // Intentar parse directo
+    const parsed = new Date(val);
+    if (!isNaN(parsed.getTime())) return parsed;
+  }
+  
+  return null;
+}
+
+async function loadData() {
+  // ===============================================
+  // NUEVA LÓGICA: Leer de LOG_FECHAS, Equipos, ESTADISTICAS_INDIVIDUALES, ESTADISTICAS_EQUIPOS, TABLA_EQUIPOS, DATA_TOTAL, TABLA_JUGADORES y PLAYOFFS
+  // ===============================================
+  const [logFechas, equiposSheet, estadisticasSheet, estadisticasEquiposSheet, tablaEquiposSheet, dataTotalSheet, tablaJugadoresSheet, playoffsSheet] = await Promise.all([
+    fetchSheet('LOG_FECHAS'),
+    fetchSheet('Equipos'),
+    fetchSheet('ESTADISTICAS_INDIVIDUALES'),
+    fetchSheet('ESTADISTICAS_EQUIPOS'),
+    fetchSheet('TABLA_EQUIPOS'),
+    fetchSheet('DATA_TOTAL'),
+    fetchSheet('TABLA_JUGADORES'),
+    fetchSheet('PLAYOFFS'),
+  ]);
+
+  // Procesar LOG_FECHAS
+  const rawLogs = logFechas.rows
+    .filter(r => gv(r,0)) // Tiene jugador
+    .map(r => ({
+      jugador: gs(r,0),
+      fecha: gn(r,1),
+      puntos: gn(r,2),
+      suma: gn(r,3),
+      torneo: gs(r,4).toUpperCase(),
+      competencia: gs(r,5).toUpperCase(),
+      timestamp: gd(r,6),
+      equipo: gs(r,7) || 'LIBRE',
+      capitan: gs(r,8) === 'SI',
+      ideal: gn(r,10),
+      temporada: gs(r,11)
+    }));
+
+  // Procesar Equipos
+  const equiposData = equiposSheet.rows
+    .filter(r => gv(r,0))
+    .map(r => ({
+      jugador: gs(r,0),
+      equipo: gs(r,1) || 'LIBRE',
+      modo: gs(r,2)
+    }));
+
+  // Procesar ESTADISTICAS_INDIVIDUALES
+  const estadisticasIndividuales = estadisticasSheet.rows
+    .filter(r => gv(r,0))
+    .map(r => ({
+      jugador: gs(r,0),
+      puestoActual: gnOrNull(r,1),
+      puestoAnterior: gnOrNull(r,2),
+      mejorFecha: gn(r,3),
+      vecesIdeal: gn(r,4),
+      equipo: gs(r,5),
+      torneo: gs(r,6),
+      puntosHistoricos: gn(r,7),
+      promedio: gn(r,8),
+      puestoGlobal: gnOrNull(r,9),
+      cantFechas: gn(r,10),
+      campeonApertura: gn(r,11) || 0,
+      campeonClausura: gn(r,12) || 0,
+      campeonAnual: gn(r,13) || 0
+    }));
+
+  // Procesar TABLA_EQUIPOS
+  // APERTURA: columnas A-D (saltar fila título y encabezados)
+  const tablaEquiposApertura = tablaEquiposSheet.rows
+    .slice(2) // Saltar fila 0 (APERTURA) y fila 1 (# | EQUIPO | PJ | PTS)
+    .filter(r => gv(r,1) && gs(r,1) !== '#N/A') // Tiene nombre válido en col B
+    .map(r => ({
+      puesto: gn(r,0),   // A: #
+      equipo: gs(r,1),   // B: EQUIPO
+      pj: gn(r,2),       // C: PJ
+      pts: gn(r,3)       // D: PTS
+    }));
+  
+  // CLAUSURA: columnas F-I (saltar fila título y encabezados)
+  const tablaEquiposClausura = tablaEquiposSheet.rows
+    .slice(2) // Saltar fila 0 (CLAUSURA) y fila 1 (# | EQUIPO | PJ | PTS)
+    .filter(r => gv(r,6) && gs(r,6) !== '#N/A') // Tiene nombre válido en col G
+    .map(r => ({
+      puesto: gn(r,5),   // F: #
+      equipo: gs(r,6),   // G: EQUIPO
+      pj: gn(r,7),       // H: PJ
+      pts: gn(r,8)       // I: PTS
+    }));
+  
+  // PROVINCIAL: columnas P-S (sin headers, datos directos)
+  const tablaEquiposProvincial = tablaEquiposSheet.rows
+    .map(r => ({
+      puesto: gn(r,15),  // P: #
+      equipo: gs(r,16),  // Q: EQUIPO
+      pj: gn(r,17),      // R: PJ
+      pts: gn(r,18)      // S: PTS
+    }))
+    .filter(eq => eq.equipo && eq.equipo.trim() !== '' && eq.equipo !== '#N/A'); // Excluir vacíos y errores
+
+  // Procesar DATA_TOTAL para obtener torneo actual y equipo ideal
+  const torneoActualNombre = dataTotalSheet.rows[0] ? gs(dataTotalSheet.rows[0], 7) : 'APERTURA'; // H1
+  
+  // Extraer equipo ideal de DATA_TOTAL
+  const idealFecha = dataTotalSheet.rows[0] ? gn(dataTotalSheet.rows[0], 4) : 0; // E1: Fecha
+  const idealJugadoresData = [];
+  let idealTotalData = 0;
+  
+  // Leer jugadores del equipo ideal (filas 2-6 aprox, mientras haya datos en columna A)
+  for (let i = 1; i < dataTotalSheet.rows.length; i++) {
+    const row = dataTotalSheet.rows[i];
+    const nombreJugador = gs(row, 0); // Columna A
+    const puntosJugador = gn(row, 1); // Columna B
+    
+    if (nombreJugador && nombreJugador.trim() !== '') {
+      idealJugadoresData.push({ nombre: nombreJugador, pts: puntosJugador });
+    } else if (puntosJugador > 0) {
+      // Si no hay nombre pero hay puntos, es el total
+      idealTotalData = puntosJugador;
+      break;
+    }
+  }
+  
+  // Si no encontramos total, calcularlo
+  if (idealTotalData === 0) {
+    idealTotalData = idealJugadoresData.reduce((sum, j) => sum + j.pts, 0);
+  }
+
+  // Procesar TABLA_JUGADORES para rankings de torneos individuales
+  // APERTURA: columnas A-D, CLAUSURA: columnas F-I, PROVINCIAL: columnas K-N, ANUAL: columnas P-S
+  const rankingApertura = tablaJugadoresSheet.rows
+    .filter(r => gv(r,1) && gs(r,1) !== '#N/A') // Tiene jugador válido en col B
+    .map(r => ({
+      pos: gn(r,0),        // A: #
+      jugador: gs(r,1),    // B: JUGADOR
+      pj: gn(r,2),         // C: PJ
+      pts: gn(r,3)         // D: PTS
+    }));
+  
+  const rankingClausura = tablaJugadoresSheet.rows
+    .filter(r => gv(r,6) && gs(r,6) !== '#N/A') // Tiene jugador válido en col G
+    .map(r => ({
+      pos: gs(r,5) ? parseInt(gs(r,5)) : null,  // F: #
+      jugador: gs(r,6),    // G: JUGADOR
+      pj: gs(r,7) ? parseInt(gs(r,7)) : 0,      // H: PJ
+      pts: gs(r,8) ? parseInt(gs(r,8)) : 0      // I: PTS
+    }));
+  
+  const rankingProvincial = tablaJugadoresSheet.rows
+    .filter(r => gv(r,11) && gs(r,11) !== '#N/A') // Tiene jugador válido en col L
+    .map(r => ({
+      pos: gn(r,10),       // K: #
+      jugador: gs(r,11),   // L: JUGADOR
+      pj: gn(r,12),        // M: PJ
+      pts: gn(r,13)        // N: PTS
+    }));
+  
+  const rankingAnual = tablaJugadoresSheet.rows
+    .filter(r => gv(r,16) && gs(r,16) !== '#N/A') // Tiene jugador válido en col Q
+    .map(r => ({
+      pos: gn(r,15),       // P: #
+      jugador: gs(r,16),   // Q: JUGADOR
+      pj: gn(r,17),        // R: PJ
+      pts: gn(r,18)        // S: PTS
+    }));
+
+  // Construir la estructura DATA que espera el resto del código
+  
+  // 1. JUGADORES con sus puntos por fecha
+  // Primero ordenar logs por timestamp para obtener el equipo más reciente de cada jugador
+  const logsOrdenados = rawLogs
+    .filter(l => l.timestamp)
+    .sort((a, b) => {
+      const dateA = new Date(a.timestamp);
+      const dateB = new Date(b.timestamp);
+      return dateB - dateA; // Más reciente primero
+    });
+  
+  // Crear un mapa con el equipo más reciente de cada jugador
+  const equipoMasReciente = {};
+  logsOrdenados.forEach(log => {
+    if (!equipoMasReciente[log.jugador]) {
+      equipoMasReciente[log.jugador] = log.equipo;
+    }
+  });
+  
+  const jugadoresMap = {};
+  rawLogs.forEach(log => {
+    if (!jugadoresMap[log.jugador]) {
+      const equipoInfo = equiposData.find(e => e.jugador === log.jugador);
+      const equipoActual = equipoMasReciente[log.jugador] || 'LIBRE';
+      const modo = equipoInfo ? equipoInfo.modo : null;
+      
+      jugadoresMap[log.jugador] = {
+        nombre: log.jugador,
+        equipo: equipoActual,
+        modo: modo,
+        ap: Array(11).fill(null),
+        ap_total: 0,
+        cl: Array(11).fill(null),
+        cl_total: 0,
+        prov: Array(12).fill(null),
+        prov_total: 0
+      };
+    }
+    const j = jugadoresMap[log.jugador];
+    const fechaIdx = log.fecha - 1;
+    if (log.torneo === 'APERTURA' && fechaIdx >= 0 && fechaIdx < 11) {
+      j.ap[fechaIdx] = log.puntos;
+      j.ap_total += log.suma;
+    } else if (log.torneo === 'CLAUSURA' && fechaIdx >= 0 && fechaIdx < 11) {
+      j.cl[fechaIdx] = log.puntos;
+      j.cl_total += log.suma;
+    } else if (log.torneo === 'PROVINCIAL' && fechaIdx >= 0 && fechaIdx < 12) {
+      j.prov[fechaIdx] = log.puntos;
+      j.prov_total += log.suma;
+    }
+  });
+  const jugadores = Object.values(jugadoresMap);
+
+  // 2. EQUIPOS APERTURA, CLAUSURA Y PROVINCIAL
+  function buildEquipos(torneo) {
+    const numFechas = torneo === 'PROVINCIAL' ? 12 : 11;
+    const equiposMap = {};
+    const logsDelTorneo = rawLogs.filter(log => log.torneo === torneo && log.equipo !== 'LIBRE');
+    
+    logsDelTorneo.forEach(log => {
+      if (!equiposMap[log.equipo]) {
+        equiposMap[log.equipo] = {
+          equipo: log.equipo,
+          jug: [],
+          fechas: Array(numFechas).fill(0),
+          pts: 0
+        };
+      }
+      const eq = equiposMap[log.equipo];
+      
+      // Agregar jugador si no está ya (sin importar si es capitán)
+      if (!eq.jug.includes(log.jugador)) {
+        eq.jug.push(log.jugador);
+      }
+      
+      // Sumar puntos por fecha
+      const fechaIdx = log.fecha - 1;
+      if (fechaIdx >= 0 && fechaIdx < numFechas) {
+        eq.fechas[fechaIdx] += log.suma;
+      }
+      eq.pts += log.suma;
+    });
+    
+    return Object.values(equiposMap);
+  }
+  
+  // Usar buildEquipos para obtener info completa de jugadores y fechas desde LOG_FECHAS
+  const equipos_ap_raw = buildEquipos('APERTURA');
+  const equipos_cl_raw = buildEquipos('CLAUSURA');
+  const equipos_provincial_raw = buildEquipos('PROVINCIAL');
+  
+  // Enriquecer con puestos de TABLA_EQUIPOS
+  const equipos_ap = equipos_ap_raw.map(eq => {
+    const tablaInfo = tablaEquiposApertura.find(t => t.equipo === eq.equipo);
+    return {
+      ...eq,
+      puesto: tablaInfo?.puesto || 0,
+      pj: tablaInfo?.pj || 0,
+      pts: tablaInfo?.pts || eq.pts // Usar puntos de tabla si existen
+    };
+  });
+  
+  const equipos_cl = equipos_cl_raw.map(eq => {
+    const tablaInfo = tablaEquiposClausura.find(t => t.equipo === eq.equipo);
+    return {
+      ...eq,
+      puesto: tablaInfo?.puesto || 0,
+      pj: tablaInfo?.pj || 0,
+      pts: tablaInfo?.pts || eq.pts
+    };
+  });
+  
+  const equipos_provincial = equipos_provincial_raw.map(eq => {
+    const tablaInfo = tablaEquiposProvincial.find(t => t.equipo === eq.equipo);
+    return {
+      ...eq,
+      puesto: tablaInfo?.puesto || 0,
+      pj: tablaInfo?.pj || 0,
+      pts: tablaInfo?.pts || eq.pts
+    };
+  });
+
+  // 3. TABLA ANUAL - Leer de TABLA_EQUIPOS columnas K-N
+  const tablaAnualEquipos = tablaEquiposSheet.rows
+    .slice(2) // Saltar fila 0 (ANUAL) y fila 1 (# | EQUIPO | PJ | PTS)
+    .filter(r => gv(r,11) && gs(r,11) !== '#N/A') // Tiene nombre válido en col L (no #N/A)
+    .map(r => ({
+      puesto: gn(r,10),    // K: #
+      equipo: gs(r,11),    // L: EQUIPO
+      pj: gn(r,12),        // M: PJ
+      pts: gn(r,13)        // N: PTS
+    }));
+  
+  // Construir tabla_anual con formato esperado (apertura + clausura = anual)
+  const tabla_anual = tablaAnualEquipos.map(eq => ({
+    equipo: eq.equipo,
+    apertura: tablaEquiposApertura.find(e => e.equipo === eq.equipo)?.pts || 0,
+    clausura: tablaEquiposClausura.find(e => e.equipo === eq.equipo)?.pts || 0,
+    anual: eq.pts,
+    puesto: eq.puesto,
+    pj: eq.pj
+  }));
+
+  // 4. IDEAL - Usar datos de DATA_TOTAL
+  const ultimaFechaConIdeal = idealFecha;
+  const ideal_jugadores = idealJugadoresData;
+  const ideal_total = idealTotalData;
+
+  // 5. TORNEOS - Usar datos de TABLA_JUGADORES
+  const torneos = {
+    apertura: rankingApertura,
+    clausura: rankingClausura,
+    provincial: rankingProvincial,
+    anual: rankingAnual
+  };
+
+  // 6. JUGADORES STATS Y HISTORIAL - usar directamente ESTADISTICAS_INDIVIDUALES
+  const jugadoresStats = estadisticasIndividuales.map(stat => ({
+    nombre: stat.jugador,
+    puestoActual: stat.puestoActual,
+    puestoAnterior: stat.puestoAnterior,
+    mejorFecha: stat.mejorFecha,
+    equipoIdeal: stat.vecesIdeal,
+    equipo: stat.equipo,
+    torneoActivo: stat.torneo,
+    puntosHistoricos: stat.puntosHistoricos,
+    promedio: stat.promedio
+  }));
+
+  const historialConsolidado = estadisticasIndividuales.map(stat => ({
+    nombre: stat.jugador,
+    mejorFechaHistorica: stat.mejorFecha,
+    vecesIdealHistorico: stat.vecesIdeal,
+    puntosHistoricos: stat.puntosHistoricos,
+    promedioHistorico: stat.promedio,
+    puestoGlobal: stat.puestoGlobal,
+    cantFechas: stat.cantFechas
+  }));
+
+  // Procesar ESTADISTICAS_EQUIPOS
+  const estadisticasEquipos = estadisticasEquiposSheet.rows
+    .filter(r => gv(r,0)) // Tiene equipo
+    .map(r => ({
+      equipo: gs(r,0),
+      mejorFecha: gn(r,1),
+      puntosHistoricos: gn(r,2),
+      promedio: gn(r,3),
+      puestoGlobal: gn(r,4),
+      campeonApertura: gn(r,5),
+      campeonClausura: gn(r,6),
+      campeonAnual: gn(r,7),
+      campeonProvincial: gn(r,8)
+    }));
+
+  // 7. FECHA Y TORNEO ACTUAL
+  const fechaActual = Math.max(...rawLogs.map(log => log.fecha), 0);
+  const torneoActual = torneoActualNombre; // De DATA_TOTAL H1
+
+  // 8. PLAYOFFS - Procesar bracket
+  const playoffsData = {
+    cuartos: [],
+    semis: [],
+    final: {},
+    campeon: ''
+  };
+
+  // Procesar CUARTOS (columnas A-D, filtrar filas con equipos)
+  const cuartosRows = playoffsSheet.rows.filter(r => gs(r, 0)); // Solo filas con equipo en col A
+  for (let i = 0; i < cuartosRows.length; i += 2) {
+    const row1 = cuartosRows[i];
+    const row2 = cuartosRows[i + 1];
+    if (row1 && row2) {
+      playoffsData.cuartos.push({
+        equipo1: gs(row1, 0) || 'A definir',
+        ida1: gn(row1, 1),
+        vuelta1: gn(row1, 2),
+        global1: gn(row1, 3),
+        equipo2: gs(row2, 0) || 'A definir',
+        ida2: gn(row2, 1),
+        vuelta2: gn(row2, 2),
+        global2: gn(row2, 3)
+      });
+    }
+  }
+
+  // Procesar SEMIS (columnas F-I, filtrar filas con equipos)
+  const semisRows = playoffsSheet.rows.filter(r => gs(r, 5)); // Solo filas con equipo en col F
+  for (let i = 0; i < semisRows.length; i += 2) {
+    const row1 = semisRows[i];
+    const row2 = semisRows[i + 1];
+    if (row1 && row2) {
+      playoffsData.semis.push({
+        equipo1: gs(row1, 5) || 'A definir',
+        ida1: gn(row1, 6) || 0,
+        vuelta1: gn(row1, 7) || 0,
+        global1: gn(row1, 8) || 0,
+        equipo2: gs(row2, 5) || 'A definir',
+        ida2: gn(row2, 6) || 0,
+        vuelta2: gn(row2, 7) || 0,
+        global2: gn(row2, 8) || 0
+      });
+    }
+  }
+  
+  // Si no hay datos en SEMIS, crear estructura por defecto
+  if (playoffsData.semis.length === 0) {
+    playoffsData.semis = [
+      { equipo1: 'A definir', ida1: 0, vuelta1: 0, global1: 0, equipo2: 'A definir', ida2: 0, vuelta2: 0, global2: 0 },
+      { equipo1: 'A definir', ida1: 0, vuelta1: 0, global1: 0, equipo2: 'A definir', ida2: 0, vuelta2: 0, global2: 0 }
+    ];
+  }
+
+  // Procesar FINAL (columnas K-N, filtrar filas con equipos)
+  const finalRows = playoffsSheet.rows.filter(r => gs(r, 10)); // Solo filas con equipo en col K
+  const finalRow1 = finalRows[0];
+  const finalRow2 = finalRows[1];
+  if (finalRow1 && finalRow2) {
+    playoffsData.final = {
+      equipo1: gs(finalRow1, 10) || 'Finalista A',
+      ida1: gn(finalRow1, 11) || 0,
+      vuelta1: gn(finalRow1, 12) || 0,
+      global1: gn(finalRow1, 13) || 0,
+      equipo2: gs(finalRow2, 10) || 'Finalista B',
+      ida2: gn(finalRow2, 11) || 0,
+      vuelta2: gn(finalRow2, 12) || 0,
+      global2: gn(finalRow2, 13) || 0
+    };
+  } else {
+    // Si no hay datos, crear objeto vacío con valores por defecto
+    playoffsData.final = {
+      equipo1: 'Finalista A',
+      ida1: 0,
+      vuelta1: 0,
+      global1: 0,
+      equipo2: 'Finalista B',
+      ida2: 0,
+      vuelta2: 0,
+      global2: 0
+    };
+  }
+
+  // Procesar CAMPEON (columna P, fila 1)
+  playoffsData.campeon = playoffsSheet.rows[1] ? gs(playoffsSheet.rows[1], 15) : '';
+
+  return { 
+    jugadores, 
+    equipos_ap, 
+    equipos_cl, 
+    equipos_provincial,
+    tabla_anual, 
+    tablaEquiposProvincial,
+    playoffs: playoffsData,
+    ideal: { fecha: ultimaFechaConIdeal, jugadores: ideal_jugadores, total: ideal_total }, 
+    torneos, 
+    jugadoresStats, 
+    historialConsolidado, 
+    estadisticasIndividuales,
+    estadisticasEquipos,
+    rawLogs,
+    fechaActual, 
+    torneoActual,
+    torneoActualNombre
+  };
+}
+
+// ---- helpers ----
+function fv(v) { return v !== null && v !== undefined && v !== '' ? `<span class="fv">${v}</span>` : `<span class="fz">&#8212;</span>`; }
+function positionTooltip(e) {
+  const tooltip = e.currentTarget.querySelector('.rank-tooltip');
+  if (!tooltip) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  tooltip.style.left = (rect.right + 10) + 'px';
+  tooltip.style.top = (rect.top + rect.height / 2) + 'px';
+  tooltip.style.transform = 'translateY(-50%)';
+}
+function rankEl(puesto, equipo, prevEquipo) {
+  // Detectar si hay empate en puntos con el equipo anterior
+  const hasTie = prevEquipo && equipo.pts === prevEquipo.pts;
+  
+  if (!hasTie) {
+    return `<span class="rank-num">${puesto}</span>`;
+  }
+  
+  // Generar mensaje explicando por qué quedó en esta posición
+  const puestoOrdinal = puesto === 1 ? '1er' : puesto === 2 ? '2do' : puesto === 3 ? '3er' : `${puesto}to`;
+  const puestoAnterior = prevEquipo.puesto;
+  const puestoAnteriorOrdinal = puestoAnterior === 1 ? '1er' : puestoAnterior === 2 ? '2do' : puestoAnterior === 3 ? '3er' : `${puestoAnterior}to`;
+  let razon = '';
+  
+  if (equipo.fechasGanadas !== prevEquipo.fechasGanadas) {
+    razon = `tener menos fechas ganadas (${equipo.fechasGanadas} vs ${prevEquipo.fechasGanadas})`;
+  } else if (equipo.mejorFecha !== prevEquipo.mejorFecha) {
+    razon = `tener menor mejor fecha (${equipo.mejorFecha} pts vs ${prevEquipo.mejorFecha} pts)`;
+  } else {
+    razon = `orden alfabético`;
+  }
+  
+  const mensaje = `<strong>${equipo.equipo}</strong> quedó en ${puestoOrdinal} lugar por ${razon} que <strong>${prevEquipo.equipo}</strong> que quedó en ${puestoAnteriorOrdinal} lugar`;
+  const tooltip = `<span class="rank-tooltip"><span class="rank-tooltip-line">${mensaje}</span></span>`;
+  return `<span class="rank-num has-tie" onmouseenter="positionTooltip(event)">${puesto}${tooltip}</span>`;
+}
+function calcularFechasGanadas(equipos) {
+  const numFechas = equipos[0]?.fechas?.length || 11;
+  const fechasGanadas = equipos.map(() => 0);
+  
+  for (let f = 0; f < numFechas; f++) {
+    const puntajes = equipos.map(eq => eq.fechas[f] || 0);
+    const maxPuntaje = Math.max(...puntajes);
+    if (maxPuntaje > 0) {
+      puntajes.forEach((pts, idx) => {
+        if (pts === maxPuntaje) fechasGanadas[idx]++;
+      });
+    }
+  }
+  return fechasGanadas;
+}
+function sortEquiposConDesempate(equipos) {
+  const fechasGanadasArray = calcularFechasGanadas(equipos);
+  
+  // Agregar stats de desempate a cada equipo
+  equipos.forEach((eq, idx) => {
+    eq.fechasGanadas = fechasGanadasArray[idx];
+    eq.mejorFecha = Math.max(...eq.fechas.filter(v => v > 0));
+    if (eq.mejorFecha === -Infinity) eq.mejorFecha = 0;
+  });
+  
+  // Ordenar por: pts DESC, fechasGanadas DESC, mejorFecha DESC, nombre ASC
+  return [...equipos].sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    if (b.fechasGanadas !== a.fechasGanadas) return b.fechasGanadas - a.fechasGanadas;
+    if (b.mejorFecha !== a.mejorFecha) return b.mejorFecha - a.mejorFecha;
+    return a.equipo.localeCompare(b.equipo);
+  });
+}
+function calcularPuestos(equipos) {
+  let puesto = 1;
+  equipos.forEach((eq, i) => {
+    if (i > 0) {
+      const prev = equipos[i - 1];
+      // Solo incrementar puesto si hay diferencia en algún criterio
+      if (eq.pts !== prev.pts || eq.fechasGanadas !== prev.fechasGanadas || 
+          eq.mejorFecha !== prev.mejorFecha || eq.equipo !== prev.equipo) {
+        puesto++;
+      }
+    }
+    eq.puesto = puesto;
+  });
+}
+function initials(n) { return n.split(" ").slice(0,2).map(w=>w[0]||'').join("").toUpperCase(); }
+function getTeamColor(teamName) {
+  const colors = {
+    'CABRON': { bg: '#FFFFFF', text: '#000000' },
+    'MONTRE': { bg: '#00D000', text: '#FFFFFF' },
+    'FERRERO HNOS': { bg: '#8B0000', text: '#FFFFFF' },
+    'INSIDE TRENEL': { bg: '#000000', text: '#FFFFFF' },
+    'CERRAJERIA OMARCITO': { bg: '#FF8C00', text: '#FFFFFF' },
+    'AGENCIA 133': { bg: '#FF00FF', text: '#FFFFFF' },
+    'TRIBUNERAS': { bg: '#DAA520', text: '#00008B' },
+    'A LO DE JUAN': { bg: '#00008B', text: '#FFD700' },
+    'RADIO UNO': { bg: '#87CEEB', text: '#FFFFFF' },
+    'EL GRAN DT': { bg: '#FFD700', text: '#000000' },
+    'FORTYUS GYM': { bg: '#8B4513', text: '#FFFFFF' },
+    'PERCHA FC': { bg: '#000000', text: '#FFD700' }
+  };
+  const upperName = teamName.toUpperCase().trim();
+  return colors[upperName] || { bg: 'linear-gradient(135deg, var(--c1), var(--c2))', text: '#fff' };
+}
+function teamAvatar(name, teamName, torneosGanados) {
+  const colors = teamName ? getTeamColor(teamName) : { bg: 'linear-gradient(135deg, var(--c1), var(--c2))', text: '#fff' };
+  const bgStyle = colors.bg.includes('gradient') ? `background: ${colors.bg}` : `background: ${colors.bg}`;
+  const style = `${bgStyle}; color: ${colors.text}`;
+  const avatar = `<span class="team-avatar" style="${style}">${initials(name)}</span>`;
+  
+  // Si tiene torneos ganados, mostrar una estrella por cada torneo
+  if (torneosGanados && torneosGanados > 0) {
+    const estrellas = '⭐'.repeat(torneosGanados);
+    return `<div class="team-avatar-wrapper">${avatar}<span class="team-avatar-trophy" title="${torneosGanados} torneo${torneosGanados > 1 ? 's' : ''} ganado${torneosGanados > 1 ? 's' : ''}">${estrellas}</span></div>`;
+  }
+  
+  return avatar;
+}
+
+function showTab(e, name) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("sec-"+name).classList.add("active");
+  e.currentTarget.classList.add("active");
+}
+
+function showTabFromMenu(name) {
+  // Ocultar menú principal
+  document.getElementById("main-menu").classList.add("hidden");
+  
+  // Mostrar botón hamburguesa
+  document.getElementById("hamburger-btn").classList.add("show");
+  
+  // Mostrar sección seleccionada
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById("sec-"+name).classList.add("active");
+  
+  // Scroll al inicio
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showMenu() {
+  // Ocultar todas las secciones
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  
+  // Ocultar botón hamburguesa
+  document.getElementById("hamburger-btn").classList.remove("show");
+  
+  // Mostrar menú principal
+  document.getElementById("main-menu").classList.remove("hidden");
+  
+  // Scroll al inicio
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ---- renders ----
+function renderHeaderStats() {
+  const fecha = DATA.ideal.fecha || 1;
+  const torneoNombre = DATA.torneoActualNombre || 'Apertura';
+  document.getElementById("header-subtitle").innerHTML = `Torneo ${torneoNombre} &mdash; Posiciones en vivo (Fecha ${fecha})`;
+}
+
+function renderJugadores(filter) {
+  const fl = (filter||"").toLowerCase();
+  const rows = DATA.estadisticasIndividuales
+    .filter(j => j.jugador && j.equipo)
+    .filter(j => !fl || j.jugador.toLowerCase().includes(fl) || j.equipo.toLowerCase().includes(fl))
+    .sort((a,b) => (b.puntosHistoricos || 0) - (a.puntosHistoricos || 0));
+  document.getElementById("jug-count").textContent = rows.length + " jugadores";
+  
+  // Calcular ranking denso
+  let puestoDenso = 1;
+  let puntosAnterior = null;
+  
+  document.getElementById("body-jugadores").innerHTML = rows.map((j, i) => {
+    // Si los puntos cambian, incrementar el puesto denso en 1
+    if (puntosAnterior !== null && j.puntosHistoricos !== puntosAnterior) {
+      puestoDenso++;
+    }
+    puntosAnterior = j.puntosHistoricos;
+    
+    const posClass = puestoDenso <= 3 ? ["pos-1","pos-2","pos-3"][puestoDenso - 1] : "";
+    
+    // Calcular tendencia
+    let tendenciaBadge = '';
+    if (j.puestoActual !== null && j.puestoAnterior !== null) {
+      const diff = j.puestoAnterior - j.puestoActual;
+      if (diff > 0) {
+        tendenciaBadge = `<span class="fut-badge-tendencia positivo">↗ +${Math.abs(diff)}</span>`;
+      } else if (diff < 0) {
+        tendenciaBadge = `<span class="fut-badge-tendencia negativo">↘ ${Math.abs(diff)}</span>`;
+      } else {
+        tendenciaBadge = `<span class="fut-badge-tendencia igual">→ =</span>`;
+      }
+    } else {
+      tendenciaBadge = `<span style="color:var(--text3);font-size:0.75rem;">-</span>`;
+    }
+    
+    // Obtener últimos 3 puntajes
+    const ultimos3Badges = getRecentScoresBadges(j.jugador);
+    
+    // Calcular total de torneos ganados
+    const torneosGanados = (j.campeonApertura || 0) + (j.campeonClausura || 0) + (j.campeonAnual || 0);
+    
+    return `<tr class="${posClass}">
+      <td class="c"><span class="rank-num">${puestoDenso}</span></td>
+      <td><div class="team-pill">${teamAvatar(j.jugador, j.equipo, torneosGanados)}<span class="team-name">${j.jugador}</span></div></td>
+      <td class="c"><span class="pts ${j.puntosHistoricos?'pts-hi':'pts-lo'}">${j.puntosHistoricos || 0}</span></td>
+      <td class="c"><span style="font-weight:600;color:var(--text2);">${j.cantFechas || 0}</span></td>
+      <td class="c"><span style="font-weight:700;color:var(--c3);">${j.promedio ? parseFloat(j.promedio).toFixed(2) : '0.00'}</span></td>
+      <td class="c">${ultimos3Badges || '<span style="color:var(--text3);font-size:0.75rem;">-</span>'}</td>
+      <td class="c">${tendenciaBadge}</td>
+      <td class="c"><button class="btn-ficha" onclick="openFutModal('${j.jugador.replace(/'/g, "\\'")}')" title="Ver ficha del jugador">FICHA</button></td>
+    </tr>`;
+  }).join("");
+}
+function filterJugadores() { renderJugadores(document.getElementById("search-jug").value); }
+
+function renderEquipos(filter) {
+  const fl = (filter||"").toLowerCase();
+  const rows = DATA.estadisticasEquipos
+    .filter(eq => eq.equipo && eq.equipo !== 'LIBRE')
+    .filter(eq => !fl || eq.equipo.toLowerCase().includes(fl))
+    .sort((a,b) => (b.puntosHistoricos || 0) - (a.puntosHistoricos || 0));
+  document.getElementById("eq-count").textContent = rows.length + " equipos";
+  
+  // Calcular ranking denso
+  let puestoDenso = 1;
+  let puntosAnterior = null;
+  
+  document.getElementById("body-equipos").innerHTML = rows.map((eq, i) => {
+    // Si los puntos cambian, incrementar el puesto denso en 1
+    if (puntosAnterior !== null && eq.puntosHistoricos !== puntosAnterior) {
+      puestoDenso++;
+    }
+    puntosAnterior = eq.puntosHistoricos;
+    
+    const posClass = puestoDenso <= 3 ? ["pos-1","pos-2","pos-3"][puestoDenso - 1] : "";
+    
+    // Calcular total de torneos ganados
+    const torneosGanados = (eq.campeonApertura || 0) + (eq.campeonClausura || 0) + (eq.campeonAnual || 0) + (eq.campeonProvincial || 0);
+    
+    // Calcular PJ (partidos jugados) = PTS / PROM
+    const pj = (eq.promedio && eq.promedio > 0) ? Math.round(eq.puntosHistoricos / eq.promedio) : 0;
+    
+    return `<tr class="${posClass}">
+      <td class="c"><span class="rank-num">${puestoDenso}</span></td>
+      <td><div class="team-pill">${teamAvatar(eq.equipo, eq.equipo, torneosGanados)}<span class="team-name">${eq.equipo}</span></div></td>
+      <td class="c"><span class="pts ${eq.puntosHistoricos?'pts-hi':'pts-lo'}">${eq.puntosHistoricos || 0}</span></td>
+      <td class="c"><span style="font-weight:600;color:var(--text2);">${pj}</span></td>
+      <td class="c"><span style="font-weight:700;color:var(--c3);">${eq.promedio ? parseFloat(eq.promedio).toFixed(2) : '0.00'}</span></td>
+      <td class="c"><button class="btn-ficha" onclick="openFutModalEquipo('${eq.equipo.replace(/'/g, "\\'")}')" title="Ver ficha del equipo">FICHA</button></td>
+    </tr>`;
+  }).join("");
+}
+function filterEquipos() { renderEquipos(document.getElementById("search-eq").value); }
+
+function buildEquipoRows(rawRows, prefix, fl) {
+  const rows = sortEquiposConDesempate(rawRows);
+  calcularPuestos(rows);
+  
+  const tbody = document.getElementById("body-"+prefix);
+  tbody.innerHTML = "";
+  const torneo = prefix === "apertura" ? "APERTURA" : prefix === "clausura" ? "CLAUSURA" : "PROVINCIAL";
+  
+  rows.forEach((eq, i) => {
+    const prevEq = i > 0 ? rows[i - 1] : null;
+    const fCols = eq.fechas.map(v=>`<td class="c fc">${fv(v)}</td>`).join("");
+    const tr = document.createElement("tr");
+    
+    // Fondo verde claro para puestos 1-8 en Provincial
+    if (prefix === "provincial" && eq.puesto <= 8) {
+      tr.style.background = "#f0fdf4";
+    }
+    
+    // Línea divisoria en puesto 8 para Provincial
+    if (prefix === "provincial" && eq.puesto === 8) {
+      tr.style.borderBottom = "3px solid #22c55e";
+      tr.classList.add("separator-clasificacion");
+    }
+    
+    // Estilo del nombre del equipo para puestos 1-8 en Provincial
+    const teamNameStyle = (prefix === "provincial" && eq.puesto <= 8) ? ' style="color:#16a34a;font-weight:bold"' : '';
+    
+    // Obtener torneos ganados para el equipo
+    const equipoStats = DATA.estadisticasEquipos.find(e => e.equipo === eq.equipo);
+    const torneosGanados = equipoStats ? (equipoStats.campeonApertura || 0) + (equipoStats.campeonClausura || 0) + (equipoStats.campeonAnual || 0) + (equipoStats.campeonProvincial || 0) : 0;
+    
+    tr.innerHTML = `
+      <td class="c">${rankEl(eq.puesto, eq, prevEq)}</td>
+      <td><div class="team-pill">${teamAvatar(eq.equipo, eq.equipo, torneosGanados)}<span class="team-name"${teamNameStyle}>${eq.equipo}</span></div></td>
+      ${fCols}
+      <td class="c"><span class="pts ${eq.pts?'pts-hi':'pts-lo'}">${eq.pts}</span></td>
+      <td class="c"><button class="btn-expand" id="btn-${prefix}-${i}" onclick="toggleDetail('${prefix}',${i})">&#128100; Ver equipo</button></td>`;
+    tbody.appendChild(tr);
+
+    const apOrCl = prefix==="apertura"?"ap":prefix==="clausura"?"cl":"prov";
+    const totalKey = prefix==="apertura"?"ap_total":prefix==="clausura"?"cl_total":"prov_total";
+    const numFechas = eq.fechas.length;
+    
+    // Todos los jugadores del equipo sin distinción de capitán fijo
+    const allP = eq.jug.filter(nombre => nombre && nombre.trim() !== '');
+    const pRows = allP.map(nombreJugador => {
+      const jd = DATA.jugadores.find(j=>j.nombre.toUpperCase()===nombreJugador.toUpperCase());
+      let arr = jd ? jd[apOrCl] : Array(numFechas).fill(0);
+      
+      // Si el array tiene menos fechas que numFechas, rellenar con null (jugador no jugó esa fecha)
+      if (arr.length < numFechas) {
+        arr = [...arr];
+        while (arr.length < numFechas) {
+          arr.push(null);
+        }
+      }
+      
+      const tot = jd ? jd[totalKey] : 0;
+      const finalTotal = tot;
+      
+      // Generar celdas de fechas con indicador de capitán dinámico
+      const fCells = arr.map((v, fechaIdx) => {
+        const fechaNum = fechaIdx + 1;
+        // Buscar en rawLogs si este jugador fue capitán en esta fecha
+        const fueCapitan = DATA.rawLogs && DATA.rawLogs.some(log => 
+          log.jugador.toUpperCase() === nombreJugador.toUpperCase() && 
+          log.torneo === torneo && 
+          log.fecha === fechaNum && 
+          log.capitan === true
+        );
+        
+        const puntos = fueCapitan ? v * 2 : v;
+        const capIndicator = fueCapitan ? '<span class="captain-indicator">Ⓒ<span class="captain-tooltip">Capitán x2</span></span>' : '';
+        
+        return `<td class="c fc">${fv(puntos)}${fueCapitan && v ? capIndicator : ''}</td>`;
+      }).join("");
+      
+      return `<tr><td><div class="player-name-cell">${teamAvatar(nombreJugador, eq.equipo)}<span style="font-weight:600;font-size:0.82rem">${nombreJugador}</span></div></td>${fCells}<td class="c"><strong style="color:var(--c1)">${finalTotal}</strong></td></tr>`;
+    }).join("");
+    const fHds = Array.from({length:numFechas},(_,k)=>`<th class="c fc">${fl}${k+1}</th>`).join("");
+    const det = document.createElement("tr");
+    det.className = "detail-row"; det.id = `det-${prefix}-${i}`;
+    const totalCols = 2 + numFechas + 2; // # + Equipo + Fechas + PTS + Botón
+    det.innerHTML = `<td colspan="${totalCols}"><div class="detail-inner"><table><thead><tr><th>Jugador</th>${fHds}<th class="c">Total</th></tr></thead><tbody>${pRows}</tbody></table></div></td>`;
+    tbody.appendChild(det);
+  });
+}
+function toggleDetail(prefix, i) {
+  const det = document.getElementById(`det-${prefix}-${i}`);
+  const btn = document.getElementById(`btn-${prefix}-${i}`);
+  const open = det.classList.toggle("open");
+  btn.innerHTML = open ? "&#10005; Cerrar" : "&#128100; Ver equipo";
+  btn.classList.toggle("open", open);
+}
+function renderApertura() { 
+  buildEquipoRows(DATA.equipos_ap, "apertura", "F");
+}
+
+function renderClausura() { 
+  buildEquipoRows(DATA.equipos_cl, "clausura", "C");
+}
+
+function renderProvincial() {
+  buildEquipoRows(DATA.equipos_provincial, "provincial", "F");
+}
+
+function renderPlayoffs() {
+  const playoffs = DATA.playoffs || {};
+  const container = document.getElementById("playoffs-bracket");
+  
+  if (!playoffs.cuartos || playoffs.cuartos.length === 0) {
+    container.innerHTML = '<p style="text-align:center;padding:60px;color:#666;font-size:1.1rem;">Los Playoffs comenzarán al finalizar la fase regular</p>';
+    return;
+  }
+  
+  // Helper para determinar ganador
+  const getWinner = (g1, g2, eq1, eq2) => {
+    if (!g1 && !g2) return null;
+    return g1 > g2 ? eq1 : eq2;
+  };
+  
+  // Helper para crear una llave estilo modal Sheets
+  const createMatch = (llave) => {
+    const equipo1 = llave.equipo1 || 'A definir';
+    const equipo2 = llave.equipo2 || 'A definir';
+    const ganador = getWinner(llave.global1, llave.global2, equipo1, equipo2);
+    const isPending = equipo1.includes('definir') || equipo1.includes('Finalista');
+    
+    return `
+      <div class="matchup ${isPending ? 'pending' : ''}">
+        <div class="team-row ${ganador === equipo1 ? 'winner' : ''}">
+          <span class="team-name">${equipo1}</span>
+          <div class="score-box">
+            <span class="pts-sec">${llave.ida1 || 0}</span>
+            <span class="pts-sec">${llave.vuelta1 || 0}</span>
+            <span class="pts-total">${llave.global1 || 0}</span>
+          </div>
+        </div>
+        <div class="team-row ${ganador === equipo2 ? 'winner' : ''}">
+          <span class="team-name">${equipo2}</span>
+          <div class="score-box">
+            <span class="pts-sec">${llave.ida2 || 0}</span>
+            <span class="pts-sec">${llave.vuelta2 || 0}</span>
+            <span class="pts-total">${llave.global2 || 0}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+  
+  // Títulos separados ANTES del grid (como en modal Sheets)
+  let html = `
+    <div class="titles-row">
+      <div class="round-title">Cuartos</div>
+      <div class="round-title">Semis</div>
+      <div class="round-title">Final</div>
+    </div>
+  `;
+  
+  html += '<div class="bracket-grid">';
+  
+  // CUARTOS
+  html += '<div class="column col-cuartos">';
+  playoffs.cuartos.forEach((llave) => {
+    html += createMatch(llave);
+  });
+  html += '</div>';
+  
+  // SEMIS
+  html += '<div class="column col-semis">';
+  playoffs.semis.forEach((llave) => {
+    html += createMatch(llave);
+  });
+  html += '</div>';
+  
+  // FINAL + CAMPEON
+  html += '<div class="column col-final">';
+  html += createMatch(playoffs.final);
+  
+  // CAMPEON
+  if (playoffs.campeon) {
+    html += `
+      <div class="champion-container">
+        <div class="round-title" style="margin-bottom: 8px;">Campeón</div>
+        <div class="champion-card">
+          <span class="cup">🏆</span>
+          <span class="champion-name">${playoffs.campeon}</span>
+        </div>
+      </div>
+    `;
+  }
+  
+  html += '</div></div>';
+  container.innerHTML = html;
+}
+
+function renderIdeal() {
+  const ideal = DATA.ideal;
+  document.getElementById("ideal-title").innerHTML = `Equipo Ideal &mdash; Fecha ${ideal.fecha}`;
+  const container = document.getElementById("ideal-field");
+  if (!ideal.jugadores?.length) { container.innerHTML = `<p style="color:var(--text3);padding:40px;text-align:center">Sin datos para esta fecha.</p>`; return; }
+  
+  const sorted = [...ideal.jugadores].sort((a,b) => b.pts - a.pts);
+  
+  // Obtener equipo de cada jugador
+  const playersWithTeam = sorted.map(p => {
+    const jugador = DATA.jugadores.find(j => j.nombre.toUpperCase() === p.nombre.toUpperCase());
+    return { ...p, equipo: jugador ? jugador.equipo : 'Desconocido' };
+  });
+  
+  // Distribuir jugadores en formación 1-3-1
+  const groups = [];
+  if (playersWithTeam.length >= 1) groups.push([playersWithTeam[0]]);
+  if (playersWithTeam.length >= 4) groups.push([playersWithTeam[1], playersWithTeam[2], playersWithTeam[3]]);
+  else if (playersWithTeam.length === 3) groups.push([playersWithTeam[1], playersWithTeam[2]]);
+  else if (playersWithTeam.length === 2) groups.push([playersWithTeam[1]]);
+  if (playersWithTeam.length >= 5) groups.push([playersWithTeam[4]]);
+  
+  // Generar HTML de la cancha
+  const fieldHTML = `<div class="field">${groups.map((g, idx) => {
+    const rowClass = g.length === 3 ? 'field-row center-row' : 'field-row';
+    return `<div class="${rowClass}">${g.map(p => {
+      const colors = getTeamColor(p.equipo);
+      const style = `background: ${colors.bg}; color: ${colors.text}`;
+      const isCaptain = playersWithTeam[0] === p;
+      const titleText = isCaptain ? `${p.nombre} - ${p.equipo} (CAPITÁN x2)` : `${p.nombre} - ${p.equipo}`;
+      return `<span class="field-avatar" style="${style}" title="${titleText}">${initials(p.nombre)}</span>`;
+    }).join("")}</div>`;
+  }).join("")}</div>`;
+  
+  // Generar HTML de la lista
+  const listHTML = `<div class="ideal-list">${playersWithTeam.map((p, i) => {
+    const capBadge = i === 0 ? `<span class="tag tag-cap" style="margin-left:6px">CAP 2x</span>` : '';
+    return `<div class="ideal-list-item">
+    ${teamAvatar(p.nombre, p.equipo)}
+    <div class="ideal-list-info">
+      <div class="ideal-list-name">${p.nombre}${capBadge}</div>
+      <div class="ideal-list-team">${p.equipo}</div>
+    </div>
+    <div class="ideal-list-pts">${p.pts} <span style="font-size:0.7em;opacity:0.6">pts</span></div>
+  </div>`;
+  }).join("")}</div>`;
+  
+  container.innerHTML = `<div class="ideal-container">
+    <div class="ideal-field-container">
+      ${fieldHTML}
+    </div>
+    <div class="ideal-list-container">
+      ${listHTML}
+      <div class="ideal-total">TOTAL: ${ideal.total} pts</div>
+    </div>
+  </div>`;
+}
+
+function renderAnual() {
+  // Combinar datos de apertura y clausura para calcular tabla anual
+  const equiposMap = {};
+  
+  DATA.equipos_ap.forEach(eq => {
+    equiposMap[eq.equipo] = {
+      equipo: eq.equipo,
+      apertura: eq.pts,
+      clausura: 0,
+      fechas: [...eq.fechas]
+    };
+  });
+  
+  DATA.equipos_cl.forEach(eq => {
+    if (equiposMap[eq.equipo]) {
+      equiposMap[eq.equipo].clausura = eq.pts;
+      equiposMap[eq.equipo].fechas = equiposMap[eq.equipo].fechas.concat(eq.fechas);
+    } else {
+      equiposMap[eq.equipo] = {
+        equipo: eq.equipo,
+        apertura: 0,
+        clausura: eq.pts,
+        fechas: eq.fechas
+      };
+    }
+  });
+  
+  const equiposAnual = Object.values(equiposMap).map(eq => ({
+    ...eq,
+    pts: eq.apertura + eq.clausura
+  }));
+  
+  const rows = sortEquiposConDesempate(equiposAnual);
+  calcularPuestos(rows);
+  
+  const maxPts = rows[0]?.pts || 1;
+  const posClass = ["pos-1","pos-2","pos-3"];
+  document.getElementById("anual-list").innerHTML = rows.map((r, i) => {
+    const prevR = i > 0 ? rows[i - 1] : null;
+    const pct = maxPts > 0 ? Math.round((r.pts / maxPts) * 100) : 0;
+    const rk = rankEl(r.puesto, r, prevR);
+    return `<div class="anual-row ${posClass[i]||""}">
+      <div class="ar-rank">${rk}</div>
+      <div class="ar-team">${teamAvatar(r.equipo, r.equipo)}<div><div class="ar-name">${r.equipo}</div><div class="ar-sub">${i===0?"L&iacute;der":r.pts>0?"A "+(maxPts-r.pts)+" pts del l&iacute;der":"Sin puntos"}</div></div></div>
+      <div class="ar-parciales">
+        <div class="ar-parcial"><div class="pv">${r.apertura}</div><div class="pl">Apertura</div></div>
+        <div class="ar-parcial"><div class="pv">${r.clausura}</div><div class="pl">Clausura</div></div>
+      </div>
+      <div class="ar-total"><div class="tv">${r.pts}</div><div class="tl">pts</div></div>
+      <div class="ar-bar-wrap"><div class="ar-bar" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join("");
+}
+
+function renderTorneosIndividuales() {
+  const { apertura, clausura, provincial, anual } = DATA.torneos;
+  
+  // Renderizar Apertura
+  document.getElementById("body-torneos-apertura").innerHTML = apertura.map((j, i) => {
+    const posClass = i < 3 ? ["pos-1","pos-2","pos-3"][i] : "";
+    const jugadorData = DATA.jugadores.find(jug => jug.nombre.toUpperCase() === j.jugador.toUpperCase());
+    const equipo = jugadorData ? jugadorData.equipo : null;
+    return `<tr class="${posClass}">
+      <td class="c"><span class="rank-num">${j.pos}</span></td>
+      <td><div class="team-pill">${teamAvatar(j.jugador, equipo)}<span class="team-name">${j.jugador}</span></div></td>
+      <td class="c"><span class="pts ${j.pts?'pts-hi':'pts-lo'}">${j.pts}</span></td>
+    </tr>`;
+  }).join("");
+  
+  // Renderizar Clausura
+  document.getElementById("body-torneos-clausura").innerHTML = clausura.map((j, i) => {
+    const posClass = i < 3 ? ["pos-1","pos-2","pos-3"][i] : "";
+    const jugadorData = DATA.jugadores.find(jug => jug.nombre.toUpperCase() === j.jugador.toUpperCase());
+    const equipo = jugadorData ? jugadorData.equipo : null;
+    return `<tr class="${posClass}">
+      <td class="c"><span class="rank-num">${j.pos}</span></td>
+      <td><div class="team-pill">${teamAvatar(j.jugador, equipo)}<span class="team-name">${j.jugador}</span></div></td>
+      <td class="c"><span class="pts ${j.pts?'pts-hi':'pts-lo'}">${j.pts}</span></td>
+    </tr>`;
+  }).join("");
+  
+  // Renderizar Provincial
+  document.getElementById("body-torneos-provincial").innerHTML = provincial.map((j, i) => {
+    const posClass = i < 3 ? ["pos-1","pos-2","pos-3"][i] : "";
+    const jugadorData = DATA.jugadores.find(jug => jug.nombre.toUpperCase() === j.jugador.toUpperCase());
+    const equipo = jugadorData ? jugadorData.equipo : null;
+    return `<tr class="${posClass}">
+      <td class="c"><span class="rank-num">${j.pos}</span></td>
+      <td><div class="team-pill">${teamAvatar(j.jugador, equipo)}<span class="team-name">${j.jugador}</span></div></td>
+      <td class="c"><span class="pts ${j.pts?'pts-hi':'pts-lo'}">${j.pts}</span></td>
+    </tr>`;
+  }).join("");
+  
+  // Renderizar Anual
+  document.getElementById("body-torneos-anual").innerHTML = anual.map((j, i) => {
+    const posClass = i < 3 ? ["pos-1","pos-2","pos-3"][i] : "";
+    const jugadorData = DATA.jugadores.find(jug => jug.nombre.toUpperCase() === j.jugador.toUpperCase());
+    const equipo = jugadorData ? jugadorData.equipo : null;
+    return `<tr class="${posClass}">
+      <td class="c"><span class="rank-num">${j.pos}</span></td>
+      <td><div class="team-pill">${teamAvatar(j.jugador, equipo)}<span class="team-name">${j.jugador}</span></div></td>
+      <td class="c"><span class="pts ${j.pts?'pts-hi':'pts-lo'}">${j.pts}</span></td>
+    </tr>`;
+  }).join("");
+}
+
+// ---- Tabs de torneos para móvil ----
+function initTorneosTabsMobile() {
+  const tabs = document.querySelectorAll('.torneo-tab');
+  const cards = document.querySelectorAll('.torneo-card');
+  
+  // Marcar la primera card como activa por defecto
+  if (cards.length > 0) {
+    cards[0].classList.add('active');
+  }
+  
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const torneoName = tab.getAttribute('data-torneo');
+      
+      // Remover clase active de todos los tabs y cards
+      tabs.forEach(t => t.classList.remove('active'));
+      cards.forEach(c => c.classList.remove('active'));
+      
+      // Agregar clase active al tab y card seleccionado
+      tab.classList.add('active');
+      const activeCard = document.querySelector(`.torneo-card[data-torneo="${torneoName}"]`);
+      if (activeCard) {
+        activeCard.classList.add('active');
+      }
+    });
+  });
+}
+
+// ---- init ----
+async function init() {
+  try {
+    DATA = await loadData();
+    document.getElementById("loading").classList.add("hidden");
+    renderHeaderStats();
+    renderJugadores();
+    renderEquipos();
+    renderApertura();
+    renderClausura();
+    renderProvincial();
+    renderPlayoffs();
+    renderIdeal();
+    renderAnual();
+    renderTorneosIndividuales();
+    initTorneosTabsMobile();
+  } catch(e) {
+    console.error(e);
+    document.getElementById("loading").classList.add("hidden");
+    document.getElementById("error-overlay").classList.add("show");
+  }
+}
+init();
+
+// ---- FICHA JUGADOR (ESTILO PROMIEDOS) ----
+
+function getMedalla(cantFechas) {
+  if (cantFechas >= 100) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512.002 512.002" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M345.339,375.17v-33.835c0-11.776-9.536-21.333-21.333-21.333h-8.875l0.917-0.384L214.331,0.002h-24.192c-2.389,0-4.715,0.405-7.04,0.853c6.059,17.856,10.901,32.085,11.904,35.008l85.248,256.064c1.92,5.76,1.173,11.712-1.472,16.683l-3.691-3.691c-8.341-8.341-21.824-8.341-30.165,0l-3.563,3.563c-0.533-1.024-1.237-1.941-1.6-3.072L154.598,49.559c-1.088-3.115-2.005-5.803-3.008-8.747L112.187,251.65c-5.461,18.603,4.48,38.784,23.019,45.739l62.293,22.613h-1.493c-11.797,0-21.333,9.557-21.333,21.333v28.437l-17.067,22.763c-5.931,7.915-5.632,18.859,0.661,26.453l16.405,19.669v30.677c0,11.776,9.536,21.333,21.333,21.333h33.835l15.083,15.083c4.16,4.16,9.621,6.251,15.083,6.251c5.461,0,10.923-2.091,15.083-6.251l15.083-15.083h33.835c11.797,0,21.333-9.557,21.333-21.333v-33.835l15.083-15.083c8.341-8.341,8.341-21.824,0-30.165L345.339,375.17z M260.006,426.669c-11.776,0-21.333-9.557-21.333-21.333s9.557-21.333,21.333-21.333s21.333,9.557,21.333,21.333S271.782,426.669,260.006,426.669z"/><path fill="currentColor" d="M399.716,248.043L352.334,27.669c-0.171-0.853-0.405-1.707-0.704-2.539C346.361,10.091,332.132,0,316.196,0h-57.067l96.427,303.04l21.44-9.003C395.449,287.125,405.39,266.731,399.716,248.043z"/></svg>', nombre: 'VETERANO', descripcion: '100+ fechas jugadas', color: '#FFD700' };
+  if (cantFechas >= 30) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 952.432 952.432" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M370.175,486.788c0-167.9,136.1-304,304-304c11.5,0,22.8,0.7,34,1.899c-2.3-2.5-11.6-7.8-14.8-9.3c-168.601-80.6-324.9,32.7-406.8,105.2c-14.2,12.6-11.8,35,4.399,44.9c36.8,22.5,0.7,124.399-63.6,93.8c-4-1.9-10.2-5.801-14.3-7.7c-91.7-43.5-219.8,62.7-212.8,74.1c9.6,15.601,86.8-74.6,285.4,157.3c134.9,157.301,270.5,168.9,353,159.4c8.2-0.9,29-6.1,33.3-11.7C505.075,789.487,370.175,653.888,370.175,486.788z"/><path fill="currentColor" d="M927.175,371.288c-15-32.8-35.8-62-62-86.7c-27.1-25.6-58.6-45.2-93.8-58.3c-17.5-6.5-35.5-11.3-53.7-14.2c-5-0.8-10.1-1.5-15.1-2c-5.101-0.5-10.2-0.9-15.301-1.2c-5.1-0.2-10.199-0.3-15.199-0.3s-10,0.2-14.9,0.5c-5,0.3-9.9,0.8-14.9,1.3c-4.899,0.601-9.899,1.3-14.8,2.101c-4.899,0.8-9.8,1.8-14.7,2.899c-4.899,1.101-9.699,2.3-14.5,3.7c-2.199,0.6-4.3,1.3-6.5,1.9c-26.5,8.199-51.5,20.3-74.5,36c-47.6,32.5-83.5,78.199-103.699,132.399c-13.101,35.2-19,71.8-17.4,109.1c1.5,35.9,9.9,70.801,24.9,103.601s35.8,62,62,86.7c27.1,25.6,58.6,45.199,93.8,58.3c31.3,11.7,64.1,17.6,97.2,17.6c0.8,0,1.5,0,2.3,0c27.2-0.2,54.1-4.399,80.2-12.5c26.5-8.2,51.5-20.3,74.5-36c47.6-32.5,83.5-78.2,103.699-132.399c13.101-35.2,19-71.9,17.4-109.101C950.475,438.987,942.075,404.188,927.175,371.288z M674.175,230.588c0.2,0,0.4,0,0.5,0c-25.5,5.3-50.5,14.9-74,28.7c-1.4,0.8-2.8,1.7-4.2,2.5c-14.6-1.4-35.7-0.3-61.1,9.7C576.375,245.088,624.575,230.588,674.175,230.588z M428.575,559.288c-15.2-51.4-14.5-108,5.699-162.101c8.2-21.899,19.101-42.1,32.101-60.199c0.2,8.6,2.399,19.5,8.899,38.199c-16.6,32-25.8,68.5-26.8,107c-0.5,20.7,1.4,37.7,3.2,48.601C442.975,541.188,433.575,552.987,428.575,559.288z M479.975,536.987c-10.3-28.199-8-61.399-2.8-90c1.9-10.8,4.6-21.399,8.2-31.8c1.899-5.7,4.1-11.399,6.6-16.899c1.4-3.101,4.9-14.5,7.9-15.9l72-32.8l104.6,89.7l-17.1,101.199l-125.101,54.7c-2.1,0.7-11.3-7.2-13.199-8.5c-4.2-3-8.101-6.2-12-9.399c-7.5-6.301-14.2-13.2-19.601-21.4C485.475,549.788,482.375,543.487,479.975,536.987z M619.375,736.888c-11.7-2.6-23.3-6-34.8-10.3c-35.4-13.2-66.2-33.5-91.301-58.601c13.4,6.601,28,11.5,40.101,15c30.899,29.301,65.3,45,92.2,53.301C623.175,736.688,621.175,736.788,619.375,736.888z M748.274,699.888c-19.899,12.2-42,20.4-62.5,26c-6.8-0.4-17.5-1.4-30.5-4c-5-1-10.3-2.2-15.899-3.8c-24-6.601-57-19.9-86.9-46.601c-6-19.5-6.6-40.699-6.2-54.5l122.7-53.6l19.2,9.3l63.5,30.7L748.274,699.888z M722.475,416.888l-28.2,4.6l-105.1-89.999l22-49.2c27-16.2,117.6-34,117.6-34c50.9,26.399,74.2,50.7,83.2,62.2l-26.2,96.199L722.475,416.888z M893.375,619.088c-22.2,36.8-52.8,66.6-88.4,87.7c-0.399-0.4-1.2-0.7-2.3-0.9c-8.9-1.4-20.5-5.2-29.3-8.4l3.5-98.8l69.2-72l63.5,7.601C912.475,558.188,899.375,601.188,893.375,619.088z M911.075,509.288l-62.5-7.5l-40.101-83.4l26.3-96.5c14.4,3.9,33.2,9.101,45.101,12.4c19.1,25.8,33.2,55.1,41.5,86.1C923.875,452.388,916.274,489.188,911.075,509.288z"/></svg>', nombre: 'AMATEUR', descripcion: '30-99 fechas jugadas', color: '#C0C0C0' };
+  return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M436.094,282.012l-1.166-26.645l-36.376,35.064l-25.499-24.586c-3.086-14.887-6.747-28.837-10.301-41.298c-3.725-13.088-7.31-24.568-9.939-33.69c3.82-5.017,7.266-10.332,10.269-15.939c7.076-2.337,39.867-13.05,54.476-15.97c-9.066-24.175-36.167-37.225-40.475-39.17c0-0.291,0.02-0.577,0.02-0.874c0.006-16.382-3.332-32.055-9.351-46.29c-9.033-21.349-24.092-39.48-43.065-52.302C305.724,7.494,282.778-0.006,258.199,0c-16.389,0-32.056,3.326-46.291,9.35c-21.349,9.034-39.486,24.092-52.302,43.066c-12.822,18.961-20.323,41.9-20.316,66.486c-0.006,21.546,5.79,41.806,15.831,59.233L131.39,274.08l-16.953,16.345l-37.244-35.92l-1.235,26.55c-0.247,5.309-0.393,10.681-0.393,16.142c0,37.275,5.543,69.407,15.432,96.679c7.412,20.45,17.264,38.15,28.964,53.138c17.548,22.496,39.22,38.834,62.654,49.439C206.048,507.065,231.211,512,256,512c22.039,0,44.358-3.896,65.517-12.22c15.863-6.24,31.054-14.976,44.884-26.379c20.754-17.098,38.391-40.221,50.694-69.527c12.315-29.313,19.34-64.744,19.34-106.676C436.435,292.066,436.309,287.01,436.094,282.012z M178.142,169.736c-9.363-14.716-14.786-32.087-14.798-50.833c0.007-13.126,2.66-25.574,7.456-36.914c7.19-17.003,19.233-31.51,34.374-41.742c15.154-10.224,33.335-16.186,53.025-16.193c13.126,0.007,25.568,2.655,36.914,7.451c17.003,7.19,31.51,19.233,41.742,34.38c10.231,15.154,16.186,33.336,16.186,53.018c-0.006,23.49-8.508,44.866-22.635,61.463l-4.105,4.814l1.641,6.113c2.902,10.732,7.228,24.219,11.675,39.841c1.78,6.246,3.573,12.848,5.303,19.696l-41.076,39.594l-47.355-45.664l-47.354,45.664l-46.024-44.377l17.795-71.966L178.142,169.736z M398.381,385.679c-6.601,18.213-15.236,33.62-25.315,46.537c-15.128,19.372-33.525,33.215-53.608,42.318c-20.076,9.098-41.855,13.412-63.458,13.412c-19.202,0-38.556-3.408-56.712-10.548c-13.614-5.365-26.576-12.822-38.391-22.559c-17.706-14.621-32.904-34.362-43.813-60.285c-9.705-23.091-15.958-51.149-17.219-84.75l14.571,14.051l31.935-30.802l4.808,1.191l1.894-7.659l8.704-8.4l47.354,45.663l47.354-45.663l47.355,45.663l47.164-45.479c0.292,1.546,0.589,3.091,0.862,4.65l3.674-0.646l43.009,41.476l8.35-8.052l5.201-5.011C410.924,339.775,406.015,364.621,398.381,385.679z"/><path fill="currentColor" d="M265.484,135.906c12.074,0,21.862-9.788,21.862-21.862s-9.788-21.856-21.862-21.856c-12.069,0-21.862,9.781-21.862,21.856S253.415,135.906,265.484,135.906z"/></svg>', nombre: 'PRINCIPIANTE', descripcion: 'Menos de 30 fechas', color: '#4CAF50' };
+}
+
+function getInsignia(promedio) {
+  const p = parseFloat(promedio);
+  if (p >= 6) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M273 459l7.79-20 6.21 20 5.79-23.33-4.25-48c-7.76 7.94-17.54 17.85-29.74 30.27zm38.5-380.86a115.06 115.06 0 0 0-21.13-19.6c-17.315-11.88-35.418-18.913-55.08-22.14-18.751-3.067-37.99-2.743-56.33.12A203.86 203.86 0 0 0 133 49.42a184.2 184.2 0 0 0-29.62 15.36c-12.304 8.597-10.431 6.828.95 1.82a179.6 179.6 0 0 1 30.9-10c50.427-4.832 98.41-7.579 134.17 27.17a80 80 0 0 1 12.28 16c4.714 8.06 7.805 16.877 9.66 25.59l45.69 2.84c-5.032-17.752-15.256-37.574-25.53-50.06zm50.05 26.63c-8.531-13.217-18.495-25.428-29.66-34.88a78.24 78.24 0 0 0-15.79-10.38c2.67 2.68 5.22 5.45 7.61 8.32a138.13 138.13 0 0 1 9.13 12.11l.1.14.09.14c9.772 15.14 17.164 33.862 20.78 49.15l22.19 1.3a253.49 253.49 0 0 0-14.43-25.91zm29.89 43l70 179.4-11.82 28.37-65.77-37.94-8 13.86 67.56 39-4.327 5.754L394.12 372l-65.33-31.47a42.41 42.41 0 0 0-9.29-1.43c-5.71 0-9.52 2.06-12.71 6.62-2.53 3.61-78.5 80.52-147.64 150.28H16V243.73l92.85 3.85 96.61-33.26 10.13-11a214.71 214.71 0 0 1 38 24.27 18.57 18.57 0 0 0 11.61 3.93c13.792-1.574 22.025-9.12 32.83-17.83-3.267-21.244-6.724-43.71-9.56-62.1-6.463-2.155-12.926-4.308-19.39-6.46l4.39-4.78zm-37.25 65.02c-4.024-14.705-20.114-19.427-30.58-18.14-3.073.432-6.167 1.427-8.77 2.68.868 3.09 2.17 7.87 3.79 10.35 6.527 9.211 17.348 13.898 27.64 12.51 3.967-.672 8.94-3.676 7.92-7.4zm61.63 105.47l19 20 11.6-11-19-20zM475 172.99s-40.54-27.8-57-1.2l11.25 28.83zM294 382.05l13.4 22.28-.4-35.64c-3.29 3.45-7.53 7.82-12.95 13.36zm-30.6-167c5.858 1.872 17.61-6.048 17.33-8.01l-6.67-43.33-28-9.31c-17.65-2.861-58.224-4.989-67.27 9.28 39.596 39.732 39.526 16.87 84.61 51.37zm127.08 172.89c-15.313-7.704-30.838-14.996-46.28-22.44 5.153 29.387 10.895 58.672 15.75 88.11l25.26 37.33-2.6-34L400 469.61v-28.67l10.19-41.95 6.67-11.05z"/></svg>', nombre: 'GOAT', descripcion: 'Promedio 6+', color: '#FFD700' };
+  if (p >= 5) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M412.919,275.764l1.261,1.897l-11.238,34.402l-63.576,20.792l-37.112-27.064v-29.754c-3.14,2.602-6.784,4.596-10.78,5.733v24.021l-37.102,27.064l-63.558-20.783l-11.274-34.412c1.438-2.285,2.902-4.561,4.473-6.748l0.017-0.026l0.133-0.168c-3.141-3.017-5.638-6.713-7.208-10.858c-3.696,9.738-12.42,17.007-22.838,18.762c-11.212,21.824-17.563,46.585-17.608,72.803v0.017v0.212c0,35.788,11.741,68.912,31.625,95.544c19.407,26.146,46.603,46.189,78.236,56.651c15.905,5.328,32.904,8.15,50.485,8.15c17.624,0,34.632-2.823,50.572-8.212c31.572-10.419,58.812-30.46,78.219-56.616l-0.009,0.017c19.822-26.631,31.563-59.756,31.554-95.535v-0.212v-0.017c-0.053-31.73-9.36-61.317-25.388-86.167C427.13,270.913,420.444,274.759,412.919,275.764z M190.585,440.75c-1.764-2.1-3.511-4.217-5.152-6.422l-0.018-0.026c-17.202-23.06-27.337-51.596-27.346-82.647v-0.194c0.009-2.717,0.176-5.39,0.335-8.072l29.076-21.065l63.602,20.791l14.21,43.464l-39.308,54.172H190.585z M348.24,480.491c-2.505,0.996-5.019,1.994-7.604,2.84l-0.08,0.026c-13.7,4.631-28.36,7.084-43.7,7.084c-15.28,0-29.966-2.452-43.684-7.04l-0.08-0.026c-2.575-0.856-5.081-1.853-7.586-2.849l-10.832-33.398l39.343-54.224h45.607l39.167,54.974L348.24,480.491z M435.634,351.461v0.194c0,31.059-10.135,59.597-27.294,82.656l-0.008,0.017c-1.641,2.205-3.388,4.313-5.152,6.422h-36.23l-38.531-54.075l14.238-43.56l63.602-20.8l29.049,21.065C435.466,346.062,435.634,348.734,435.634,351.461z"/><path fill="currentColor" d="M373.514,119.609l-1.508,2.258l-19.222,19.213c-3.644,3.652-9.545,3.652-13.197,0c-3.652-3.643-3.652-9.544,0-13.196l13.735-13.735c-6.986-2.188-14.176-4.711-21.445-7.508l-0.264,0.398l-21.965,21.956c-3.644,3.644-9.554,3.644-13.198,0c-3.652-3.652-3.652-9.553,0-13.214l16.761-16.761c-7.454-3.211-14.838-6.572-22-10.003c-0.459,1.067-1.094,2.081-1.958,2.955l-21.966,21.957c-3.634,3.643-9.553,3.643-13.205,0c-3.634-3.652-3.634-9.554,0-13.198l20.13-20.13c-19.416-9.942-35.858-19.477-45.218-25.723c-14.935-9.96-22.062-10.269-27.912-7.463V0h-18.066v60.894c-12.28,10.974-32.577,28.793-60.982,28.793c-31.977,0-42.95-10.974-55.124-24.876c-3.467-3.961-6.978-6.74-10.356-8.478V0H38.487v60.488c-2.214,3.688-3.554,8.945-3.554,15.825c0,14.334,0,114.457,0,134.306c0,18.031,7.348,30.566,33.468,32.718l0.874,10.63c0.326,4.093,3.75,7.251,7.86,7.251h13.109c4.102,0,7.534-3.158,7.86-7.251l0.944-11.503c9.042-0.935,18.19-2.286,28.343-3.652l0.926,11.291c0.327,4.093,3.759,7.251,7.861,7.251h13.108c4.102,0,7.534-3.158,7.861-7.251l1.2-14.732c9.518-0.776,20.015-1.385,32.056-1.623c1.703-0.035,3.378-0.009,5.02,0.027l1.341,16.328c0.326,4.093,3.758,7.251,7.86,7.251h13.109c4.111,0,7.534-3.158,7.86-7.251l1.006-12.253c10.056,1.958,21.136,4.226,35.082,5.91l0.829,10.207c0.335,4.093,3.767,7.251,7.869,7.251h13.1c4.111,0,7.534-3.158,7.869-7.251l0.644-7.957c10.648,0.336,22.662,0.282,36.406-0.344l0.68,8.301c0.335,4.093,3.758,7.251,7.868,7.251h13.099c4.102,0,7.534-3.158,7.868-7.251l0.856-10.542c10.364-1.05,19.954-2.399,28.704-4.067l0.644,7.842c0.335,4.093,3.767,7.251,7.86,7.251h13.108c4.111,0,7.534-3.158,7.869-7.251l1.288-15.843c44.142-15.243,58.829-40.199,58.829-63.744C477.067,135.928,424.457,131.552,373.514,119.609z M89.572,122.722c-10.312,0-39.97,0-39.97,0s0-38.664,0-43.181c0-4.516,4.517-7.745,10.321-2.584c2.584,2.302,23.835,21.922,32.224,25.785C100.528,106.615,99.884,122.722,89.572,122.722z M153.474,203.94l-48.438-65.745h27.073l48.438,65.745H153.474z M208.546,203.94l-48.438-65.745h27.073l48.438,65.745H208.546z M266.555,203.94l-48.438-65.745h27.081l48.429,65.745H266.555z"/></svg>', nombre: 'CRACK', descripcion: 'Promedio 5 - 5.9', color: '#FFE500' };
+  if (p >= 4.5) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path d="M30.02 16C32.7814 16 35.02 13.7614 35.02 11C35.02 8.23858 32.7814 6 30.02 6C27.2586 6 25.02 8.23858 25.02 11C25.02 13.7614 27.2586 16 30.02 16Z" fill="currentColor" stroke="currentColor" stroke-width="2"/><path d="M42 31L35 44M32.01 40L26 29L9 40L21 20L44 25M4 40H44" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>', nombre: 'REMADOR', descripcion: 'Promedio 4.5 - 4.9', color: '#FF9800' };
+  return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.564 16.564" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M12.085,11.966c-1.45-1.816-1.521-4.027-1.521-4.027c-0.092-0.073-0.18-0.175-0.316-0.264c-0.032-0.021-0.054-0.038-0.085-0.057C10.053,7.542,9.922,7.47,9.796,7.42C9.392,7.255,9.034,7.201,8.585,7.182C7.936,7.157,7.466,7.42,7.042,7.748C6.97,7.805,6.899,7.871,6.833,7.938c-0.153,0.154-0.21,0.228-0.34,0.366C6.467,8.328,6.467,8.339,6.445,8.361c0,0-0.549,1.878-1.563,3.231c-1.013,1.353-2.331,1.874-2.331,2.226c0,0.544,0.026,0.8,0.234,1.287c0.056,0.137,0.143,0.274,0.222,0.392c0.152,0.219,0.183,0.216,0.278,0.336c0.082,0.104,0.209,0.199,0.32,0.281c0.085,0.066,0.183,0.13,0.279,0.181c0.014,0.006,0.03,0.015,0.045,0.024c0.155,0.079,0.331,0.155,0.511,0.184l0.554,0.061h0.174c0.585-0.025,1.496-0.294,2.014-0.437c0.136-0.038,0.281-0.07,0.426-0.104l0.942-0.117c0.462-0.028,1.322,0.158,1.791,0.294c0.531,0.158,1.169,0.335,1.72,0.364h0.288c0.537-0.029,1.037-0.223,1.441-0.557c0.522-0.428,0.851-0.952,0.951-1.642C14.874,13.436,13.535,13.782,12.085,11.966z"/><path fill="currentColor" d="M15.926,6.508c0.072-0.097,0.129-0.202,0.163-0.313c0.061-0.199,0.062-0.405,0.008-0.594c-0.05-0.189-0.148-0.364-0.327-0.505c-0.13,0.188-0.2,0.346-0.259,0.49c-0.064,0.144-0.104,0.271-0.142,0.39c-0.028,0.087-0.048,0.171-0.069,0.258c-0.745-0.004-1.609,0.87-1.969,1.7c-0.415,0.958-0.102,2.015,0.698,2.361s1.784-0.15,2.197-1.108C16.586,8.359,16.479,7.066,15.926,6.508z"/><path fill="currentColor" d="M10.824,6.566c1.054,0.225,2.127-0.616,2.396-1.878c0.225-1.053-0.182-2.523-0.935-3.114c0.027-0.055,0.062-0.107,0.079-0.165c0.061-0.199,0.062-0.405,0.008-0.594c-0.05-0.188-0.148-0.364-0.328-0.504c-0.13,0.188-0.199,0.346-0.258,0.49c-0.064,0.144-0.104,0.271-0.142,0.39c-0.013,0.042-0.023,0.082-0.033,0.122c-0.99-0.024-1.954,1.373-2.207,2.56C9.135,5.135,9.77,6.341,10.824,6.566z"/><path fill="currentColor" d="M6.147,6.631C7.291,6.539,8.13,5.355,8.021,3.985C7.917,2.679,6.81,1.068,5.715,0.996C5.705,0.958,5.695,0.92,5.683,0.88C5.646,0.76,5.606,0.633,5.542,0.49C5.483,0.346,5.414,0.188,5.283,0c-0.18,0.141-0.278,0.316-0.328,0.505C4.902,0.693,4.903,0.899,4.964,1.098c0.01,0.031,0.031,0.06,0.043,0.091c-0.796,0.524-1.219,1.99-1.129,3.125C3.987,5.685,5.003,6.721,6.147,6.631z"/><path fill="currentColor" d="M3.783,7.789C3.504,6.685,2.33,5.466,1.377,5.532c-0.01-0.038-0.019-0.075-0.032-0.113C1.308,5.3,1.269,5.172,1.205,5.028c-0.059-0.143-0.129-0.301-0.258-0.49C0.767,4.68,0.669,4.854,0.619,5.043C0.565,5.232,0.567,5.439,0.627,5.638c0.021,0.07,0.06,0.136,0.097,0.202C0.139,6.43,0,7.733,0.24,8.684c0.297,1.173,1.33,1.923,2.31,1.675C3.527,10.111,4.08,8.96,3.783,7.789z"/></svg>', nombre: 'PERRO', descripcion: 'Promedio -4.5', color: '#9E9E9E' };
+}
+
+function getMedallaPuesto(puesto) {
+  if (puesto === 1) return { emoji: '<i class="fas fa-medal"></i>', nombre: 'LÍDER', descripcion: 'Primer puesto', color: '#FFD700', tieneMedalla: true };
+  if (puesto === 2) return { emoji: '<i class="fas fa-medal"></i>', nombre: 'ESCOLTA', descripcion: 'Segundo puesto', color: '#C0C0C0', tieneMedalla: true };
+  if (puesto === 3) return { emoji: '<i class="fas fa-medal"></i>', nombre: 'PODIO', descripcion: 'Tercer puesto', color: '#CD7F32', tieneMedalla: true };
+  return { emoji: '', nombre: '', descripcion: 'Fuera del podio', color: '#666', tieneMedalla: false };
+}
+
+function getMedallaTotalAcumulado(puntos) {
+  if (puntos >= 300) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M170.667,0h-96C68.779,0,64,4.779,64,10.667v74.731c0,23.488,15.744,44.544,38.272,51.157l68.395,20.117V0z"/><path fill="currentColor" d="M437.333,0h-96v156.693l68.395-20.117C432.277,129.941,448,108.907,448,85.419V10.688C448,4.779,443.221,0,437.333,0z"/><path fill="currentColor" d="M290.069,217.408c5.312-7.125,8.597-15.851,8.597-25.408c0-8.725-2.645-16.832-7.168-23.595c9.579-1.408,19.115-3.2,28.501-5.696V0H192v162.709c9.387,2.496,18.923,4.288,28.501,5.696c-4.501,6.763-7.168,14.869-7.168,23.595c0,9.557,3.264,18.283,8.597,25.408c-65.963,15.488-115.264,74.645-115.264,145.259C106.667,445.013,173.653,512,256,512s149.333-66.987,149.333-149.333C405.333,292.053,356.032,232.896,290.069,217.408z M347.797,339.157l-45.803,34.859l18.56,60.16c1.365,4.459-0.32,9.301-4.16,11.947c-3.84,2.645-8.981,2.475-12.629-0.427l-47.68-37.632l-46.699,37.568c-1.941,1.557-4.309,2.347-6.677,2.347c-2.069,0-4.117-0.597-5.931-1.792c-3.883-2.603-5.632-7.403-4.309-11.861l17.685-60.245l-45.888-34.923c-3.648-2.773-5.12-7.552-3.648-11.904c1.451-4.352,5.525-7.253,10.112-7.253h56.32l18.901-56.704c2.901-8.704,17.344-8.704,20.224,0L285.077,320h56.32c4.565,0,8.64,2.923,10.112,7.253C352.896,331.584,351.445,336.384,347.797,339.157z"/></svg>', nombre: 'MAESTRO', descripcion: '300+ puntos', color: '#00D9FF', tieneMedalla: true };
+  if (puntos >= 200) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="none" d="M24,0V24H0V0Z"/><path fill="currentColor" fill-opacity="0.3" d="M20,10V8.33A1.34,1.34,0,0,0,18.67,7H16V17h2.67A1.34,1.34,0,0,0,20,15.67V14h2V10Z"/><path fill="currentColor" d="M16,7H3.34A1.34,1.34,0,0,0,2,8.33v7.33A1.34,1.34,0,0,0,3.33,17H16Z"/></svg>', nombre: 'GRAN ACUMULADOR', descripcion: '200-299 puntos', color: '#FFD700', tieneMedalla: true };
+  if (puntos >= 100) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="none" d="M24,0V24H0V0Z"/><path fill="currentColor" fill-opacity="0.3" d="M20,10V8.33A1.34,1.34,0,0,0,18.67,7H8V17H18.67A1.34,1.34,0,0,0,20,15.67V14h2V10Z"/><path fill="currentColor" d="M3.33,17H8V7H3.34A1.34,1.34,0,0,0,2,8.33v7.33A1.34,1.34,0,0,0,3.33,17Z"/></svg>', nombre: 'ACUMULADOR', descripcion: '100-199 puntos', color: '#CD7F32', tieneMedalla: true };
+  if (puntos >= 50) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="none" d="M24,0V24H0V0Z"/><path fill="currentColor" d="M3,7.07A1.31,1.31,0,0,0,2,8.33v7.33a1.32,1.32,0,0,0,1,1.27Z"/><path fill="currentColor" fill-opacity="0.3" d="M20,10V8.33A1.34,1.34,0,0,0,18.67,7H3.34A1.28,1.28,0,0,0,3,7.07v9.86a1.21,1.21,0,0,0,.33.07H18.67A1.34,1.34,0,0,0,20,15.67V14h2V10Z"/></svg>', nombre: 'NOVATO', descripcion: '50-99 puntos', color: '#9E9E9E', tieneMedalla: true };
+  return { emoji: '', nombre: '', descripcion: 'Menos de 50 puntos', color: '#666', tieneMedalla: false };
+}
+
+function getMedallaMejorFecha(puntos) {
+  if (puntos === 10) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M422.844,309.25 422.844,309.219 365.813,250.766 328.234,309.25"/><path fill="currentColor" d="M195.375,332.938 243.219,512 291.063,332.938"/><path fill="currentColor" d="M283.25,309.219 242.359,252.891 202.781,309.219 202.781,309.25 283.25,309.25"/><path fill="currentColor" d="M305.922,300.094 342.047,243.875 265.141,243.875"/><path fill="currentColor" d="M219.719,243.875 144.406,243.875 180.375,299.844"/><path fill="currentColor" d="M63.594,309.219 63.594,309.25 158.219,309.25 120.641,250.766"/><path fill="currentColor" d="M217.938,509.188 217.938,509.188 217.938,509.188"/><path fill="currentColor" d="M61.719,332.938 217.938,509.188 170.844,332.938"/><path fill="currentColor" d="M268.531,509.188 268.531,509.188 424.734,332.938 315.609,332.938"/><path fill="currentColor" d="M500.594,181.438c-25.844,0-34.781-6.484-39.813-11.5c-5-5.031-11.5-13.969-11.5-39.813c0-0.969-0.094-3.75-3.188-3.75c-3.063,0-3.188,2.781-3.188,3.75c0,25.844-6.484,34.781-11.5,39.813c-5.031,5.016-13.969,11.5-39.797,11.5c-0.984,0-3.766,0.109-3.766,3.188c0,3.063,2.781,3.188,3.766,3.188c25.828,0,34.766,6.5,39.797,11.5c5.016,5.031,11.5,13.969,11.5,39.813c0,1,0.125,3.75,3.188,3.75c3.094,0,3.188-2.75,3.188-3.75c0-25.844,6.5-34.781,11.5-39.813c5.031-5.016,13.969-11.5,39.813-11.5c0.984,0,3.766-0.094,3.766-3.188C504.359,181.563,501.578,181.438,500.594,181.438z"/><path fill="currentColor" d="M116.25,84.438c35.516,0,47.813,8.938,54.719,15.844c6.875,6.891,15.813,19.188,15.813,54.719c0,1.344,0.172,5.156,4.375,5.156c4.25,0,4.375-3.813,4.375-5.156c0-35.531,8.938-47.828,15.828-54.719c6.891-6.906,19.172-15.844,54.703-15.844c1.375,0,5.188-0.125,5.188-4.375c0-4.203-3.813-4.375-5.188-4.375c-35.531,0-47.813-8.906-54.703-15.813s-15.828-19.188-15.828-54.703c0-1.359-0.125-5.172-4.375-5.172c-4.203,0-4.375,3.813-4.375,5.172c0,35.516-8.938,47.797-15.813,54.703c-6.906,6.906-19.203,15.813-54.719,15.813c-1.344,0-5.156,0.156-5.156,4.391C111.094,84.281,114.906,84.438,116.25,84.438z"/><path fill="currentColor" d="M64.156,245.625c0-23.766,5.969-32,10.594-36.609c4.625-4.625,12.844-10.594,36.625-10.594c0.891,0,3.453-0.094,3.453-2.922s-2.563-2.938-3.453-2.938c-23.781,0-32-5.969-36.625-10.594s-10.594-12.844-10.594-36.594c0-0.906-0.094-3.469-2.922-3.469s-2.922,2.563-2.922,3.469c0,23.75-5.984,31.969-10.594,36.594c-4.625,4.625-12.844,10.594-36.625,10.594c-0.906,0-3.453,0.109-3.453,2.938c0,2.813,2.547,2.922,3.453,2.922c23.781,0,32,5.984,36.625,10.594c4.609,4.609,10.594,12.844,10.594,36.609c0,0.906,0.094,3.469,2.922,3.469S64.156,246.531,64.156,245.625z"/></svg>', nombre: 'FECHA PERFECTA', descripcion: '10 puntos', color: '#00D9FF' };
+  if (puntos === 9) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M2.103 12.052l13.398 16.629-5.373-16.629h-8.025zM11.584 12.052l4.745 16.663 4.083-16.663h-8.828zM17.051 28.681l12.898-16.629h-7.963l-4.935 16.629zM29.979 10.964l-3.867-6.612-3.869 6.612h7.736zM24.896 3.973h-7.736l3.867 6.839 3.869-6.839zM19.838 10.964l-3.867-6.612-3.868 6.612h7.735zM14.839 3.973h-7.735l3.868 6.839 3.867-6.839zM5.889 4.352l-3.867 6.612h7.735l-3.868-6.612z"/></svg>', nombre: 'FECHA EXCELENTE', descripcion: '9 puntos', color: '#FFD700' };
+  if (puntos === 8) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M384,85.333L469.333,192L256,480L42.667,192L128,85.333L384,85.333ZM305.23,208L206.77,208L256,400L305.23,208ZM170.37,208L107.206,208L226.973,387.796L170.37,208ZM404.772,208L341.629,208L285.062,387.682L404.772,208ZM211.556,128L148.48,128L109.07,176L175.889,176L211.556,128ZM266.667,128L245.333,128L213.334,176L298.666,176L266.667,128ZM363.499,128L300.444,128L335.11,176L401.908,176L363.499,128Z"/></svg>', nombre: 'FECHA DESTACADA', descripcion: '8 puntos', color: '#FFA500' };
+  if (puntos === 7) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M405.82,328.693c-6.672,0-29.906,0-63.75,0c-27.203,0-32.422-4.578-32.422-11.906c0-8.359,13.609-23.016,16.734-28.25c3.156-5.234,23.016-23.016,27.203-49.188c4.188-26.141-27.203-44.984-37.656-27.188c-6.203,10.563-21.969,41.844-40.797,55.454c-34.938,25.234-63.828,80.172-100.234,80.172v118.422c29.984,0,97.953,33.328,122.016,38.156c27.266,5.453,62.875,17.5,81.781-8.172c11.656-15.828,29.922-58.453,43.625-102.047C457.102,360.74,433.086,328.693,405.82,328.693z"/><rect fill="currentColor" x="348.351" y="106.396" width="7.484" height="61.281"/><polygon fill="currentColor" points="372.164,187.583 379.664,187.552 379.398,126.286 371.898,126.302"/><path fill="currentColor" d="M72.382,378.662v100.469c0,14.734,11.953,26.688,26.703,26.688h31.859c9.813,0,17.797-7.953,17.797-17.781V351.975H99.085C84.335,351.975,72.382,363.928,72.382,378.662z"/><path fill="currentColor" d="M354.195,43.067c0.266,0.438,0.594,0.844,0.984,1.219c0.359,0.359,0.797,0.656,1.234,0.906c0.453,0.219,0.938,0.391,1.391,0.469c0.469,0.063,0.922,0.078,1.328-0.031l8.844-2.016l3.703,6.422c1.234,2.156,2.781,4.109,4.5,5.859c1.719,1.703,3.609,3.172,5.578,4.313s4.031,1.969,6,2.406c1.984,0.438,3.922,0.469,5.672,0.094c1.766-0.422,3.172-1.25,4.234-2.391c1.094-1.156,1.797-2.609,2.125-4.297c0.344-1.672,0.313-3.563-0.109-5.594c-0.422-1.984-1.25-4.125-2.484-6.266l-6.547-11.359c-0.25-0.422-0.594-0.844-0.969-1.203s-0.797-0.672-1.266-0.875c-0.438-0.25-0.906-0.391-1.359-0.484c-0.453-0.078-0.906-0.078-1.328,0l-31.297,7.188c-0.438,0.109-0.781,0.281-1.047,0.531s-0.469,0.578-0.578,0.938c-0.094,0.359-0.125,0.766-0.063,1.188s0.234,0.891,0.516,1.328L354.195,43.067z M386.773,39.271l3.719,6.422c0.578,1.016,0.969,2.031,1.188,2.984c0.188,0.938,0.203,1.844,0.031,2.641c-0.141,0.797-0.484,1.5-1,2.031c-0.5,0.547-1.188,0.938-2,1.141c-0.844,0.203-1.75,0.172-2.703-0.047c-0.938-0.203-1.906-0.594-2.844-1.156c-0.906-0.516-1.813-1.234-2.641-2.047c-0.828-0.797-1.531-1.75-2.109-2.75l-3.719-6.422L386.773,39.271z"/><path fill="currentColor" d="M344.304,87.692c13.781,12.031,30.563,19.203,44.875,19.203c9.609,0,17.453-3.141,22.609-9.094l11.422-13.094c6.532-7.469,8.063-18.453,4.313-30.922c-3.672-12.25-12.032-24.547-23.532-34.578C390.195,7.192,373.414,0.005,359.101,0.005c-9.625,0-17.453,3.156-22.625,9.094l-11.391,13.094c-6.516,7.484-8.063,18.469-4.328,30.922C324.445,65.38,332.789,77.661,344.304,87.692z M344.117,15.755c3.25-3.703,8.406-5.672,14.938-5.672c11.75,0,26.406,6.422,38.266,16.75c9.469,8.25,16.578,18.266,20.016,28.203c3.375,9.688,2.75,17.875-1.75,23.031c-3.234,3.703-8.406,5.672-14.938,5.672c-11.75,0-26.422-6.422-38.297-16.766c-9.453-8.234-16.563-18.234-20-28.188C339.007,29.099,339.617,20.911,344.117,15.755z"/></svg>', nombre: 'CONSUELO', descripcion: '7 puntos', color: '#9E9E9E' };
+  if (puntos < 7 && puntos > 0) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 219 256" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M216.856,175.643V254H2.144v-27.913h71.44v-24.774h67.185v-25.67H216.856z M45.918,61.625c6.611-6.189,6.907-16.487,0.67-23.047c-6.189-6.611-16.487-6.907-23.047-0.67s-6.856,16.536-0.67,23.047C29.108,67.515,39.407,67.811,45.918,61.625z M29,205.047c-2.671,5.144-0.665,11.478,4.479,14.149c1.551,0.805,3.196,1.19,4.829,1.19c3.791,0,7.454-2.065,9.332-5.657l20.052-38.599l-15.001-16.657L29,205.047z M124.407,85.048c0,0-56.152-25.398-56.516-25.505c-5.118-1.942-11.078-1.385-15.88,2.017h0c-7.665,5.43-9.477,16.045-4.047,23.709l24.738,34.921l-15.54,16.854c-5.488,5.952-6.036,14.617,0.12,21.093l32.293,34.277c2.066,2.193,4.852,3.299,7.643,3.299c2.582,0,5.169-0.947,7.197-2.857c4.22-3.976,4.418-10.62,0.443-14.84l-28.764-30.531l23.859-25.877c0.891-0.966,1.554-2.057,2.016-3.208c2.767-5.45,2.504-12.208-1.274-17.542l-9-12.705l25.974,11.767c1.093,0.496,2.238,0.73,3.364,0.73c3.108,0,6.077-1.783,7.443-4.798C130.336,91.747,128.514,86.909,124.407,85.048z M158.075,33.099L87.011,2L65.148,51.958l71.063,31.099L158.075,33.099z"/></svg>', nombre: 'SIGUE INTENTANDO', descripcion: 'Menos de 7 puntos', color: '#757575' };
+  return null;
+}
+
+function getMedallaEquipoIdeal(veces, equipo) {
+  if (veces >= 2) {
+    if (equipo && equipo.toUpperCase() === 'LIBRE') {
+      return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M28.268 11.618c1.161 2.381 0.076 7.706-3.688 8.419 1.591-1.333 2.694-4.677 2.087-6.053-2.072 2.835-4.713 0.152-2.053-2.574 1.768-1.812 2.379-4.099 0.626-6.61 0.542 2.394-2.25 5.059-4.162 3.374-1.291-1.137-0.61-3.628 1.414-4.279-1.606-0.556-2.843 0.168-3.131 1.287-1.052-1.018-2.432-1.685-2.053-3.374l-0-0c-1.906 0.846-1.363 3.292-0.487 4.349 1.668 2.013-1.867 3.107-2.922-0.313-0.32 1.050-1.461 1.281-2.122 0.452-0.418-0.524-1.161-1.883-0.731-3.201-1.244 0.878-1.887 2.684-1.148 3.757 1.744 2.533-0.699 4.484-3.514 2.435 2.172 2.844 1.261 7.141-0.974 8.593 0.875-1.909 0.492-5.254-1.322-5.914 0.946 2.803-1.402 4.891-2.54 3.688v15.045h2.901c0.795-3.373 2.633-5.452 6.927-6.26-1.297-1.563-2.118-3.778-2.118-6.233 0-4.729 2.992-8.565 6.694-8.565s6.694 3.837 6.694 8.565c0 2.395-0.75 4.593-1.991 6.148 4.698 0.739 6.466 2.878 7.119 6.345h2.998v-13.688c-0.383-1.85-1.051-4.946-2.505-5.392zM5.058 7.486c-1.45-2.901 4.029-3.59 0.3-6.178-0.139 1.972-5.941 2.821-0.3 6.178z"/></svg>', nombre: 'JUGADOR A FICHAR', descripcion: '2+ veces sin equipo', color: '#4CAF50', tieneMedalla: true };
+    } else {
+      return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M145.896 18.31l-21.51 3.016 50.184 404.992c7.915-.592 16-1.099 24.248-1.515l-30.935-237.614c25.61-7.714 50.943-16.448 73.25-36.277 14.77 90.454-1.795 182.196-2.377 272.658 12.68-.146 26.55-.009 37.9.293-.566-6.92-7.696-101.44 24.094-130.373 18.74-17.055 75.734-6.549 75.734-6.549 13.115 21.985 13.064 36.927 8.98 62.612l31.163 8.045c2.469-14.451 1.707-51.72-7.055-96.522-1.229-2.948-10.45-4.763-18.036-8.04-.183-30.68 6.268-60.047.273-90.727-14.382-11.332-45.991-20.998-70.762-34.35l-5.58-.762c-7.236 7.58-16.643 12.56-27.188 12.56-15.213-2.301-26.7-10.05-33.625-20.849l-12.734-1.736c-23.748 18.203-50.06 31.28-77.733 41.635zM288.28 36.94c-6.21 0-12.37 3.612-17.55 11.154-5.181 7.542-8.762 18.73-8.762 31.256 0 12.525 3.58 23.711 8.762 31.254 5.18 7.542 11.34 11.154 17.55 11.154 6.211 0 12.372-3.612 17.553-11.154 5.18-7.543 8.76-18.729 8.76-31.254 0-12.526-3.58-23.714-8.76-31.256-5.18-7.542-11.342-11.155-17.553-11.155zM109.873 54.4c-.932 2.868-1.81 5.768-2.848 8.555-3.482 9.362-7.548 18.137-12.91 25.352-5.361 7.214-12.501 13.287-21.787 14.603-13.724 1.946-21 6.09-25.857 11.809-4.858 5.72-7.681 14.024-9.352 25.42-2.552 17.412-.925 39.067 1.97 61.132 1.418-4.107 2.921-8.171 4.733-12.01 4.205-8.905 9.672-17.033 17.334-23.017 7.663-5.984 17.6-9.48 28.815-9.146 7.657.228 13.652-4.943 18.765-14.57 5.056-9.52 7.849-22.506 7.909-31.97zM323.744 160.97c13.772 8.366 27.424 15.481 44.86 16.52 6.827 23.86 1.635 49.908.83 73.769-22.109-4.356-43.114-9.48-45.623-23.147 2.972-34.461 3.447-49.16-.067-67.142zm48.836 203.847c-4.585 21.75-13.021 42.473-24.904 63.268 36.88 2.608 75.117 5.883 112.222 15.611-.06-19.97-6.113-40.476-16.906-60.699zm-127.242 76.692c-97.482.507-174.844 14.648-227.338 28.416V491h476v-18.94c-58.673-14.917-146.115-31.086-248.662-30.552z"/></svg>', nombre: 'ESTRELLA DE SU EQUIPO', descripcion: '2+ veces en equipo ideal', color: '#FFD700', tieneMedalla: true };
+    }
+  }
+  return { emoji: '', nombre: '', descripcion: 'Menos de 2 apariciones', color: '#666', tieneMedalla: false };
+}
+
+// Funciones específicas para EQUIPOS
+function getInsigniaEquipo(promedio) {
+  const p = parseFloat(promedio);
+  if (p >= 50) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M273 459l7.79-20 6.21 20 5.79-23.33-4.25-48c-7.76 7.94-17.54 17.85-29.74 30.27zm38.5-380.86a115.06 115.06 0 0 0-21.13-19.6c-17.315-11.88-35.418-18.913-55.08-22.14-18.751-3.067-37.99-2.743-56.33.12A203.86 203.86 0 0 0 133 49.42a184.2 184.2 0 0 0-29.62 15.36c-12.304 8.597-10.431 6.828.95 1.82a179.6 179.6 0 0 1 30.9-10c50.427-4.832 98.41-7.579 134.17 27.17a80 80 0 0 1 12.28 16c4.714 8.06 7.805 16.877 9.66 25.59l45.69 2.84c-5.032-17.752-15.256-37.574-25.53-50.06zm50.05 26.63c-8.531-13.217-18.495-25.428-29.66-34.88a78.24 78.24 0 0 0-15.79-10.38c2.67 2.68 5.22 5.45 7.61 8.32a138.13 138.13 0 0 1 9.13 12.11l.1.14.09.14c9.772 15.14 17.164 33.862 20.78 49.15l22.19 1.3a253.49 253.49 0 0 0-14.43-25.91zm29.89 43l70 179.4-11.82 28.37-65.77-37.94-8 13.86 67.56 39-4.327 5.754L394.12 372l-65.33-31.47a42.41 42.41 0 0 0-9.29-1.43c-5.71 0-9.52 2.06-12.71 6.62-2.53 3.61-78.5 80.52-147.64 150.28H16V243.73l92.85 3.85 96.61-33.26 10.13-11a214.71 214.71 0 0 1 38 24.27 18.57 18.57 0 0 0 11.61 3.93c13.792-1.574 22.025-9.12 32.83-17.83-3.267-21.244-6.724-43.71-9.56-62.1-6.463-2.155-12.926-4.308-19.39-6.46l4.39-4.78zm-37.25 65.02c-4.024-14.705-20.114-19.427-30.58-18.14-3.073.432-6.167 1.427-8.77 2.68.868 3.09 2.17 7.87 3.79 10.35 6.527 9.211 17.348 13.898 27.64 12.51 3.967-.672 8.94-3.676 7.92-7.4zm61.63 105.47l19 20 11.6-11-19-20zM475 172.99s-40.54-27.8-57-1.2l11.25 28.83zM294 382.05l13.4 22.28-.4-35.64c-3.29 3.45-7.53 7.82-12.95 13.36zm-30.6-167c5.858 1.872 17.61-6.048 17.33-8.01l-6.67-43.33-28-9.31c-17.65-2.861-58.224-4.989-67.27 9.28 39.596 39.732 39.526 16.87 84.61 51.37zm127.08 172.89c-15.313-7.704-30.838-14.996-46.28-22.44 5.153 29.387 10.895 58.672 15.75 88.11l25.26 37.33-2.6-34L400 469.61v-28.67l10.19-41.95 6.67-11.05z"/></svg>', nombre: 'DE OTRA LIGA', descripcion: 'Promedio 50+', color: '#FFD700' };
+  if (p >= 35) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M412.919,275.764l1.261,1.897l-11.238,34.402l-63.576,20.792l-37.112-27.064v-29.754c-3.14,2.602-6.784,4.596-10.78,5.733v24.021l-37.102,27.064l-63.558-20.783l-11.274-34.412c1.438-2.285,2.902-4.561,4.473-6.748l0.017-0.026l0.133-0.168c-3.141-3.017-5.638-6.713-7.208-10.858c-3.696,9.738-12.42,17.007-22.838,18.762c-11.212,21.824-17.563,46.585-17.608,72.803v0.017v0.212c0,35.788,11.741,68.912,31.625,95.544c19.407,26.146,46.603,46.189,78.236,56.651c15.905,5.328,32.904,8.15,50.485,8.15c17.624,0,34.632-2.823,50.572-8.212c31.572-10.419,58.812-30.46,78.219-56.616l-0.009,0.017c19.822-26.631,31.563-59.756,31.554-95.535v-0.212v-0.017c-0.053-31.73-9.36-61.317-25.388-86.167C427.13,270.913,420.444,274.759,412.919,275.764z M190.585,440.75c-1.764-2.1-3.511-4.217-5.152-6.422l-0.018-0.026c-17.202-23.06-27.337-51.596-27.346-82.647v-0.194c0.009-2.717,0.176-5.39,0.335-8.072l29.076-21.065l63.602,20.791l14.21,43.464l-39.308,54.172H190.585z M348.24,480.491c-2.505,0.996-5.019,1.994-7.604,2.84l-0.08,0.026c-13.7,4.631-28.36,7.084-43.7,7.084c-15.28,0-29.966-2.452-43.684-7.04l-0.08-0.026c-2.575-0.856-5.081-1.853-7.586-2.849l-10.832-33.398l39.343-54.224h45.607l39.167,54.974L348.24,480.491z M435.634,351.461v0.194c0,31.059-10.135,59.597-27.294,82.656l-0.008,0.017c-1.641,2.205-3.388,4.313-5.152,6.422h-36.23l-38.531-54.075l14.238-43.56l63.602-20.8l29.049,21.065C435.466,346.062,435.634,348.734,435.634,351.461z"/><path fill="currentColor" d="M373.514,119.609l-1.508,2.258l-19.222,19.213c-3.644,3.652-9.545,3.652-13.197,0c-3.652-3.643-3.652-9.544,0-13.196l13.735-13.735c-6.986-2.188-14.176-4.711-21.445-7.508l-0.264,0.398l-21.965,21.956c-3.644,3.644-9.554,3.644-13.198,0c-3.652-3.652-3.652-9.553,0-13.214l16.761-16.761c-7.454-3.211-14.838-6.572-22-10.003c-0.459,1.067-1.094,2.081-1.958,2.955l-21.966,21.957c-3.634,3.643-9.553,3.643-13.205,0c-3.634-3.652-3.634-9.554,0-13.198l20.13-20.13c-19.416-9.942-35.858-19.477-45.218-25.723c-14.935-9.96-22.062-10.269-27.912-7.463V0h-18.066v60.894c-12.28,10.974-32.577,28.793-60.982,28.793c-31.977,0-42.95-10.974-55.124-24.876c-3.467-3.961-6.978-6.74-10.356-8.478V0H38.487v60.488c-2.214,3.688-3.554,8.945-3.554,15.825c0,14.334,0,114.457,0,134.306c0,18.031,7.348,30.566,33.468,32.718l0.874,10.63c0.326,4.093,3.75,7.251,7.86,7.251h13.109c4.102,0,7.534-3.158,7.86-7.251l0.944-11.503c9.042-0.935,18.19-2.286,28.343-3.652l0.926,11.291c0.327,4.093,3.759,7.251,7.861,7.251h13.108c4.102,0,7.534-3.158,7.861-7.251l1.2-14.732c9.518-0.776,20.015-1.385,32.056-1.623c1.703-0.035,3.378-0.009,5.02,0.027l1.341,16.328c0.326,4.093,3.758,7.251,7.86,7.251h13.109c4.111,0,7.534-3.158,7.86-7.251l1.006-12.253c10.056,1.958,21.136,4.226,35.082,5.91l0.829,10.207c0.335,4.093,3.767,7.251,7.869,7.251h13.1c4.111,0,7.534-3.158,7.869-7.251l0.644-7.957c10.648,0.336,22.662,0.282,36.406-0.344l0.68,8.301c0.335,4.093,3.758,7.251,7.868,7.251h13.099c4.102,0,7.534-3.158,7.868-7.251l0.856-10.542c10.364-1.05,19.954-2.399,28.704-4.067l0.644,7.842c0.335,4.093,3.767,7.251,7.86,7.251h13.108c4.111,0,7.534-3.158,7.869-7.251l1.288-15.843c44.142-15.243,58.829-40.199,58.829-63.744C477.067,135.928,424.457,131.552,373.514,119.609z M89.572,122.722c-10.312,0-39.97,0-39.97,0s0-38.664,0-43.181c0-4.516,4.517-7.745,10.321-2.584c2.584,2.302,23.835,21.922,32.224,25.785C100.528,106.615,99.884,122.722,89.572,122.722z M153.474,203.94l-48.438-65.745h27.073l48.438,65.745H153.474z M208.546,203.94l-48.438-65.745h27.073l48.438,65.745H208.546z M266.555,203.94l-48.438-65.745h27.081l48.429,65.745H266.555z"/></svg>', nombre: 'DE CAMPEON', descripcion: 'Promedio 35 - 49.99', color: '#FFE500' };
+  if (p >= 25) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path d="M30.02 16C32.7814 16 35.02 13.7614 35.02 11C35.02 8.23858 32.7814 6 30.02 6C27.2586 6 25.02 8.23858 25.02 11C25.02 13.7614 27.2586 16 30.02 16Z" fill="currentColor" stroke="currentColor" stroke-width="2"/><path d="M42 31L35 44M32.01 40L26 29L9 40L21 20L44 25M4 40H44" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>', nombre: 'EN LA PELEA', descripcion: 'Promedio 25 - 34.99', color: '#FF9800' };
+  return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.564 16.564" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M12.085,11.966c-1.45-1.816-1.521-4.027-1.521-4.027c-0.092-0.073-0.18-0.175-0.316-0.264c-0.032-0.021-0.054-0.038-0.085-0.057C10.053,7.542,9.922,7.47,9.796,7.42C9.392,7.255,9.034,7.201,8.585,7.182C7.936,7.157,7.466,7.42,7.042,7.748C6.97,7.805,6.899,7.871,6.833,7.938c-0.153,0.154-0.21,0.228-0.34,0.366C6.467,8.328,6.467,8.339,6.445,8.361c0,0-0.549,1.878-1.563,3.231c-1.013,1.353-2.331,1.874-2.331,2.226c0,0.544,0.026,0.8,0.234,1.287c0.056,0.137,0.143,0.274,0.222,0.392c0.152,0.219,0.183,0.216,0.278,0.336c0.082,0.104,0.209,0.199,0.32,0.281c0.085,0.066,0.183,0.13,0.279,0.181c0.014,0.006,0.03,0.015,0.045,0.024c0.155,0.079,0.331,0.155,0.511,0.184l0.554,0.061h0.174c0.585-0.025,1.496-0.294,2.014-0.437c0.136-0.038,0.281-0.07,0.426-0.104l0.942-0.117c0.462-0.028,1.322,0.158,1.791,0.294c0.531,0.158,1.169,0.335,1.72,0.364h0.288c0.537-0.029,1.037-0.223,1.441-0.557c0.522-0.428,0.851-0.952,0.951-1.642C14.874,13.436,13.535,13.782,12.085,11.966z"/><path fill="currentColor" d="M15.926,6.508c0.072-0.097,0.129-0.202,0.163-0.313c0.061-0.199,0.062-0.405,0.008-0.594c-0.05-0.189-0.148-0.364-0.327-0.505c-0.13,0.188-0.2,0.346-0.259,0.49c-0.064,0.144-0.104,0.271-0.142,0.39c-0.028,0.087-0.048,0.171-0.069,0.258c-0.745-0.004-1.609,0.87-1.969,1.7c-0.415,0.958-0.102,2.015,0.698,2.361s1.784-0.15,2.197-1.108C16.586,8.359,16.479,7.066,15.926,6.508z"/><path fill="currentColor" d="M10.824,6.566c1.054,0.225,2.127-0.616,2.396-1.878c0.225-1.053-0.182-2.523-0.935-3.114c0.027-0.055,0.062-0.107,0.079-0.165c0.061-0.199,0.062-0.405,0.008-0.594c-0.05-0.188-0.148-0.364-0.328-0.504c-0.13,0.188-0.199,0.346-0.258,0.49c-0.064,0.144-0.104,0.271-0.142,0.39c-0.013,0.042-0.023,0.082-0.033,0.122c-0.99-0.024-1.954,1.373-2.207,2.56C9.135,5.135,9.77,6.341,10.824,6.566z"/><path fill="currentColor" d="M6.147,6.631C7.291,6.539,8.13,5.355,8.021,3.985C7.917,2.679,6.81,1.068,5.715,0.996C5.705,0.958,5.695,0.92,5.683,0.88C5.646,0.76,5.606,0.633,5.542,0.49C5.483,0.346,5.414,0.188,5.283,0c-0.18,0.141-0.278,0.316-0.328,0.505C4.902,0.693,4.903,0.899,4.964,1.098c0.01,0.031,0.031,0.06,0.043,0.091c-0.796,0.524-1.219,1.99-1.129,3.125C3.987,5.685,5.003,6.721,6.147,6.631z"/><path fill="currentColor" d="M3.783,7.789C3.504,6.685,2.33,5.466,1.377,5.532c-0.01-0.038-0.019-0.075-0.032-0.113C1.308,5.3,1.269,5.172,1.205,5.028c-0.059-0.143-0.129-0.301-0.258-0.49C0.767,4.68,0.669,4.854,0.619,5.043C0.565,5.232,0.567,5.439,0.627,5.638c0.021,0.07,0.06,0.136,0.097,0.202C0.139,6.43,0,7.733,0.24,8.684c0.297,1.173,1.33,1.923,2.31,1.675C3.527,10.111,4.08,8.96,3.783,7.789z"/></svg>', nombre: 'DESCENSO', descripcion: 'Promedio -25', color: '#9E9E9E' };
+}
+
+function getMedallaTotalAcumuladoEquipo(puntos) {
+  if (puntos >= 440) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M170.667,0h-96C68.779,0,64,4.779,64,10.667v74.731c0,23.488,15.744,44.544,38.272,51.157l68.395,20.117V0z"/><path fill="currentColor" d="M437.333,0h-96v156.693l68.395-20.117C432.277,129.941,448,108.907,448,85.419V10.688C448,4.779,443.221,0,437.333,0z"/><path fill="currentColor" d="M290.069,217.408c5.312-7.125,8.597-15.851,8.597-25.408c0-8.725-2.645-16.832-7.168-23.595c9.579-1.408,19.115-3.2,28.501-5.696V0H192v162.709c9.387,2.496,18.923,4.288,28.501,5.696c-4.501,6.763-7.168,14.869-7.168,23.595c0,9.557,3.264,18.283,8.597,25.408c-65.963,15.488-115.264,74.645-115.264,145.259C106.667,445.013,173.653,512,256,512s149.333-66.987,149.333-149.333C405.333,292.053,356.032,232.896,290.069,217.408z M347.797,339.157l-45.803,34.859l18.56,60.16c1.365,4.459-0.32,9.301-4.16,11.947c-3.84,2.645-8.981,2.475-12.629-0.427l-47.68-37.632l-46.699,37.568c-1.941,1.557-4.309,2.347-6.677,2.347c-2.069,0-4.117-0.597-5.931-1.792c-3.883-2.603-5.632-7.403-4.309-11.861l17.685-60.245l-45.888-34.923c-3.648-2.773-5.12-7.552-3.648-11.904c1.451-4.352,5.525-7.253,10.112-7.253h56.32l18.901-56.704c2.901-8.704,17.344-8.704,20.224,0L285.077,320h56.32c4.565,0,8.64,2.923,10.112,7.253C352.896,331.584,351.445,336.384,347.797,339.157z"/></svg>', nombre: 'EXPERTO ACUMULADOR', descripcion: '440-600 puntos', color: '#00D9FF', tieneMedalla: true };
+  if (puntos >= 220) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="none" d="M24,0V24H0V0Z"/><path fill="currentColor" fill-opacity="0.3" d="M20,10V8.33A1.34,1.34,0,0,0,18.67,7H16V17h2.67A1.34,1.34,0,0,0,20,15.67V14h2V10Z"/><path fill="currentColor" d="M16,7H3.34A1.34,1.34,0,0,0,2,8.33v7.33A1.34,1.34,0,0,0,3.33,17H16Z"/></svg>', nombre: 'GRAN ACUMULADOR', descripcion: '220-439 puntos', color: '#FFD700', tieneMedalla: true };
+  return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="none" d="M24,0V24H0V0Z"/><path fill="currentColor" fill-opacity="0.3" d="M20,10V8.33A1.34,1.34,0,0,0,18.67,7H8V17H18.67A1.34,1.34,0,0,0,20,15.67V14h2V10Z"/><path fill="currentColor" d="M3.33,17H8V7H3.34A1.34,1.34,0,0,0,2,8.33v7.33A1.34,1.34,0,0,0,3.33,17Z"/></svg>', nombre: 'ACUMULADOR', descripcion: '0-219 puntos', color: '#CD7F32', tieneMedalla: true };
+}
+
+function getMedallaMejorFechaEquipo(puntos) {
+  if (puntos >= 45) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M422.844,309.25 422.844,309.219 365.813,250.766 328.234,309.25"/><path fill="currentColor" d="M195.375,332.938 243.219,512 291.063,332.938"/><path fill="currentColor" d="M283.25,309.219 242.359,252.891 202.781,309.219 202.781,309.25 283.25,309.25"/><path fill="currentColor" d="M305.922,300.094 342.047,243.875 265.141,243.875"/><path fill="currentColor" d="M219.719,243.875 144.406,243.875 180.375,299.844"/><path fill="currentColor" d="M63.594,309.219 63.594,309.25 158.219,309.25 120.641,250.766"/><path fill="currentColor" d="M217.938,509.188 217.938,509.188 217.938,509.188"/><path fill="currentColor" d="M61.719,332.938 217.938,509.188 170.844,332.938"/><path fill="currentColor" d="M268.531,509.188 268.531,509.188 424.734,332.938 315.609,332.938"/><path fill="currentColor" d="M500.594,181.438c-25.844,0-34.781-6.484-39.813-11.5c-5-5.031-11.5-13.969-11.5-39.813c0-0.969-0.094-3.75-3.188-3.75c-3.063,0-3.188,2.781-3.188,3.75c0,25.844-6.484,34.781-11.5,39.813c-5.031,5.016-13.969,11.5-39.797,11.5c-0.984,0-3.766,0.109-3.766,3.188c0,3.063,2.781,3.188,3.766,3.188c25.828,0,34.766,6.5,39.797,11.5c5.016,5.031,11.5,13.969,11.5,39.813c0,1,0.125,3.75,3.188,3.75c3.094,0,3.188-2.75,3.188-3.75c0-25.844,6.5-34.781,11.5-39.813c5.031-5.016,13.969-11.5,39.813-11.5c0.984,0,3.766-0.094,3.766-3.188C504.359,181.563,501.578,181.438,500.594,181.438z"/><path fill="currentColor" d="M116.25,84.438c35.516,0,47.813,8.938,54.719,15.844c6.875,6.891,15.813,19.188,15.813,54.719c0,1.344,0.172,5.156,4.375,5.156c4.25,0,4.375-3.813,4.375-5.156c0-35.531,8.938-47.828,15.828-54.719c6.891-6.906,19.172-15.844,54.703-15.844c1.375,0,5.188-0.125,5.188-4.375c0-4.203-3.813-4.375-5.188-4.375c-35.531,0-47.813-8.906-54.703-15.813s-15.828-19.188-15.828-54.703c0-1.359-0.125-5.172-4.375-5.172c-4.203,0-4.375,3.813-4.375,5.172c0,35.516-8.938,47.797-15.813,54.703c-6.906,6.906-19.203,15.813-54.719,15.813c-1.344,0-5.156,0.156-5.156,4.391C111.094,84.281,114.906,84.438,116.25,84.438z"/><path fill="currentColor" d="M64.156,245.625c0-23.766,5.969-32,10.594-36.609c4.625-4.625,12.844-10.594,36.625-10.594c0.891,0,3.453-0.094,3.453-2.922s-2.563-2.938-3.453-2.938c-23.781,0-32-5.969-36.625-10.594s-10.594-12.844-10.594-36.594c0-0.906-0.094-3.469-2.922-3.469s-2.922,2.563-2.922,3.469c0,23.75-5.984,31.969-10.594,36.594c-4.625,4.625-12.844,10.594-36.625,10.594c-0.906,0-3.453,0.109-3.453,2.938c0,2.813,2.547,2.922,3.453,2.922c23.781,0,32,5.984,36.625,10.594c4.609,4.609,10.594,12.844,10.594,36.609c0,0.906,0.094,3.469,2.922,3.469S64.156,246.531,64.156,245.625z"/></svg>', nombre: 'GUSTA GANA y GOLEA', descripcion: '45-60 puntos', color: '#00D9FF' };
+  if (puntos >= 30) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M2.103 12.052l13.398 16.629-5.373-16.629h-8.025zM11.584 12.052l4.745 16.663 4.083-16.663h-8.828zM17.051 28.681l12.898-16.629h-7.963l-4.935 16.629zM29.979 10.964l-3.867-6.612-3.869 6.612h7.736zM24.896 3.973h-7.736l3.867 6.839 3.869-6.839zM19.838 10.964l-3.867-6.612-3.868 6.612h7.735zM14.839 3.973h-7.735l3.868 6.839 3.867-6.839zM5.889 4.352l-3.867 6.612h7.735l-3.868-6.612z"/></svg>', nombre: 'PARTIDAZO', descripcion: '30-44.9 puntos', color: '#FFD700' };
+  if (puntos >= 15) return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M384,85.333L469.333,192L256,480L42.667,192L128,85.333L384,85.333ZM305.23,208L206.77,208L256,400L305.23,208ZM170.37,208L107.206,208L226.973,387.796L170.37,208ZM404.772,208L341.629,208L285.062,387.682L404.772,208ZM211.556,128L148.48,128L109.07,176L175.889,176L211.556,128ZM266.667,128L245.333,128L213.334,176L298.666,176L266.667,128ZM363.499,128L300.444,128L335.11,176L401.908,176L363.499,128Z"/></svg>', nombre: 'PARTIDO CHATO', descripcion: '15-29.9 puntos', color: '#FFA500' };
+  return { emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 219 256" style="width:26px;height:26px;display:inline-block;vertical-align:middle;"><path fill="currentColor" d="M216.856,175.643V254H2.144v-27.913h71.44v-24.774h67.185v-25.67H216.856z M45.918,61.625c6.611-6.189,6.907-16.487,0.67-23.047c-6.189-6.611-16.487-6.907-23.047-0.67s-6.856,16.536-0.67,23.047C29.108,67.515,39.407,67.811,45.918,61.625z M29,205.047c-2.671,5.144-0.665,11.478,4.479,14.149c1.551,0.805,3.196,1.19,4.829,1.19c3.791,0,7.454-2.065,9.332-5.657l20.052-38.599l-15.001-16.657L29,205.047z M124.407,85.048c0,0-56.152-25.398-56.516-25.505c-5.118-1.942-11.078-1.385-15.88,2.017h0c-7.665,5.43-9.477,16.045-4.047,23.709l24.738,34.921l-15.54,16.854c-5.488,5.952-6.036,14.617,0.12,21.093l32.293,34.277c2.066,2.193,4.852,3.299,7.643,3.299c2.582,0,5.169-0.947,7.197-2.857c4.22-3.976,4.418-10.62,0.443-14.84l-28.764-30.531l23.859-25.877c0.891-0.966,1.554-2.057,2.016-3.208c2.767-5.45,2.504-12.208-1.274-17.542l-9-12.705l25.974,11.767c1.093,0.496,2.238,0.73,3.364,0.73c3.108,0,6.077-1.783,7.443-4.798C130.336,91.747,128.514,86.909,124.407,85.048z M158.075,33.099L87.011,2L65.148,51.958l71.063,31.099L158.075,33.099z"/></svg>', nombre: 'SILVIDOS', descripcion: '0-14.9 puntos', color: '#757575' };
+}
+
+function getMedallasTorneos(campeonApertura, campeonClausura, campeonAnual) {
+  const medallas = [];
+  
+  // Apertura: repetir según cantidad de veces ganadas
+  for (let i = 0; i < campeonApertura; i++) {
+    medallas.push('<div class="fut-medalla-torneo" title="Campeón Apertura"><span class="medal-icon">🏆</span><span>A</span></div>');
+  }
+  
+  // Clausura: repetir según cantidad de veces ganadas
+  for (let i = 0; i < campeonClausura; i++) {
+    medallas.push('<div class="fut-medalla-torneo" title="Campeón Clausura"><span class="medal-icon">🏆</span><span>C</span></div>');
+  }
+  
+  // Anual: repetir según cantidad de veces ganadas
+  for (let i = 0; i < campeonAnual; i++) {
+    medallas.push('<div class="fut-medalla-torneo" title="Campeón Anual"><span class="medal-icon">🏆</span><span>An</span></div>');
+  }
+  
+  if (medallas.length === 0) return '';
+  
+  return `<div class="fut-trofeos-wrapper">${medallas.join('')}</div>`;
+}
+
+function getMedallasTorneosEquipo(campeonApertura, campeonClausura, campeonAnual, campeonProvincial) {
+  const medallas = [];
+  
+  // Apertura: repetir según cantidad de veces ganadas
+  for (let i = 0; i < campeonApertura; i++) {
+    medallas.push('<div class="fut-medalla-torneo" title="Campeón Apertura"><span class="medal-icon">🏆</span><span>A</span></div>');
+  }
+  
+  // Clausura: repetir según cantidad de veces ganadas
+  for (let i = 0; i < campeonClausura; i++) {
+    medallas.push('<div class="fut-medalla-torneo" title="Campeón Clausura"><span class="medal-icon">🏆</span><span>C</span></div>');
+  }
+  
+  // Anual: repetir según cantidad de veces ganadas
+  for (let i = 0; i < campeonAnual; i++) {
+    medallas.push('<div class="fut-medalla-torneo" title="Campeón Anual"><span class="medal-icon">🏆</span><span>An</span></div>');
+  }
+  
+  // Provincial: repetir según cantidad de veces ganadas
+  for (let i = 0; i < campeonProvincial; i++) {
+    medallas.push('<div class="fut-medalla-torneo" title="Campeón Provincial"><span class="medal-icon">🏆</span><span>P</span></div>');
+  }
+  
+  if (medallas.length === 0) return '';
+  
+  return `<div class="fut-trofeos-wrapper">${medallas.join('')}</div>`;
+}
+
+function getRecentScoresBadges(nombreJugador) {
+  if (!DATA.rawLogs || DATA.rawLogs.length === 0) {
+    console.warn('No hay rawLogs disponibles');
+    return '';
+  }
+  
+  // Agrupar por ID_FECHA único para identificar cada fecha jugada del sistema
+  const fechasMap = new Map();
+  DATA.rawLogs.forEach(log => {
+    const key = `${log.torneo}-${log.fecha}`;
+    if (!fechasMap.has(key)) {
+      fechasMap.set(key, {
+        torneo: log.torneo,
+        fecha: log.fecha,
+        timestamp: log.timestamp || new Date(0)
+      });
+    }
+  });
+  
+  // Convertir a array y ordenar por el orden de aparición en rawLogs (ya viene cronológico)
+  const fechasOrdenadas = Array.from(fechasMap.values());
+  
+  // Tomar las últimas 3 fechas globales
+  const ultimasTresFechas = fechasOrdenadas.slice(-3);
+  
+  if (ultimasTresFechas.length === 0) {
+    console.warn('No hay fechas jugadas en rawLogs');
+    return '';
+  }
+  
+  // Para cada una de las últimas 3 fechas globales, buscar si el jugador jugó
+  const badgesHTML = ultimasTresFechas.map(fechaInfo => {
+    const logJugador = DATA.rawLogs.find(log => 
+      log.jugador.toUpperCase() === nombreJugador.toUpperCase() && 
+      log.torneo === fechaInfo.torneo && 
+      log.fecha === fechaInfo.fecha
+    );
+    
+    if (!logJugador) {
+      // No jugó esta fecha
+      return `<span class="score-badge-mini gray">-</span>`;
+    }
+    
+    const puntos = logJugador.puntos;
+    let colorClass = 'green';
+    if (puntos <= 3) colorClass = 'red';
+    else if (puntos <= 6) colorClass = 'yellow';
+    
+    return `<span class="score-badge-mini ${colorClass}">${puntos}</span>`;
+  }).join('');
+  
+  return `<span class="recent-scores-badges">${badgesHTML}</span>`;
+}
+
+function openFutModal(nombreJugador) {
+  // Buscar datos del jugador en ESTADISTICAS_INDIVIDUALES
+  const stats = DATA.estadisticasIndividuales.find(s => s.jugador.toUpperCase() === nombreJugador.toUpperCase());
+  
+  if (!stats) {
+    console.error('No se encontraron estadísticas para:', nombreJugador);
+    return;
+  }
+
+  // Buscar el equipo ACTUALIZADO en DATA.jugadores (fuente de verdad: hoja Equipos)
+  const jugadorData = DATA.jugadores.find(j => j.nombre.toUpperCase() === nombreJugador.toUpperCase());
+  const equipoActual = jugadorData ? jugadorData.equipo : 'LIBRE';
+
+  // Extraer datos directamente de ESTADISTICAS_INDIVIDUALES
+  const {
+    jugador,
+    puestoActual,
+    puestoAnterior,
+    mejorFecha,
+    vecesIdeal,
+    torneo,
+    puntosHistoricos,
+    promedio,
+    puestoGlobal,
+    cantFechas,
+    campeonApertura,
+    campeonClausura,
+    campeonAnual
+  } = stats;
+  
+  // Usar el equipo actualizado en lugar del de ESTADISTICAS_INDIVIDUALES
+  const equipo = equipoActual;
+  
+  // Calcular tendencia comparando puesto actual con puesto anterior
+  let tendenciaBadge = '';
+  if (puestoActual !== null && puestoAnterior !== null) {
+    const diff = puestoAnterior - puestoActual;
+    if (diff > 0) {
+      tendenciaBadge = `<span class="fut-badge-tendencia positivo">↗ +${Math.abs(diff)}</span>`;
+    } else if (diff < 0) {
+      tendenciaBadge = `<span class="fut-badge-tendencia negativo">↘ ${Math.abs(diff)}</span>`;
+    } else {
+      tendenciaBadge = `<span class="fut-badge-tendencia igual">→ =</span>`;
+    }
+  } else {
+    tendenciaBadge = `<span style="color:var(--text3);font-size:0.75rem;">-</span>`;
+  }
+  
+  // Renderizar modal
+  const modal = document.getElementById('fut-modal');
+  const card = modal.querySelector('.fut-card');
+  
+  card.innerHTML = `
+    <div class="fut-close-btn" onclick="closeFutModal()">✕</div>
+    
+    <div class="fut-card-header">
+      <h1>${jugador}</h1>
+      ${getMedallasTorneos(campeonApertura, campeonClausura, campeonAnual)}
+    </div>
+
+    <div class="fut-sub-header">ESTADÍSTICAS DEL JUGADOR</div>
+
+    <div class="fut-tabla-resumen">
+      <div class="fut-fila-tres-columnas">
+        <div class="fut-col-puesto">
+          <span class="fut-numero-grande">${puestoActual !== null ? puestoActual : '?'}</span>
+          <span class="fut-txt-label">PUESTO</span>
+        </div>
+        <div class="fut-col-badge">
+          <div class="fut-badge-wrapper">${tendenciaBadge}</div>
+          <span class="fut-txt-label">TENDENCIA</span>
+        </div>
+        <div class="fut-col-indicadores">
+          <div class="fut-badges-wrapper">${getRecentScoresBadges(nombreJugador)}</div>
+          <span class="fut-txt-label">ÚLTIMAS FECHAS</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fut-stats-container">
+      <div class="fut-stats-col">
+        <div class="fut-stats-col-header">TORNEO ACTUAL</div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">TORNEO</div>
+          <div class="fut-sorteo-ganador">${torneo}</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">EQUIPO</div>
+          <div class="fut-sorteo-ganador">${equipo}</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">PUNTOS</div>
+          <div class="fut-sorteo-ganador">${puntosHistoricos} PTS</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">PROMEDIO</div>
+          <div class="fut-sorteo-ganador">${promedio ? parseFloat(promedio).toFixed(2) : '0'}</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">MEJOR FECHA</div>
+          <div class="fut-sorteo-ganador">${mejorFecha} PTS</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">EQ IDEAL</div>
+          <div class="fut-sorteo-ganador">${vecesIdeal}</div>
+        </div>
+      </div>
+
+      <div class="fut-stats-col historico">
+        <div class="fut-stats-col-header">HISTÓRICO GLOBAL</div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">PUESTO GLOBAL</div>
+          <div class="fut-sorteo-ganador">${puestoGlobal !== null ? '#' + puestoGlobal : 'N/D'}</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">FECHAS JUGADAS</div>
+          <div class="fut-sorteo-ganador">${cantFechas || 'N/D'}</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">TOTAL ACUMULADO</div>
+          <div class="fut-sorteo-ganador">${puntosHistoricos || 'N/D'} PTS</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">PROMEDIO GLOBAL</div>
+          <div class="fut-sorteo-ganador">${promedio ? parseFloat(promedio).toFixed(2) : 'N/D'}</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">MEJOR FECHA HISTÓRICA</div>
+          <div class="fut-sorteo-ganador">${mejorFecha || 'N/D'} PTS</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">EQ IDEAL (TOTAL)</div>
+          <div class="fut-sorteo-ganador">${vecesIdeal || 'N/D'}</div>
+        </div>
+      </div>
+
+      <div class="fut-stats-col">
+        <div class="fut-stats-col-header">MEDALLAS</div>
+        <div class="fut-sorteo-box">
+          ${puestoGlobal !== null ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${m.color};">${m.emoji}</div>` : ''; })() : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${cantFechas ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${getMedalla(cantFechas).color};">${getMedalla(cantFechas).emoji}</div>` : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${puntosHistoricos ? (() => { const m = getMedallaTotalAcumulado(puntosHistoricos); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${m.color};">${m.emoji}</div>` : ''; })() : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${promedio ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${getInsignia(promedio).color};">${getInsignia(promedio).emoji}</div>` : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${mejorFecha && getMedallaMejorFecha(mejorFecha) ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${getMedallaMejorFecha(mejorFecha).color};">${getMedallaMejorFecha(mejorFecha).emoji}</div>` : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${vecesIdeal >= 0 ? (() => { const m = getMedallaEquipoIdeal(vecesIdeal, equipo); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${m.color};">${m.emoji}</div>` : ''; })() : ''}
+        </div>
+      </div>
+
+      <div class="fut-stats-col">
+        <div class="fut-stats-col-header">DESCRIPCIÓN</div>
+        <div class="fut-sorteo-box">
+          ${puestoGlobal !== null ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${cantFechas ? `<div class="fut-sorteo-titulo" style="color: ${getMedalla(cantFechas).color}; margin-bottom: 4px; font-size: 11px;">${getMedalla(cantFechas).nombre}</div>
+          <div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getMedalla(cantFechas).descripcion}</div>` : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${puntosHistoricos ? (() => { const m = getMedallaTotalAcumulado(puntosHistoricos); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${promedio ? `<div class="fut-sorteo-titulo" style="color: ${getInsignia(promedio).color}; margin-bottom: 4px; font-size: 11px;">${getInsignia(promedio).nombre}</div>
+          <div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getInsignia(promedio).descripcion}</div>` : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${mejorFecha && getMedallaMejorFecha(mejorFecha) ? `<div class="fut-sorteo-titulo" style="color: ${getMedallaMejorFecha(mejorFecha).color}; margin-bottom: 4px; font-size: 11px;">${getMedallaMejorFecha(mejorFecha).nombre}</div>
+          <div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getMedallaMejorFecha(mejorFecha).descripcion}</div>` : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${vecesIdeal >= 0 ? (() => { const m = getMedallaEquipoIdeal(vecesIdeal, equipo); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  modal.classList.add('show');
+}
+
+function closeFutModal() {
+  document.getElementById('fut-modal').classList.remove('show');
+}
+
+function openFutModalEquipo(nombreEquipo) {
+  // Buscar datos del equipo en ESTADISTICAS_EQUIPOS
+  const stats = DATA.estadisticasEquipos.find(s => s.equipo.toUpperCase() === nombreEquipo.toUpperCase());
+  
+  if (!stats) {
+    console.error('No se encontraron estadísticas para:', nombreEquipo);
+    return;
+  }
+
+  // Extraer datos
+  const {
+    equipo,
+    mejorFecha,
+    puntosHistoricos,
+    promedio,
+    puestoGlobal,
+    campeonApertura,
+    campeonClausura,
+    campeonAnual,
+    campeonProvincial
+  } = stats;
+  
+  // Obtener jugadores del equipo
+  const jugadoresDelEquipo = DATA.jugadores
+    .filter(j => j.equipo && j.equipo.toUpperCase() === equipo.toUpperCase())
+    .map(j => j.nombre)
+    .sort();
+  
+  // Buscar quién fue capitán en la última fecha del equipo (por timestamp más reciente)
+  const logsDelEquipo = DATA.rawLogs || [];
+  const logsEquipoFiltrados = logsDelEquipo.filter(l => l.equipo.toUpperCase() === equipo.toUpperCase());
+  
+  // Encontrar el timestamp más reciente del equipo
+  const logsConTimestamp = logsEquipoFiltrados.filter(l => l.timestamp && l.timestamp instanceof Date && !isNaN(l.timestamp.getTime()));
+  
+  let nombreCapitan = null;
+  
+  if (logsConTimestamp.length > 0) {
+    const timestampMasReciente = logsConTimestamp.reduce((max, log) => {
+      return log.timestamp > max ? log.timestamp : max;
+    }, new Date(0));
+    
+    // Buscar todos los logs de esa fecha más reciente (mismo día, puede haber diferencias de minutos)
+    const logsUltimaFecha = logsConTimestamp.filter(l => {
+      // Comparar solo año, mes y día (ignorar horas/minutos)
+      return l.timestamp.getFullYear() === timestampMasReciente.getFullYear() &&
+             l.timestamp.getMonth() === timestampMasReciente.getMonth() &&
+             l.timestamp.getDate() === timestampMasReciente.getDate();
+    });
+    
+    // Buscar el capitán en esa última fecha
+    const capitanUltimaFecha = logsUltimaFecha.find(l => l.capitan === true);
+    nombreCapitan = capitanUltimaFecha ? capitanUltimaFecha.jugador : null;
+  }
+  
+  // Crear lista de jugadores con indicador de capitán (última fecha)
+  const jugadoresHTML = jugadoresDelEquipo.map(nombre => {
+    const esCapitan = nombreCapitan && nombre.toUpperCase() === nombreCapitan.toUpperCase();
+    return esCapitan ? `${nombre} <span style="color:#f5a623;font-weight:900">(C)</span>` : nombre;
+  }).join(' • ');
+  
+  // Renderizar modal
+  const modal = document.getElementById('fut-modal');
+  const card = modal.querySelector('.fut-card');
+  
+  card.innerHTML = `
+    <div class="fut-close-btn" onclick="closeFutModal()">✕</div>
+    
+    <div class="fut-card-header">
+      <h1>${equipo}</h1>
+      ${getMedallasTorneosEquipo(campeonApertura, campeonClausura, campeonAnual, campeonProvincial)}
+    </div>
+
+    <div class="fut-sub-header">ESTADÍSTICAS DEL EQUIPO</div>
+
+    <div class="fut-tabla-resumen">
+      <div class="fut-fila-tres-columnas">
+        <div class="fut-col-puesto">
+          <span class="fut-numero-grande">${puestoGlobal !== null ? puestoGlobal : '?'}</span>
+          <span class="fut-txt-label">PUESTO GLOBAL</span>
+        </div>
+        <div class="fut-col-badge" style="grid-column: span 2;">
+          <div class="fut-badge-wrapper" style="display:block;text-align:center;">
+            <div style="font-size:11px;color:#3cba54;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Integrantes (${jugadoresDelEquipo.length}) ${nombreCapitan ? '• <span style="color:#f5a623">(C)</span> = Capitán actual' : ''}</div>
+            <div style="font-size:13px;color:#e0e0e0;line-height:1.6;font-weight:500;">${jugadoresHTML}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fut-stats-container">
+      <div class="fut-stats-col historico">
+        <div class="fut-stats-col-header">CAMPEONATOS</div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">APERTURA</div>
+          <div class="fut-sorteo-ganador">${campeonApertura ? `🏆 ${campeonApertura}` : '-'}</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">CLAUSURA</div>
+          <div class="fut-sorteo-ganador">${campeonClausura ? `🏆 ${campeonClausura}` : '-'}</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">ANUAL</div>
+          <div class="fut-sorteo-ganador">${campeonAnual ? `🏆 ${campeonAnual}` : '-'}</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">PROVINCIAL</div>
+          <div class="fut-sorteo-ganador">${campeonProvincial ? `🏆 ${campeonProvincial}` : '-'}</div>
+        </div>
+      </div>
+
+      <div class="fut-stats-col">
+        <div class="fut-stats-col-header">ESTADÍSTICAS GENERALES</div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">PUESTO GLOBAL</div>
+          <div class="fut-sorteo-ganador">#${puestoGlobal !== null ? puestoGlobal : 'N/D'}</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">PUNTOS HISTÓRICOS</div>
+          <div class="fut-sorteo-ganador">${puntosHistoricos} PTS</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">PROMEDIO</div>
+          <div class="fut-sorteo-ganador">${promedio ? parseFloat(promedio).toFixed(2) : '0'}</div>
+        </div>
+        <div class="fut-sorteo-box">
+          <div class="fut-sorteo-titulo">MEJOR FECHA</div>
+          <div class="fut-sorteo-ganador">${mejorFecha} PTS</div>
+        </div>
+      </div>
+
+      <div class="fut-stats-col">
+        <div class="fut-stats-col-header">MEDALLAS</div>
+        <div class="fut-sorteo-box">
+          ${puestoGlobal !== null ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${m.color};">${m.emoji}</div>` : ''; })() : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${puntosHistoricos ? (() => { const m = getMedallaTotalAcumuladoEquipo(puntosHistoricos); return m.tieneMedalla ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${m.color};">${m.emoji}</div>` : ''; })() : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${promedio ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${getInsigniaEquipo(promedio).color};">${getInsigniaEquipo(promedio).emoji}</div>` : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${mejorFecha && getMedallaMejorFechaEquipo(mejorFecha) ? `<div class="fut-sorteo-ganador" style="font-size: 26px; color: ${getMedallaMejorFechaEquipo(mejorFecha).color};">${getMedallaMejorFechaEquipo(mejorFecha).emoji}</div>` : ''}
+        </div>
+      </div>
+
+      <div class="fut-stats-col">
+        <div class="fut-stats-col-header">DESCRIPCIÓN</div>
+        <div class="fut-sorteo-box">
+          ${puestoGlobal !== null ? (() => { const m = getMedallaPuesto(puestoGlobal); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${puntosHistoricos ? (() => { const m = getMedallaTotalAcumuladoEquipo(puntosHistoricos); return m.tieneMedalla ? `<div class="fut-sorteo-titulo" style="color: ${m.color}; margin-bottom: 4px; font-size: 11px;">${m.nombre}</div><div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>` : `<div class="fut-sorteo-ganador" style="font-size: 12px; color: ${m.color}; font-weight: 300; letter-spacing: 0.3px;">${m.descripcion}</div>`; })() : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${promedio ? `<div class="fut-sorteo-titulo" style="color: ${getInsigniaEquipo(promedio).color}; margin-bottom: 4px; font-size: 11px;">${getInsigniaEquipo(promedio).nombre}</div>
+          <div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getInsigniaEquipo(promedio).descripcion}</div>` : ''}
+        </div>
+        <div class="fut-sorteo-box">
+          ${mejorFecha && getMedallaMejorFechaEquipo(mejorFecha) ? `<div class="fut-sorteo-titulo" style="color: ${getMedallaMejorFechaEquipo(mejorFecha).color}; margin-bottom: 4px; font-size: 11px;">${getMedallaMejorFechaEquipo(mejorFecha).nombre}</div>
+          <div class="fut-sorteo-ganador" style="font-size: 12px; color: #ccc; font-weight: 300; letter-spacing: 0.3px;">${getMedallaMejorFechaEquipo(mejorFecha).descripcion}</div>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  modal.classList.add('show');
+}
+
+// Cerrar modal al hacer clic fuera de la carta
+document.addEventListener('click', function(e) {
+  const modal = document.getElementById('fut-modal');
+  if (e.target === modal) {
+    closeFutModal();
+  }
+});
+
+// Cerrar modal con tecla ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeFutModal();
+  }
+});
+
+// ---- Orientation & Fullscreen ----
+var fullscreenBtnDismissed = false;
+
+function dismissFullscreenBtn() {
+  document.getElementById('fullscreen-btn').classList.remove('show');
+  fullscreenBtnDismissed = true;
+}
+
+async function enterFullscreen() {
+  try {
+    await document.body.requestFullscreen();
+    if (screen.orientation && screen.orientation.lock) {
+      try {
+        await screen.orientation.lock('landscape');
+      } catch(err) {
+        console.log('No se pudo forzar landscape:', err);
+      }
+    }
+    dismissFullscreenBtn();
+  } catch(err) {
+    console.log('Error al entrar en fullscreen:', err);
+  }
+}
+
+(function() {
+  function checkOrientation() {
+    var fullscreenBtn = document.getElementById('fullscreen-btn');
+    var isMobile = window.innerWidth <= 768;
+    var isPortrait = window.innerHeight > window.innerWidth;
+    
+    // Mostrar botón fullscreen en landscape (si no fue cerrado manualmente)
+    if (isMobile && !isPortrait && !fullscreenBtnDismissed) {
+      fullscreenBtn.classList.add('show');
+    } else if (fullscreenBtnDismissed || !isMobile || isPortrait) {
+      fullscreenBtn.classList.remove('show');
+    }
+  }
+  
+  window.addEventListener('load', checkOrientation);
+  window.addEventListener('resize', checkOrientation);
+  window.addEventListener('orientationchange', checkOrientation);
+})();
+
+// Contador de visitas con GoatCounter
+(function() {
+  const counterEl = document.getElementById('visit-count');
+  
+  // Obtener contador total del sitio desde GoatCounter
+  fetch('https://prodequipos.goatcounter.com/counter/TOTAL.json')
+    .then(res => {
+      if (!res.ok) throw new Error('Network response was not ok');
+      return res.json();
+    })
+    .then(data => {
+      if (data && data.count !== undefined) {
+        counterEl.textContent = data.count; // Ya viene formateado
+      } else {
+        throw new Error('Invalid data');
+      }
+    })
+    .catch(err => {
+      console.error('Error loading visit counter:', err);
+      // Usar contador local alternativo
+      let visits = localStorage.getItem('local-visits-v3') || 0;
+      visits = parseInt(visits) + 1;
+      localStorage.setItem('local-visits-v3', visits);
+      counterEl.textContent = parseInt(visits).toLocaleString('es-AR');
+    });
+})();
+</script>
+
+<!-- MODAL FICHA JUGADOR -->
+<div class="fut-modal-overlay" id="fut-modal" onclick="closeFutModal()">
+  <div class="fut-card" onclick="event.stopPropagation()">
+    <!-- Contenido generado dinámicamente por JavaScript -->
+  </div>
+</div>
+
+<!-- GoatCounter Analytics -->
+<script data-goatcounter="https://prodequipos.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
