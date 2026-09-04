@@ -23,6 +23,8 @@
     .top { background:#173e32; color:#fff; border-bottom:4px solid #c99a42; }
     .top-inner { max-width:1240px; margin:auto; padding:23px 24px 0; }
     .brand-row { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+    .visits { display:flex; align-items:center; }
+    .visits img { display:block; height:20px; }
     h1 { font:700 28px/1 "Fraunces",serif; margin:0; letter-spacing:0; }
     .season { color:#d7e4da; font-size:13px; margin:6px 0 0; }
     .season strong { color:#fff; }
@@ -54,7 +56,7 @@
   </style>
 </head>
 <body>
-  <header class="top"><div class="top-inner"><div class="brand-row"><div><h1>Prode Equipos</h1><p class="season" id="season-label">Cargando temporada...</p></div></div><nav class="tabs" id="tabs">
+  <header class="top"><div class="top-inner"><div class="brand-row"><div><h1>Prode Equipos</h1><p class="season" id="season-label">Cargando temporada...</p></div><div class="visits"><img src="https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fnau87.github.io%2Fprodequipos%2F&label=Visitas&labelColor=%23173e32&countColor=%2317734d&style=flat" alt="Visitas a la página" /></div></div><nav class="tabs" id="tabs">
     <button class="active" data-view="jugadores">Jugadores</button><button data-view="equipos">Equipos</button><button data-view="individuales">Torneos indiv.</button><button data-view="apertura">Apertura de eq.</button><button data-view="clausura">Clausura de eq.</button><button data-view="provincial">Provincial de eq.</button><button data-view="anual">Tabla anual de eq.</button><button data-view="buscar">Buscar</button><button data-view="comparar">Comparar</button>
   </nav></div></header>
   <main id="app"><div class="loading">Cargando datos de la planilla...</div></main>
