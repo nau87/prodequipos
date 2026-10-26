@@ -183,7 +183,7 @@
       const advanced=new Set([...P.semiSlots,...P.finalSlots].map(t=>teamKey(t.equipo)));if(P.campeon)advanced.add('CHAMP:'+teamKey(P.campeon));
       const isWinner=(t,round)=>t.equipo&&(round==='final'?teamKey(P.campeon)===teamKey(t.equipo):round==='semi'?P.finalSlots.some(f=>teamKey(f.equipo)===teamKey(t.equipo)):P.semiSlots.some(f=>teamKey(f.equipo)===teamKey(t.equipo)));
       const val=v=>v===''?'–':escape(v);
-      const row=(t,round,side)=>t.placeholder?`<div class="po-team po-empty"><span>${escape(t.placeholder)}</span></div>`:`<div class="po-team${isWinner(t,round)?' winner':''}${side==='r'?' r':''}"><span class="name-with-jersey">${jerseyMini(t.equipo)}<button class="profile-link" onclick="openProfile('team','${attr(t.equipo)}')">${escape(t.equipo)}</button></span><span class="score">${val(t.ida)} · ${val(t.vuelta)} · <b>${val(t.total)}</b></span></div>`;
+      const row=(t,round,side)=>t.placeholder?`<div class="po-team po-empty"><span>${escape(t.placeholder)}</span></div>`:`<div class="po-team${isWinner(t,round)?' winner':''}${side==='r'?' r':''}"><span class="name-with-jersey">${jerseyMini(t.equipo)}<button class="profile-link" onclick="openProfile('team','${attr(t.equipo)}')">${escape(t.equipo)}</button></span><span class="score">${side==='r'?`<b>${val(t.total)}</b> · ${val(t.vuelta)} · ${val(t.ida)}`:`${val(t.ida)} · ${val(t.vuelta)} · <b>${val(t.total)}</b>`}</span></div>`;
       const match=(pair,round,side='l')=>`<div class="match">${pair.map(t=>row(t,round,side)).join('')}</div>`;
       const champ=championCard();
       const mirror=`<div class="bm" id="bm"><svg class="bm-lines" aria-hidden="true"></svg>
